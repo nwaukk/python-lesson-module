@@ -1,0 +1,6 @@
+{
+  "name": "Python Visual Lab",
+  "description": "An interactive, visual 30 Days of Python learning environment with simulations, real code execution, and responsive workspaces.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

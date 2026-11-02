@@ -1,0 +1,154 @@
+@import "tailwindcss";
+
+:root {
+  /* Dynamic Design Tokens applied by Settings Engine */
+  --bg-app: #0f172a;
+  --bg-surface: #1e293b;
+  --bg-surface-elevated: #334155;
+  --bg-surface-subtle: #1e293b80;
+  
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+  
+  --border-subtle: #334155;
+  --border-strong: #475569;
+  
+  --accent-primary: #38bdf8;
+  --accent-hover: #0284c7;
+  --accent-pressed: #0369a1;
+  --accent-subtle: #0284c726;
+  --accent-on: #0f172a;
+  
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #06b6d4;
+  
+  /* Semantic Python Type Tokens */
+  --type-int: #38bdf8;
+  --type-float: #06b6d4;
+  --type-complex: #6366f1;
+  --type-str: #34d399;
+  --type-bool: #fbbf24;
+  --type-none: #94a3b8;
+  --type-list: #f472b6;
+  --type-tuple: #c084fc;
+  --type-set: #fb923c;
+  --type-dict: #a78bfa;
+  --type-func: #60a5fa;
+  --type-obj: #e879f9;
+
+  /* Python Syntax Tokens */
+  --syntax-keyword: #c084fc;
+  --syntax-builtin: #38bdf8;
+  --syntax-string: #34d399;
+  --syntax-number: #fbbf24;
+  --syntax-comment: #64748b;
+  --syntax-operator: #f472b6;
+  --syntax-identifier: #f8fafc;
+
+  /* Typography & Layout Tokens */
+  --font-interface: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-code: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-serif: 'Newsreader', serif;
+  --font-ligatures: normal;
+  
+  --text-scale: 1;
+  --code-font-size: 13.5px;
+  --reading-max-width: 75ch;
+  --line-height-mult: 1.6;
+  --letter-spacing: normal;
+  
+  --radius-card: 12px;
+  --radius-btn: 8px;
+  --radius-badge: 6px;
+  
+  --spacing-density: 1;
+}
+
+/* Glass surface utility */
+.surface-glass {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background-color: var(--bg-surface-subtle);
+}
+
+.surface-soft {
+  background-color: var(--bg-surface);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.25);
+}
+
+.surface-flat {
+  background-color: var(--bg-surface);
+}
+
+/* Scrollbar refinement */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-dim);
+}
+
+/* Anti-aliasing and responsive base */
+html {
+  font-size: calc(16px * var(--text-scale));
+  font-family: var(--font-interface);
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  line-height: var(--line-height-mult);
+  letter-spacing: var(--letter-spacing);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+code, pre, kbd {
+  font-family: var(--font-code);
+  font-variant-ligatures: var(--font-ligatures);
+}
+
+/* Keyboard focus ring */
+*:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* Eyebrow label typography standard */
+.eyebrow-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+/* Run badge standard */
+.badge-real-python {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.badge-trace {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.badge-simulation {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}

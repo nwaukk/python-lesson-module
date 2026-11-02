@@ -1,0 +1,402 @@
+PYTHON VISUAL LAB
+Master Development Specification · Version 2.0 An interactive, visual 30 Days of Python learning environment, designed to be built one day at a time.
+How to use this document
+• Paste this whole specification at the start of a new Google AI Studio session (or save it as the system instruction). Then send one short build request at a time, using the templates in Section 15.
+• Sections 1–12 are permanent rules. Section 13 is the build protocol. Section 14 holds one Day Build Brief per day. Section 15 holds the copy-and-paste requests.
+• Ask for one build part per request. When a session becomes long, start a new session with this specification, the current file tree and the next request.
+• This version replaces the earlier seven-stage prompt. The curriculum is unchanged; delivery is now Phase 0 (foundation) followed by one day at a time.
+1. Product charter
+1.1 Role
+Act as a senior educational software engineer, Python instructor, interactive-learning designer, data-visualisation specialist and accessibility-minded frontend architect.
+1.2 Mission
+Build a professional, animated, responsive web application that teaches Python through visual demonstrations, simulations, real code execution and practical applications. The curriculum foundation is the repository https://github.com/Asabeneh/30-Days-Of-Python.
+Central principle: do not just tell the learner what Python does. Show how Python does it.
+1.3 Audience
+Complete beginners (including secondary-school learners), self-taught adults, and teachers who project lessons in a classroom. Assume no programming knowledge. Explain every technical term the first time it appears and keep a searchable glossary.
+1.4 The ten-step learner journey (applies to every concept)
+1. Understand it through a simple explanation. 2. See a visual representation. 3. Interact with that representation. 4. Manipulate inputs, values, variables and objects. 5. Observe what each Python instruction changes. 6. Examine the equivalent code. 7. Execute the code or step through it. 8. Understand the output. 9. Explore a practical application. 10. Practise and demonstrate understanding.
+1.5 Non-negotiables
+• No paid backend, authentication service or API key is required. The app is fully client-side.
+• Never use eval(), new Function() or any dynamic JavaScript execution on learner code.
+• Always label what is happening: a clear badge shows REAL PYTHON (executed by an interpreter), TRACE (a recorded real execution being replayed) or SIMULATION (a scripted visual model). Never present a simulation as real execution.
+• No decorative controls. Every button, slider, tab and toggle must work. If a feature is not yet built, it is hidden or shown as an honestly labelled Coming soon card, never a dead control.
+• Every build leaves the whole app working. Earlier days must never break when a new day is added.
+• Each concept gets a visual that matches its true programming behaviour. Do not reuse one generic diagram.
+• Python 3 only. Verify every example against current Python 3 behaviour. Names that no longer exist (for example file()) must not appear as current built-ins.
+• All learner-facing text uses British spelling (colour, visualise, behaviour, programme, practise as a verb).
+• Write original explanations and examples. Do not paste large passages from the source repository. Credit the author (Asabeneh Yetayeh) with a link on each day page and on a Credits page.
+• The two reference screenshots are layout inspiration only. Do not copy their branding, logos, wording or assets, and do not use the name PySchool or marimo anywhere in the interface.
+2. Source curriculum and fidelity rules
+Beginner (Days 1–8): 1 Introduction to Python · 2 Variables and Built-in Functions · 3 Operators · 4 Strings · 5 Lists · 6 Tuples · 7 Sets · 8 Dictionaries
+Intermediate (Days 9–20): 9 Conditionals · 10 Loops · 11 Functions · 12 Modules · 13 List Comprehension and Lambda Functions · 14 Higher-Order Functions, Closures and Decorators · 15 Python Type Errors · 16 Date and Time · 17 Exception Handling, Packing, Unpacking, Enumerate and Zip · 18 Regular Expressions · 19 File Handling · 20 Python Package Manager
+Advanced and Applied (Days 21–30): 21 Classes and Objects · 22 Web Scraping · 23 Virtual Environments · 24 Statistics and NumPy · 25 Pandas · 26 Python for Web Development using Flask · 27 Python with MongoDB · 28 Application Programming Interfaces · 29 Building APIs · 30 Conclusions, Revision and Final Projects
+Fidelity rules:
+• Every concept and important subtopic in each source lesson must be represented, not just the headings.
+• Where the source is outdated, incomplete or inaccurate, teach the correct modern behaviour and add a visible Source note explaining the difference.
+• Link each day to its folder in the repository. If the exact Markdown filename cannot be confirmed, link to the repository contents instead. Never invent a URL.
+• Material beyond the source (for example the match statement) is allowed only as clearly marked Enrichment.
+• Recommend the day order but never lock content. Learners may open any day at any time.
+3. Experience design
+3.1 Visual direction
+A modern programming laboratory: calm, professional, uncluttered. Rounded cards with soft borders, small-caps eyebrow labels for section headings (SUMMARY, TASK, EXAMPLES), a single strong primary action colour for Run, clear status badges, smooth but restrained animation, readable typography and consistent spacing. Dark by default, with a polished light appearance and the full customisation described in Section 4.
+3.2 Application map
+A Dashboard · B Course Roadmap · C Lesson pages · D Visual Simulation Laboratory · E Code Playground · F Python Methods Explorer · G Real-World Application Laboratory · H Exercises and Challenges · I Mini Projects · J Progress Tracker · K Personal Notes · L Final Projects and Assessment · plus M Notebook Lab, N Glossary, O Appearance Studio and P Teaching Mode. A consistent top navigation, a day selector and a global search (Ctrl or Cmd + K) are available everywhere. The learner never loses their position when moving between days, subtopics, simulations, exercises and projects.
+3.3 Guided Workspace layout (primary lesson layout, inspired by the first screenshot)
+• Top bar: logo and app name, main links (Lessons, Roadmap, Methods, Notebook Lab, Playground), search, Appearance button, text-size A− and A+ buttons, progress chip, streak.
+• Day and subtopic strip: a day selector dropdown with a horizontally scrollable row of subtopic pills. Each pill shows its number, title and a status mark (not started, in progress, complete) and carries previous and next arrows.
+• Left panel – Lesson: eyebrow-labelled sections: Objectives, Concept, Worked example, Common mistakes, Real-world use, Source note. Sticky mini-progress and reading time.
+• Centre panel – Workspace: the Visualisation canvas on top (with step, play, pause, reset, speed and before/after controls) and the Code editor beneath it. The editor toolbar has Hide results, Reset, Step and a primary Run code button. Beneath the editor sits a results area with tabs: Tests, Console, Variables, Trace, Run insights (run time, steps executed, memory objects created).
+• Right panel – Coach: graduated hints, plain-language error explanations, glossary lookup and a what-just-happened explainer. It collapses to give the workspace more room.
+• Each panel is resizable, collapsible and swappable, and its state is remembered.
+3.4 Notebook Lab (reactive layout, inspired by the second screenshot)
+• A narrow left icon rail: Outline, Variables, Datasets, Methods, Files, Notes, Settings.
+• Content is made of cards (cells). Each cell has line-numbered, syntax-highlighted code with its live output beneath it. Cells can be arranged in one, two or three columns.
+• Interactive controls (dropdown, slider, switch, text box, radio group) appear as cell outputs. Changing a control re-runs the cells that depend on it. Dependencies are declared in lesson data, not guessed; a stale cell shows a visible marker until it re-runs.
+• A data table component with column names, data types, a small distribution chart per column, row and column counts, pagination and CSV download (used from Day 24).
+• A bottom status bar: runtime state (loading, ready, running, error), run mode (auto-run or manual), and the number of cells with errors.
+• Every lesson can open its prepared examples in the Notebook Lab, and learners can add their own Python cells.
+3.5 Layout presets
+Guided (default), Notebook, Focus (one panel at a time), Side-by-side Visual (code and visual share the screen), Stacked (tablet and phone), and Teaching (see Section 11). The learner may switch preset at any time from Appearance.
+4. Appearance Studio (the learner controls how the app looks)
+Available from a persistent Appearance button on every page and from the mobile menu. It opens as a right-hand drawer on desktop and a bottom sheet on phones. Every change previews live, can be undone, and is saved automatically. A Reset to default button restores everything.
+Colour
+• Mode: Light, Dark or Follow system.
+• At least ten complete presets: Midnight (default), Graphite, Daylight, Paper (warm, low glare), Ocean, Forest, Violet Night, Solar, High-contrast Dark, High-contrast Light and a Colour-blind-safe preset.
+• Accent colour: a colour picker plus eight quick swatches. Derive hover, pressed, subtle and on-accent colours automatically.
+• Custom palette editor for background, surface, text, accent, success, warning and error, with a live WCAG contrast badge on each pair and a warning (with an automatic fix suggestion) when contrast is too low.
+• Semantic colours, individually editable and resettable: data types (int, float, complex, str, bool, None, list, tuple, set, dict, function, object), execution states (idle, running, paused, success, warning, error) and Python syntax categories. Colour is never the only signal: every type or state also has a label, icon or shape.
+• A separate code-editor colour theme with at least six choices, independent of the app theme.
+• Surface style: flat, soft or glass (glass disabled automatically when reduced motion or low power is detected).
+Text
+• Text size: a slider from 80% to 160% with quick presets (Small, Default, Large, Extra large), also available as A− and A+ in the top bar. All sizes are rem-based so everything scales together.
+• Code font size (11–28 px) independent of interface text; console font size follows code unless changed.
+• Line height, letter spacing, and reading width (narrow, comfortable, wide).
+• Interface font choices: system, a humanist sans, a highly legible face and a serif for reading. Code font choices: system monospace plus one or two additional monospace fonts, with a ligatures toggle. Every font has a fallback stack and loads lazily.
+• A reading-comfort option: increased spacing, left-aligned text and an off-white background.
+Layout
+• Workspace preset (Section 3.5), panel sizes, panel positions (swap left and right), and sidebar position.
+• Density (compact, comfortable, spacious), corner radius (sharp, rounded, extra-rounded) and content width (fit, contained, ultra-wide).
+• Dashboard widgets can be shown, hidden and reordered.
+Motion
+• Animation: Follow system, Full, Reduced or Off. A simulation speed multiplier (0.5× to 2×) and an autoplay toggle.
+Editor
+• Line numbers, word wrap, indentation guides, bracket matching, auto-closing brackets, active-line highlight. Python indentation is four spaces by default.
+Profiles and portability
+• Save up to five named appearance profiles (for example Classroom projector, Evening reading). Export and import all settings as a JSON file.
+Implementation rules
+• Settings are stored in a versioned schema and applied before first paint so the app never flashes the wrong theme.
+• All colours, radii, spacing and type sizes are CSS custom properties (design tokens) on the root element and a theme attribute. The Tailwind configuration reads these tokens. No component may hard-code a colour.
+• Every preset must meet WCAG AA contrast for text and interface components across every screen. Include an Appearance Preview panel showing a lesson card, code block, error message, type chips and a simulation, so the learner can judge a change instantly.
+5. Responsive design
+The interface must be re-composed for the real screen, not merely shrunk.
+• Breakpoints: under 480 (phone), 480–767 (large phone and landscape), 768–1023 (tablet), 1024–1439 (laptop), 1440–1919 (desktop), 1920 and above (wide), 2560 and above (ultrawide).
+• Phone: one column with a bottom tab bar: Concept, Visualise, Code, Output, Practise. Navigation is a slide-over menu. The Run button stays reachable. Use dynamic viewport units, safe-area insets, and keep the editor visible above the on-screen keyboard.
+• Tablet: adaptive two columns (lesson and visual beside editor and output) or a stacked layout in portrait. The Coach becomes a drawer.
+• Laptop and desktop: the three-zone Guided Workspace, with side-by-side code and visualisation.
+• Wide and ultrawide: extra width is used for more panels, notebook columns or a pinned Variables panel, never for stretched text. Reading text stays within a comfortable line length.
+• Rules: CSS Grid, Flexbox, container queries and fluid type (clamp). No fixed widths. Set min-width to zero on flexible children so nothing forces horizontal scroll. Code blocks and tables scroll inside their own container. Diagrams use viewBox scaling; canvases redraw on resize with a ResizeObserver and the device pixel ratio. Touch targets are at least 44 px. Dragging uses pointer events with a keyboard alternative. No feature depends on hover. Rotating the device preserves all state. Nothing overlaps at any size.
+• Test widths: 320, 360, 390, 768, 1024, 1280, 1440, 1920 and 2560, in portrait and landscape.
+6. Accessibility and inclusion
+• Target WCAG 2.2 AA. All interactions, including simulations and drag-and-drop, work with a keyboard. Visible focus rings; logical focus order; focus moves sensibly when panels open.
+• Run results, errors and simulation steps are announced through polite live regions. Every diagram has a text description and a step-by-step textual alternative.
+• Respect prefers-reduced-motion and prefers-color-scheme as defaults. Never flash content.
+• Plain, friendly language; short sentences; glossary pop-ups on first-use terms.
+• Examples draw on varied everyday contexts: school records, markets, shopping, mobile data, transport, farming, sports, health, savings and small businesses, including Nigerian and wider African settings (naira amounts, WAT time zone) alongside universal ones.
+7. Technical architecture
+7.1 Stack
+React and TypeScript (strict mode), Vite, Tailwind CSS driven by design tokens, Framer Motion for orchestrated animation (CSS transitions for simple ones), CodeMirror 6 with the Python language package for the editor (lighter and more touch-friendly than a full IDE component), lightweight custom SVG chart components, and hash-based routing so deep links work on static hosting. Keep dependencies minimal and justify each one in a comment.
+7.2 Folder structure
+src/
+  app/            shell, routes, providers, error boundaries
+  design/         tokens, themes, Appearance Studio, base components
+  engine/
+    lesson/       schema, renderer, subtopic pager
+    simulation/   reusable primitives (stepper, timeline, memory view, grid, venn, flow)
+    runtime/      worker, trace, fallback, error translator
+    exercises/    question types, scoring, variants
+  features/       dashboard, roadmap, playground, methods, notebook, notes, search, glossary, teaching
+  data/           manifest.ts (all 30 days), glossary, methods registry, datasets
+  days/
+    day01/ ... day30/   one folder per day (content, simulations, exercises, quiz)
+  store/          progress, notes, settings, storage adapter
+  dev/            self-test route (Section 12)
+A new day is added by creating its folder and registering it in the manifest. No core file should need rewriting. Each day is lazy-loaded with React.lazy.
+7.3 Lesson data contract (keep stable and versioned)
+interface DayModule {
+  schemaVersion: 1; number: number; title: string;
+  level: 'beginner' | 'intermediate' | 'advanced';
+  sourceUrl: string; estimatedMinutes: number; prerequisites: number[];
+  objectives: string[]; subtopics: Subtopic[];
+  realWorldLabs: RealWorldLab[]; miniProject: MiniProject;
+  dayQuiz: Assessment; cheatSheet: CheatSheetBlock[]; sourceNotes: string[];
+}
+interface Subtopic {
+  id: string; title: string; summary: string; estimatedMinutes: number;
+  introduce: RichText;           // 1 INTRODUCE
+  visualise: SimulationRef;      // 2 VISUALISE and 3 INTERACT
+  code: CodeExample[];           // 4 CONNECT, with runMode: 'real' | 'trace' | 'simulation'
+  explain: ExplainStep[];        // 6 EXPLAIN, linked to code lines
+  apply: PracticalExample;       // 7 APPLY
+  commonMistakes: Mistake[];
+  practise: Exercise[];          // 8 PRACTISE
+  assess: Question[];            // 9 ASSESS
+}
+type ExerciseType = 'scenario-mcq' | 'predict-output' | 'fix-the-bug' | 'order-the-lines'
+  | 'fill-the-gaps' | 'write-code' | 'theory-reasoning' | 'explain-the-trace';
+interface TestCase { id: string; label: string; setup: string; expected: string; hidden: boolean }
+Content lives in data files; presentation lives in components. Simulations receive typed props and a shared controller (play, pause, step, back, reset, speed).
+7.4 State, routing and persistence
+• Context with reducers for progress, notes, settings and navigation. Error boundaries around every simulation so one failure never blanks the page.
+• Persist to localStorage using versioned keys with migration. Wrap every read and write in try/catch and fall back to in-memory storage with a visible notice when storage is blocked (this happens in sandboxed frames).
+• Saved: completed days and subtopics, exercise attempts and scores, quiz results, completed projects, bookmarks, notes, current position, learning streak, appearance settings and layout, and runtime preferences. Progress survives reloads.
+• Provide Export progress, Import progress and Reset progress (with a confirmation that states exactly what will be erased). No sign-in.
+7.5 Performance and security
+• Load Pyodide only when first needed, from a pinned version on a public CDN, with a progress indicator. Load NumPy and Pandas only on the days that need them and warn about download size. All non-Python simulations work without Pyodide.
+• Code-split by day. Memoise heavy diagrams. Animate with transform and opacity.
+• Render notes and any learner text as plain text or sanitised Markdown. Never inject learner input as HTML.
+• Learner code runs only inside the Web Worker.
+8. Python runtime and the Visual Learning Engine
+8.1 Runtime abstraction
+Define a PythonRuntime interface (run, trace, stop, reset, installPackage, status) with three implementations that can be swapped without touching lessons:
+1. PyodideWorkerRuntime (real execution, preferred).
+2. TraceReplayRuntime (replays a recorded or pre-authored trace).
+3. SimulationRuntime (a safe scripted visual model for concepts that cannot run in a browser, such as servers and databases).
+8.2 Real execution
+• Pyodide runs in a dedicated Web Worker, loaded lazily, with clear states: not loaded, loading (with progress), ready, running, stopped, failed.
+• Capture standard output and standard error separately. Show errors as a friendly summary plus the full traceback, and let the Coach translate common exceptions into plain language.
+• Time limit: default five seconds, learner-adjustable. On timeout, terminate and recreate the worker and tell the learner what happened. Also cap output length and recursion depth.
+• input(): a browser worker cannot block waiting for a prompt. Provide an Input queue panel where the learner supplies values before running, and override input() to read from it. Show a clear message when the program asks for more input than was supplied.
+• If Pyodide cannot load (offline or blocked), show an honest unavailable state and automatically offer the scripted traces and simulations for that lesson.
+8.3 Step-through tracing
+Record a real execution trace (line events, call and return events, local and global variables with name, type, a readable value and a stable friendly object number) using Python tracing hooks inside the worker. Limit the trace to a few hundred steps and state when it was truncated. The learner can step forward and backward, play and pause, change speed, jump to a step, and watch the highlighted line, the Variables panel and the visual all move together.
+8.4 Simulation primitives
+Build once, reuse everywhere: Stepper and timeline · memory and object-binding view (names pointing to objects) · sequence grid (indices, slices) · expression tree evaluator · truth-table switches · flowchart tracer · call-stack and scope view · Venn diagram · key-to-value lookup · pipeline conveyor · file cursor view · request and response view · table and chart viewer. Every simulation supports: sliders, input fields, selectable values, drag-and-drop with a keyboard alternative, clickable objects, play and pause, reset, forward and backward, speed, before-and-after comparison, an output panel, and a variable inspector.
+Every simulation must show the cause-and-effect link: this instruction produced this change, which produced this output. Where useful, explain what Python does internally (how values are stored, referenced, processed and returned). Describe CPython-specific details such as small-integer caching or string interning as implementation details, never as language guarantees.
+9. Python Methods Explorer
+A dedicated, data-driven explorer that grows every day.
+• Teach the difference between built-in functions (len(name)), object methods (name.upper()), functions the learner defines, and methods defined in a class. Explain dot notation, which object receives the call, arguments, return values and side effects.
+• The learner chooses an object type, browses its methods, picks one and edits its arguments with validation.
+• For each run, display: 1 original object, 2 selected method, 3 arguments, 4 generated Python code, 5 step-by-step execution, 6 returned result, 7 the object afterwards, 8 a plain explanation.
+• Show a clear badge: Returns a new value, Modifies the object in place, or Both. Make immutable types (str, tuple) and mutable types (list, set, dict) visibly different.
+• Results come from the real runtime when available, with a clearly labelled fallback.
+• Registry entry for every method: name, type, signature, purpose, parameter schema with defaults, mutates or not, return type, two examples, edge cases, common errors, related methods, and the day that introduces it.
+• Verification: the self-test (Section 12) compares the registry with the real dir() output of each type so no method is missed or invented.
+• Coverage grows by day: str (Day 4), list (5), tuple (6), set (7), dict (8), plus file, datetime, regular-expression, NumPy and Pandas methods in their days.
+10. Pedagogy and content standards
+10.1 Teaching sequence for every subtopic
+1 INTRODUCE · 2 VISUALISE · 3 INTERACT · 4 CONNECT (the equivalent code) · 5 EXECUTE · 6 EXPLAIN (highlight the executed line and say what Python did) · 7 APPLY · 8 PRACTISE (guided, then independent) · 9 ASSESS. Progress from very simple to more sophisticated examples. Define each new term where it first appears.
+10.2 Exercise and assessment standard
+• Questions test reasoning, understanding of context and application of concepts, not plain recall. Prefer scenario-based multiple-choice and theory questions in which the learner must decide what Python will do, why, and what to change.
+• Each question uses a fresh real-life context. Keep a scenario register so no context is reused within a day or across consecutive days, and never repeat earlier question sets.
+• Multiple-choice distractors reflect genuine misconceptions. Every option, right or wrong, has a short explanation. Options are shuffled.
+• Where numbers or strings can vary, generate parameterised variants from a seed so retries are different but fair.
+• Coding exercises use visible and hidden test cases and report expected against actual output, with the Tests, Console and Run insights tabs.
+• Theory-reasoning questions offer a model answer and a short marking checklist for self-assessment (and for teacher use).
+• Difficulty tiers for exercises: 🟢 Foundation, 🔵 Standard, 🟡 Challenge, 🟣 Project.
+• Hint ladder: three progressive hints before a worked solution is offered, with the worked solution recorded so it does not count as mastery.
+10.3 Levels
+Beginner, Intermediate and Advanced each have an overview page, progress indicators and a checkpoint quiz. The recommended sequence is displayed, but nothing is locked.
+10.4 Coach (no paid AI required)
+The right-hand Coach uses authored hints, an error dictionary, a glossary and the live trace. Define a TutorProvider interface so a model-based tutor could be added later by the owner, but it is disabled by default and the app never needs it.
+11. Dashboard, progress, notes and Teaching Mode
+• Dashboard: course completion percentage, current level and day, completed, in-progress and upcoming days, exercises completed, learning streak, recently studied lessons, a Continue learning button, level overviews and the roadmap. Days not yet built show as Coming soon and are generated from the manifest.
+• Roadmap: thirty day cards grouped by level, each with status, estimated time, subtopic count and a progress ring.
+• Notes and bookmarks: per-subtopic notes with autosave, a bookmark button on every subtopic, and a page that lists all notes and bookmarks with search.
+• Teaching Mode (for classroom projection): larger text and controls, simplified chrome, a presenter bar with next and previous step, reveal-answer-on-demand for exercises and quizzes, a blank-canvas simulation mode, and a one-click return to the previous layout.
+12. Quality and verification
+12.1 Verified content
+Every expected output shown in a lesson, exercise or quiz must be correct. Provide a hidden development route (/#/dev/selftest) that runs every runnable example in the registry through the real runtime, compares actual with declared output, checks Methods Explorer coverage against dir(), and reports failures. Run it at the end of every day build and fix mismatches before finishing.
+12.2 Quality gates (apply to every build)
+• All lessons for the day are present and every subtopic follows the teaching sequence.
+• Every simulation works and its numbers match real Python.
+• Navigation, bookmarks, notes and progress saving work, including after a reload.
+• Appearance Studio changes (theme, accent, text size, layout) correctly restyle the new content, including in both light and dark.
+• No overlap, clipping or sideways scrolling at the test widths in Section 5.
+• Keyboard operation, focus order, live-region announcements and reduced motion verified.
+• No console errors; error boundaries tested by forcing a failure.
+• Earlier days still work (regression check).
+13. Build protocol
+13.1 Phases
+• Phase 0A – Foundation shell: project scaffold, design tokens, all theme presets, Appearance Studio, app shell (top bar, navigation, hash routing), responsive layout frames for the Guided Workspace and Notebook Lab, storage adapter with fallback, error boundaries.
+• Phase 0B – Runtime and playground: Pyodide worker runtime, time limit, Input queue, trace recorder, scripted-trace fallback, CodeMirror editor, Console, Variables panel, Run insights, error translator and the REAL PYTHON / TRACE / SIMULATION badges.
+• Phase 0C – Lesson engine and navigation: lesson schema and renderer, subtopic pager, simulation controller with a starter set of primitives, the manifest for all thirty days (shown as Coming soon), Dashboard, Roadmap, progress, notes, bookmarks, search, glossary, Teaching Mode, and a short Welcome Tour lesson that exercises every engine capability.
+• Phase 0D – Practice and tooling: exercise engine with every question type, assessment engine with seeded variants, Methods Explorer framework, Notebook Lab framework, Coach panel, self-test route and Credits page.
+• Days 1–30: each built in three parts (A, B, C). Days marked with a star are large and may be split further (A1, A2, and so on).
+• Phase 31 – Release polish: performance, accessibility and responsive audits across all days, bundle review, content proofreading, final regression pass and a README for maintainers.
+13.2 The three parts of each day
+• Part A – Learn: the day overview, every subtopic page, the signature simulations, common mistakes and source notes.
+• Part B – Practise: Methods Explorer additions, the Real-World Lab, exercises in all four tiers, the mini project and the day quiz.
+• Part C – Verify: run the self-test, fix mismatches, audit accessibility, responsiveness and Appearance Studio behaviour, regression-check earlier days, and add the cheat sheet and day summary.
+13.3 Rules for every request
+• Do not rewrite working modules. Extend through the manifest and registries. If a core change is unavoidable, keep it small and backward compatible, and say so.
+• Do not ask clarifying questions. State any assumption in one line and proceed.
+• Never leave the application broken between requests. If the output limit is approaching, finish the current unit cleanly and stop, rather than leaving half-built code.
+• Never claim that something works unless it has been wired up and checked.
+13.4 Required response format after every build
+1. What was built (five lines at most).
+2. Files created or changed.
+3. How to test it (up to six steps).
+4. Self-test and quality-gate results (Section 12).
+5. Known limitations, stated honestly, and what remains.
+6. The exact next request to send.
+13.5 Definition of done for a day
+All subtopics from the brief are present; the signature simulations are interactive and numerically correct; the Methods Explorer includes the day’s methods; at least fifteen practice items across the four tiers and a ten-question day quiz exist (reasoning and scenario based, per Section 10.2); a mini project and a cheat sheet exist; progress, notes and bookmarks work; the self-test passes; and Section 12.2 is satisfied.
+14. Day Build Briefs
+Each brief lists the minimum scope. Every subtopic named must be covered. ★ marks a large day.
+Day 1 – Introduction to Python (Beginner)
+• Subtopics: what Python is; why it is useful; where it is used (web, data, AI, automation, games, science, education); installing Python and an editor (Windows, macOS, Linux, as a guided checklist with a version check); the interactive shell; writing and running a script file; syntax; indentation; comments; first look at data types; debugging.
+• Signature simulations: Instruction Journey (typed instruction, read, interpreted, executed, output); Shell versus Script (the same code run line by line and as a file); Terminal and Python Console (clearly labelled SIMULATION, with a limited command set); Indentation Lab (shift lines and watch blocks and IndentationError change); Syntax Repair Lab (broken programs the learner fixes and then runs for real).
+• Lab and project: a Welcome Message programme for a school or a shop.
+• Watch-outs: the command may be python or python3 depending on the system, so show both. Do not pin a version number. State that the installer walk-through is a simulation.
+Day 2 – Variables and Built-in Functions ★ (Beginner)
+• Subtopics: variables as names bound to objects; assignment and reassignment; assigning one variable to another; multiple assignment; naming rules and conventions (with an invalid-names checker that uses the real keyword list); the data types (int, float, complex, str, bool, list, tuple, set, dict, and None); type() and checking types; type conversion; built-in functions; print versus return; mutable and immutable objects with shared references.
+• Signature simulations: Name-to-Object Binding (the learner creates variables, picks a type, edits values and sees arrows from names to objects update; reassignment moves an arrow; b = a makes two arrows point to one object; changing a shared list through one name changes what both see, while rebinding an integer does not); Data Types Visualiser (select a type to see what it represents, examples, syntax and uses, then type any value and inspect it with type()); Type Conversion Simulator (int, float, str, bool, list, with the original value, the instruction and the result, plus failing conversions explained); Built-in Function Explorer (print, len, type, int, float, str, input, list, dict, min, max, sum, sorted, open, help, dir: the learner supplies arguments and sees the returned value and the printed output shown separately).
+• Lab and project: a Student Profile Card using the Input queue.
+• Watch-outs: input() always returns a string; bool is a subclass of int; int(3.9) gives 3 and int('3.5') raises ValueError; float('abc') raises ValueError; list('abc') splits into characters; sorted() returns a new list; dir() and help() output must be real; show friendly object numbers instead of raw memory addresses; label small-integer caching and interning as CPython details; open() is previewed only against the virtual file system and fully taught on Day 19.
+Day 3 – Operators (Beginner)
+• Subtopics: Boolean values; assignment and augmented assignment; arithmetic (add, subtract, multiply, divide, modulus, exponent, floor division); comparison; logical (and, or, not); operator precedence; the practical calculations from the course.
+• Signature simulations: Expression Evaluator (operands by input or slider, an expression tree evaluated step by step with precedence); Remainder Bars (modulus shown as a remainder, floor division as a whole-number result with the leftover removed); Comparison Scale (two operands and a True or False result); Truth-Table Switches (interactive AND, OR and NOT with input switches and a highlighted row); Practical Calculators (area of a circle, area of a rectangle, weight from mass, density from mass and volume, plus a VAT or discount example) with editable measurements and units.
+• Watch-outs: / always returns a float; // rounds toward negative infinity (-7 // 2 is -4); % takes the sign of the divisor (-7 % 3 is 2); ** is right-associative; 0.1 + 0.2 is not exactly 0.3 (give a float-precision mini lab); and / or return one of their operands, not always a Boolean; chained comparisons such as 1 < x < 10; weight equals mass times gravitational acceleration, state the value of g used; use math.pi for circle area and note that the source rounds pi.
+Day 4 – Strings ★ (Beginner)
+• Subtopics: strings as sequences of characters; creating strings (single, double and triple quotes); escape sequences; concatenation and repetition; length; positive and negative indexing; slicing (start, stop, step) and reversing; immutability; the in operator; formatting (f-strings, format(), and the older percent style); character codes (ord and chr); the string methods listed below.
+• Signature simulations: Character Index Grid (type any text; every character shows its positive and negative index; click a character to highlight it and see the matching Python expression); Slice Sliders (start, stop and step sliders with the selected characters highlighted and the expression shown, including negative values and out-of-range cases); String Methods Laboratory with before-and-after character transformation, editable text and arguments, generated code, and a result; split and join (one string becoming a list of pieces, and pieces being glued into one string); find and index (the matching position highlighted).
+• Methods to cover: capitalize, count, endswith, expandtabs, find, rfind, format, index, rindex, isalnum, isalpha, isdecimal, isdigit, isnumeric, isidentifier, islower, isupper, join, replace, split, strip, startswith, swapcase, title, lower, upper. Add lstrip, rstrip, rsplit, splitlines, zfill, center and casefold as Enrichment.
+• Watch-outs: an out-of-range index raises IndexError but an out-of-range slice does not; find returns -1 while index raises ValueError; split() with no argument splits on runs of whitespace; strip removes any of the listed characters, not a substring; join needs strings (a TypeError otherwise); isdigit, isdecimal and isnumeric differ (for example superscript two is a digit but not a decimal; one half is numeric but not a digit); title() mishandles apostrophes; every method returns a new string because strings are immutable; compare similar methods (find versus index, strip versus replace, isdigit versus isdecimal versus isnumeric) in a side-by-side panel.
+Day 5 – Lists ★ (Beginner)
+• Subtopics: creating lists; indexing and negative indexing; slicing; mutability; adding items (append, extend, insert); removing items (remove, pop, del, clear); copy and aliasing; count, index, reverse, sort and sorted; concatenation, repetition and the in operator; nested lists; unpacking; looping over a list (preview).
+• Signature simulations: List Memory Strip (cells holding references, with insert and pop animating the shifting of items); Alias or Copy (two names, one list versus a real copy, and shallow-copy limits with nested lists); Sort Explorer (the key and reverse arguments, stability, sort versus sorted).
+• Methods Explorer: the full list method set with the in-place or returns badge.
+• Watch-outs: list.sort() returns None; remove deletes only the first match and raises ValueError if absent; the nested-list repetition trap ([[0] * 3] * 3); += on a list modifies in place; do not change a list while looping over it.
+Day 6 – Tuples (Beginner)
+• Subtopics: creating tuples; the single-item tuple; indexing and slicing; immutability; tuple to list and back; unpacking; count and index; joining and repeating; in; deleting a tuple; why and when to use tuples.
+• Signature simulations: Try to Change It (the learner attempts item assignment on a tuple and on a list and compares the errors); Immutable Container, Mutable Contents (a tuple holding a list whose contents can still change); Unpacking Machine (values dropping into named variables).
+• Watch-outs: a tuple is defined by its commas, not its brackets; only count and index exist as methods; a tuple is hashable only if everything inside it is hashable.
+Day 7 – Sets (Beginner)
+• Subtopics: creating sets; unique items and no duplicates; unordered with no indexing; adding (add, update); removing (remove, discard, pop, clear); union, intersection, difference, symmetric difference; subset, superset and disjoint tests; converting a list to a set to remove duplicates; frozenset (Enrichment).
+• Signature simulations: Interactive Venn Diagram (drag items between circles; the operation result updates; operator and method forms shown together); Duplicate Remover (list in, set out); Membership Speed Idea (a simple, honest illustration of why lookups in a set are fast).
+• Watch-outs: {} creates an empty dictionary, not a set (use set()); items must be hashable; remove raises KeyError but discard does not; pop removes an arbitrary item; never rely on set ordering.
+Day 8 – Dictionaries ★ (Beginner)
+• Subtopics: key-value pairs; creating dictionaries; accessing values (square brackets versus get); adding and changing items; checking keys; removing (pop, popitem, del, clear); keys, values and items; update; setdefault; copy; fromkeys; nested dictionaries; looping over a dictionary (preview); merging.
+• Signature simulations: Key Lookup (a key travelling to its value with a not-found path that raises KeyError or returns None); Nested Dictionary Tree with a JSON-style view; Student Records Table (a dictionary and a table kept in sync as the learner edits).
+• Watch-outs: dictionaries keep insertion order in modern Python; keys must be hashable; popitem removes the last inserted item; dict.fromkeys with a mutable value shares one object; keys(), values() and items() are live views; copy is shallow; the | merge operator needs Python 3.9 or later.
+Day 9 – Conditionals (Intermediate)
+• Subtopics: if; if and else; if, elif and else; short-hand (conditional expression); nesting; combining conditions with and, or and not; truthiness and falsiness.
+• Signature simulations: Flowchart Tracer (the path through branches lights up as inputs change); Grade Boundaries (a WAEC-style A1 to F9 grader where elif order matters, with a wrong-order version that misgrades); Truthiness Sorter (drag values into truthy and falsy bins and verify with bool()).
+• Enrichment: the match statement, clearly marked as beyond the source.
+• Watch-outs: = versus ==; overlapping ranges and elif order; indentation errors inside nested blocks.
+Day 10 – Loops (Intermediate)
+• Subtopics: while loops; for loops; range (start, stop, step); break; continue; pass; the else clause on loops; nested loops; looping over strings, lists, tuples, sets and dictionaries.
+• Signature simulations: Iteration Timeline (each pass of the loop with the loop variable, the accumulator and the output at that moment); Nested Loop Grid (a multiplication-table grid filling cell by cell); Infinite Loop Safety Lab (a while loop that never ends, stopped by the step limit, with an explanation of how to fix it); Range Slider (the numbers produced by start, stop and step).
+• Watch-outs: stop is exclusive; negative steps; the loop variable still exists after the loop; the loop else runs only when no break occurred.
+Day 11 – Functions ★ (Intermediate)
+• Subtopics: defining and calling; parameters versus arguments; return values; default, keyword and positional arguments; arbitrary arguments (args and kwargs); docstrings; local and global scope; functions as objects; recursion basics; a first look at type hints (Enrichment).
+• Signature simulations: Call Stack Frames (each call creates a frame with its own variables, which is removed on return); Scope Finder (local, enclosing, global and built-in lookup order); Print versus Return (the same function written both ways, with the value that reaches the caller); Argument Matcher (arguments matching parameters, with errors for missing or extra arguments).
+• Methods Explorer: compare a learner-defined function with a built-in function, an object method and a class method.
+• Watch-outs: the mutable default argument trap; a function with no return gives None; global should be used rarely; recursion depth limit (demonstrate a RecursionError safely).
+Day 12 – Modules (Intermediate)
+• Subtopics: what a module is; the import forms (import, from, as, star imports and why to avoid them); the math, random, statistics and datetime modules in outline; os and sys safely; creating and importing your own module; the main-script check; listing contents with dir; the standard library.
+• Signature simulations: Import Simulator with a virtual file tree and a namespace diagram; Module Explorer (choose a module and see its names, with dir output from the real runtime); Seeded Random Lab (the same seed gives the same sequence).
+• Watch-outs: the browser runtime has a virtual file system and a limited standard library; label that clearly. Examples that use random must be seeded so expected output is stable.
+Day 13 – List Comprehension and Lambda Functions (Intermediate)
+• Subtopics: the anatomy of a comprehension (expression, loop, optional condition); conditional expressions inside comprehensions; nested comprehensions; set and dictionary comprehensions; generator expressions (outline); lambda syntax; lambda with sorted, map and filter.
+• Signature simulations: Comprehension Builder (drag the expression, the loop and the condition into place and see the equivalent for-loop beside it); Lambda Unwrapper (a lambda expanded into a def); Loop versus Comprehension side by side with the same output.
+• Watch-outs: the position of if versus if-else differs; a lambda is a single expression; keep comprehensions readable; the late-binding trap for lambdas created in a loop.
+Day 14 – Higher-Order Functions, Closures and Decorators (Intermediate)
+• Subtopics: functions as arguments and return values; map, filter and reduce; closures; nonlocal; decorators; the at-sign syntax; decorators with arguments; preserving metadata with functools.wraps.
+• Signature simulations: Pipeline Conveyor (items moving through map, filter and reduce stages, with each intermediate value visible); Closure Cell Inspector (the captured variable surviving after the outer function returns); Decorator Gift-Wrapping (a function wrapped, called and unwrapped step by step, with the call order shown).
+• Watch-outs: map and filter return iterators and need list() to display; reduce lives in functools; a decorator with arguments has three layers.
+Day 15 – Python Type Errors (Intermediate)
+• Subtopics: the error types learners meet (SyntaxError, IndentationError, NameError, TypeError, ValueError, KeyError, IndexError, AttributeError, ZeroDivisionError, ModuleNotFoundError, UnboundLocalError); how to read a traceback; common causes and fixes; debugging methods (print debugging, reading the message, isolating the problem); an introduction to isinstance and type checking.
+• Signature simulations: Traceback Anatomy (hover over each part of a real traceback to learn what it means); Bug Clinic (broken programs run for real; the learner diagnoses, fixes and re-runs); Error Matchmaker (match a message to its cause in a scenario).
+• Watch-outs: read a traceback from the bottom; IndentationError is a kind of SyntaxError; the messages must come from the real interpreter, not be hand-typed.
+Day 16 – Date and Time (Intermediate)
+• Subtopics: the datetime module; date, time, datetime and timedelta; formatting with strftime; parsing with strptime; timestamps and the time module; date arithmetic; naive versus timezone-aware values; time zones, including West Africa Time (UTC+1).
+• Signature simulations: Format Code Builder (click codes such as year, month and weekday to build a format string and see it applied to a chosen date); Timeline Difference (two dates and the timedelta between them, with a sliding bar); World Clock (one moment shown in several time zones with offsets).
+• Watch-outs: examples must use fixed dates so expected output never depends on today’s date; if the time-zone database is unavailable in the browser runtime, fall back to fixed-offset timezone objects and say so; strptime formats must match exactly.
+Day 17 – Exception Handling, Packing, Unpacking, Enumerate and Zip (Intermediate)
+• Subtopics: try and except; catching specific exceptions; else and finally; raising exceptions; custom exceptions; packing and unpacking with * and **; unpacking in function calls and in literals; enumerate (including the start argument); zip (including unequal lengths).
+• Signature simulations: Exception Flow Lanes (the path through try, except, else and finally lights up for the chosen input); Unpack and Pack Machine; Zipper (two lists zipping, and stopping at the shorter); Enumerate Counter.
+• Watch-outs: a bare except hides bugs; order of except clauses matters; zip and enumerate return iterators; finally always runs.
+Day 18 – Regular Expressions (Intermediate)
+• Subtopics: the re module; match, search, findall, finditer, sub and split; character classes; quantifiers; anchors; groups and alternation; flags (such as ignore-case); raw strings; practical patterns (phone numbers including Nigerian formats, simple email checks, extracting words and numbers).
+• Signature simulations: Regex Playground (live highlighted matches with each group in its own colour); Pattern Explainer (the pattern broken into tokens with a plain-language meaning for each); Interactive Cheat Sheet (click a token to insert it); Greedy versus Lazy comparison.
+• Watch-outs: match anchors at the start while search scans the string; findall returns tuples when there are several groups; email and phone patterns are approximations, so teach their limits; run patterns under the worker time limit so a pathological pattern cannot freeze the page.
+Day 19 – File Handling (Intermediate)
+• Subtopics: opening files and the modes (r, w, a, x, r+, and the binary b); reading (read, readline, readlines); writing and appending; the with statement; the file pointer (seek and tell); checking for and deleting files; text encoding; working with JSON; working with CSV.
+• Signature simulations: File Cursor (the pointer moving as the learner reads and writes); Mode Matrix (what each mode allows, whether it creates or truncates the file, and where it starts); Virtual Disk Explorer (a clearly labelled in-browser file system where learners create, open and inspect files); optional upload of a small local text or CSV file that is read entirely in the browser and never sent anywhere.
+• Watch-outs: the browser has no access to the real disk, so say so plainly; always use with; open the file with an explicit encoding; FileNotFoundError handling.
+Day 20 – Python Package Manager (Intermediate)
+• Subtopics: what packages and PyPI are; pip commands (install, uninstall, list, show, freeze); requirements files; version specifiers and semantic versioning; running pip through python -m; finding and judging a package.
+• Signature simulations: Pip Terminal (a SIMULATION with a safe command set and sample packages); Dependency Graph (installing one package pulls in others); Requirements Builder.
+• Watch-outs: nothing is really installed. If micropip is used for pure-Python packages in the browser runtime, mark it experimental and optional.
+Day 21 – Classes and Objects ★ (Advanced)
+• Subtopics: classes and objects; the constructor and self; attributes and methods; class versus instance attributes; the str and repr methods; inheritance; super; method overriding; polymorphism; encapsulation by convention; the property decorator; class and static methods; special (dunder) methods such as len, add and eq; method resolution order.
+• Signature simulations: Blueprint to Object Factory (a class definition producing instances, each with its own attribute dictionary); Object Inspector (instance versus class attributes, with lookup order); Inheritance Tree (a call travelling up the tree and the method chosen); Dunder Playground (how operators call special methods).
+• Watch-outs: a mutable class attribute is shared between instances; the difference between str and repr; double-underscore name mangling is not true privacy; dataclasses are Enrichment.
+Day 22 – Web Scraping (Advanced)
+• Subtopics: how web pages are structured (HTML, tags, attributes, the DOM tree); the request and response idea; BeautifulSoup concepts (find, find_all, select, text, attributes); extracting links, headings, tables and lists; cleaning scraped data; the ethics and legality of scraping (permission, robots.txt, terms of use, rate limits, personal data).
+• Signature simulations: DOM Tree Explorer (click a node to see its selector; type a selector to see matching nodes highlighted); Scrape a Sample Page (extract data from bundled local pages such as a school notice board or a market price list); Selector Practice.
+• Watch-outs: do not scrape live sites inside the app; use bundled sample pages. If a BeautifulSoup package is available for the runtime, load it lazily and run for real; otherwise use a clearly labelled SIMULATION. Explain that real scraping needs the requests library on the learner’s own computer.
+Day 23 – Virtual Environments (Advanced)
+• Subtopics: why environments exist; creating one with venv; activating it on Windows, macOS and Linux; installing packages inside it; freezing requirements; deactivating; folder structure; good habits for projects.
+• Signature simulations: Terminal Walkthrough (SIMULATION); Dependency Collision (two projects need different versions of one package, first broken in a shared setup, then solved with separate environments); Project Folder Explorer.
+• Watch-outs: use the correct activation command for each system; do not run real shell commands.
+Day 24 – Statistics and NumPy ★ (Advanced)
+• Subtopics: descriptive statistics (mean, median, mode, range, variance, standard deviation, percentiles, quartiles); data distributions; NumPy arrays; creating arrays (array, arange, linspace, zeros, ones); shape, dimensions and dtype; indexing and slicing; reshaping; vectorised operations versus loops; broadcasting; aggregation along an axis; random numbers with a seed; simple matrix operations.
+• Signature simulations: Distribution Studio (edit a dataset and watch a histogram, box plot and summary statistics update); Array Grid (shape, axis highlighting and slicing); Broadcast Animator; Loop versus Vectorised comparison (timing shown honestly); the Notebook Lab data table with per-column summaries.
+• Watch-outs: sample versus population standard deviation (statistics.stdev is sample, statistics.pstdev and NumPy’s default are population); percentile methods differ between tools; understand views versus copies; load NumPy lazily with a size warning.
+Day 25 – Pandas ★ (Advanced)
+• Subtopics: Series and DataFrame; creating from lists, dictionaries and CSV text; head, tail, info, describe and shape; selecting columns; loc versus iloc; boolean filtering; adding and changing columns; sorting; missing values (isna, fillna, dropna); groupby; apply; merge and concat; summary statistics.
+• Signature simulations: DataFrame Explorer (a Notebook Lab table with dropdown controls for dataset, columns and chart type, and column summaries); Filter Builder (conditions combined visually into a boolean mask); Group and Combine (rows splitting into groups, aggregating and recombining); Missing Data Lab.
+• Watch-outs: use small bundled datasets (school scores, market prices in naira, attendance); avoid behaviour that differs between pandas versions; load pandas lazily with a clear download notice and a graceful failure message.
+Day 26 – Python for Web Development using Flask (Advanced)
+• Subtopics: how the web works (client, server, request, response); what a framework does; routes and views; templates and Jinja2; passing data to a template; forms with GET and POST; static files; project structure; the idea of deployment.
+• Signature simulations: Request and Response Journey (an animated trip from browser to route to template to page); Flask Simulator (a virtual server with an editable route table, a request console and a preview pane); Template Renderer (data plus template producing HTML).
+• Watch-outs: a real server cannot run in the browser, so everything here is a clearly labelled SIMULATION. Real Flask code is shown for the learner to copy and run on their own computer.
+Day 27 – Python with MongoDB (Advanced)
+• Subtopics: relational versus document databases; collections and documents; JSON-like structure and ObjectId; connecting (concept); insert, find, update and delete; query operators (such as greater-than and in); sorting, limiting and counting; indexes (concept); designing a document.
+• Signature simulations: Collection Explorer (an in-memory sample database); Query Builder (build a query visually and see the matching documents and the PyMongo code); CRUD Animator.
+• Watch-outs: no real database connection is made; present the PyMongo syntax accurately; explain that find returns a cursor; mention hosted options only as Enrichment.
+Day 28 – Application Programming Interfaces (Advanced)
+• Subtopics: what an API is; HTTP methods; URLs, query parameters and headers; status codes; JSON; calling an API with the requests library (concept and syntax); reading and parsing responses; handling errors and timeouts; API keys and keeping them private.
+• Signature simulations: Request Builder and Response Inspector (method, URL, headers and body against a local mock API with simulated delay and failures); Status Code Lab; JSON Navigator.
+• Watch-outs: no live network calls and no real keys inside the app; explain CORS in one paragraph as the reason real browser calls differ from Python scripts.
+Day 29 – Building APIs (Advanced)
+• Subtopics: REST principles; designing resources and endpoints; mapping create, read, update and delete to POST, GET, PUT or PATCH, and DELETE; building an API with Flask (concept and code); JSON responses; validation and error responses; status codes (201, 204, 400, 404, 409, 422); pagination; authentication ideas; testing an API.
+• Signature simulations: API Designer and Tester (a route table, a request console and a live data store viewer, all simulated); Status Code Chooser scenarios; Validation Lab.
+• Mini project: a Student Records API, simulated.
+• Watch-outs: state which parts are simulated; show idempotency of PUT and DELETE with a demonstration.
+Day 30 – Conclusions, Revision and Final Projects (Advanced)
+• Subtopics: a visual map of the whole course; a revision engine that selects questions from the topics where the learner scored lowest; level checkpoints; final assessment; capstone projects (learners choose one: Student Result Manager, Naira Expense Tracker, Text Analyser, Quiz Game or a simulated Inventory API); a printable completion certificate generated locally with the learner’s own name; next steps.
+• Signature features: Course Map (progress by day and concept); Weak-Spot Revision; Capstone Workspace with a requirements checklist and a self-review rubric.
+• Watch-outs: the final assessment must follow Section 10.2 (reasoning and scenario based, with fresh contexts); the certificate states honestly that it is a self-tracked record.
+15. Copy-and-paste build requests
+Send one request at a time. Replace the values in curly brackets.
+Request 1 – Foundation phases
+Using the Python Visual Lab Master Specification, build PHASE {0A | 0B | 0C | 0D}.
+Follow Sections 3–9 and 13. Do not build any day content beyond what the phase lists.
+Finish with the response format in Section 13.4, including the exact next request.
+Request 2 – Build a day
+Using the Python Visual Lab Master Specification, build DAY {N}, PART {A | B | C}.
+Use the Day {N} Build Brief in Section 14 as the scope.
+Extend only through the manifest and registries. Do not modify other days.
+Finish with the response format in Section 13.4.
+Request 3 – Split a large day
+Build DAY {N}, PART {A1 | A2}: {list the subtopics for this request}.
+Keep everything else unchanged and leave the app working.
+Request 4 – Fix a problem
+Fix this problem without changing anything else.
+Where: {day, subtopic or screen}. Device and width: {for example phone, 390 px}.
+What happens: {describe}. What should happen: {describe}.
+After fixing, run the relevant quality gates from Section 12.2.
+Request 5 – Adjust appearance options
+Extend the Appearance Studio: {for example add a new preset called X, add a code font Y, change the maximum text size}.
+Keep existing settings and saved preferences working, and confirm every preset still meets WCAG AA.
+Request 6 – Regression audit
+Audit Days 1 to {N} against Section 12.2. Report failures first, then fix them.
+Check responsive layouts at all test widths, keyboard use, reduced motion, saved progress after reload, and the self-test.
+Request 7 – Resume in a new session
+I am continuing the Python Visual Lab build. The Master Specification is above.
+Current file tree: {paste}. Days complete: {list}. Next request: {Request 2 for Day N Part X}.
+Do not rebuild anything that exists.
+End of specification. Build Phase 0A first, confirm it works, then continue in the order shown in Section 13.
