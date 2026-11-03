@@ -10,6 +10,7 @@ import { COURSE_DAYS_MANIFEST } from '../../data/manifest';
 import { DAY_1_MODULE } from '../../data/days/day1';
 import { DAY_2_MODULE } from '../../data/days/day2';
 import { DAY_3_MODULE } from '../../data/days/day3';
+import { DAY_4_MODULE } from '../../data/days/day4';
 
 export function getDayModule(dayNumber: number): DayModule {
   if (dayNumber === 0) {
@@ -31,6 +32,11 @@ export function getDayModule(dayNumber: number): DayModule {
   // If Day 3, return the fully authored DAY_3_MODULE
   if (dayNumber === 3) {
     return DAY_3_MODULE;
+  }
+
+  // If Day 4, return the fully authored DAY_4_MODULE
+  if (dayNumber === 4) {
+    return DAY_4_MODULE;
   }
 
   // Placeholder module for Days 2–30

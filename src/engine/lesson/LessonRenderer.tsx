@@ -307,7 +307,7 @@ export const LessonRenderer: React.FC<Props> = ({
                 dayNumber: dayModule.number,
                 title: `${dayModule.title} - ${subtopic.title}`,
                 passingScorePercentage: 80,
-                questions: subtopic.assess.map((q) => ({
+                questions: (subtopic.assess || []).map((q) => ({
                   id: q.id,
                   scenario: q.scenario,
                   question: q.question,
@@ -516,7 +516,9 @@ export const LessonRenderer: React.FC<Props> = ({
                 Day {dayModule.number} Mastery Checklist &amp; Knowledge Wrap-up
               </h3>
               <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                {dayModule.number === 3
+                {dayModule.number === 4
+                  ? 'Congratulations on finishing Day 4! You have mastered Python strings from memory representation, zero-based and negative indexing, and slicing to modern f-strings, safe immutability patterns, and 33 essential string methods.'
+                  : dayModule.number === 3
                   ? 'Congratulations on finishing Day 3! You have mastered arithmetic, relational, boolean logic, short-circuiting, object identity (is) vs equality (==), and operator precedence.'
                   : dayModule.number === 2
                   ? 'Congratulations on finishing Day 2! You have mastered variables as name-to-object bindings, dynamic typing, type inspection, safe conversions, and essential built-in functions.'
@@ -545,7 +547,42 @@ export const LessonRenderer: React.FC<Props> = ({
                 Key Technical Vocabulary
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                {dayModule.number === 3 ? (
+                {dayModule.number === 4 ? (
+                  <>
+                    <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="font-bold text-[var(--text-main)]">Unicode Code Points</div>
+                      <div className="text-[var(--text-muted)] text-[11px]">Strings are immutable ordered sequences of Unicode characters indexed from 0 to len-1.</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="font-bold text-[var(--text-main)]">Negative Slicing ([::-1])</div>
+                      <div className="text-[var(--text-muted)] text-[11px]">Slices never raise IndexError; negative steps reverse traversal without mutating the original.</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="font-bold text-[var(--text-main)]">Strict Immutability</div>
+                      <div className="text-[var(--text-muted)] text-[11px]">s[0] = 'X' raises TypeError; string transformations allocate brand-new memory objects.</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="font-bold text-[var(--text-main)]">PEP 498 f-Strings</div>
+                      <div className="text-[var(--text-muted)] text-[11px]">Runtime expression evaluation with formatting specifiers like :, and .2f.</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="font-bold text-[var(--text-main)]">strip() vs Suffix Removal</div>
+                      <div className="text-[var(--text-muted)] text-[11px]">strip(chars) strips an unordered set of characters from ends, not an exact substring!</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="font-bold text-[var(--text-main)]">split() Whitespace Collapse</div>
+                      <div className="text-[var(--text-muted)] text-[11px]">s.split() collapses arbitrary whitespace runs; s.split(' ') preserves empty string tokens.</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="font-bold text-[var(--text-main)]">find() vs index()</div>
+                      <div className="text-[var(--text-muted)] text-[11px]">find() returns -1 on absence; index() raises ValueError. Use in to guard index().</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="font-bold text-[var(--text-main)]">isdecimal() vs isnumeric()</div>
+                      <div className="text-[var(--text-muted)] text-[11px]">isdecimal() guarantees 0-9 for int(); isdigit() includes superscripts; isnumeric() includes fractions.</div>
+                    </div>
+                  </>
+                ) : dayModule.number === 3 ? (
                   <>
                     <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
                       <div className="font-bold text-[var(--text-main)]">Boolean Truthiness</div>
@@ -797,6 +834,53 @@ export const LessonRenderer: React.FC<Props> = ({
                 className="w-full mt-2 py-3 rounded-xl bg-[var(--accent-primary)] hover:bg-[var(--accent-hover)] text-[var(--accent-on)] font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-colors"
               >
                 <span>Continue to Day 4: Strings</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          ) : dayModule.number === 4 ? (
+            <div className="p-5 rounded-2xl border border-[var(--accent-primary)]/40 bg-gradient-to-br from-[var(--bg-surface)] to-[var(--accent-subtle)]/20 space-y-3 shadow-md">
+              <div className="flex items-center justify-between">
+                <span className="eyebrow-label text-[10px] text-[var(--accent-primary)]">
+                  NEXT UP IN 30 DAYS OF PYTHON
+                </span>
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[var(--bg-app)] text-[var(--text-muted)] border border-[var(--border-subtle)]">
+                  BEGINNER • 80 MINS
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-base font-bold text-[var(--text-main)] mb-1">
+                  Day 5 — Lists (Creation, Mutability, Slicing &amp; 11 Core Methods) ★
+                </h3>
+                <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+                  Transition from immutable sequences to Python's foundational mutable collection. In Day 5, you will master dynamic arrays, memory addresses, in-place vs return semantics, and 11 core list methods.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[var(--text-muted)] pt-1">
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-[var(--bg-app)]/80 border border-[var(--border-subtle)]">
+                  <span className="text-[var(--accent-primary)] font-bold">→</span>
+                  <span>Mutable Sequence Semantics &amp; Memory Allocation</span>
+                </div>
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-[var(--bg-app)]/80 border border-[var(--border-subtle)]">
+                  <span className="text-[var(--accent-primary)] font-bold">→</span>
+                  <span>Dynamic Array Over-Allocation in CPython</span>
+                </div>
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-[var(--bg-app)]/80 border border-[var(--border-subtle)]">
+                  <span className="text-[var(--accent-primary)] font-bold">→</span>
+                  <span>11 Core List Methods (append, extend, pop, sort)</span>
+                </div>
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-[var(--bg-app)]/80 border border-[var(--border-subtle)]">
+                  <span className="text-[var(--accent-primary)] font-bold">→</span>
+                  <span>Shallow vs Deep Copies &amp; Aliasing Traps</span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => selectDay(5)}
+                className="w-full mt-2 py-3 rounded-xl bg-[var(--accent-primary)] hover:bg-[var(--accent-hover)] text-[var(--accent-on)] font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-colors"
+              >
+                <span>Continue to Day 5: Lists</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>

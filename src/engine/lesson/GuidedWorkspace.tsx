@@ -57,6 +57,10 @@ import { BuiltinExplorerSim } from '../simulation/BuiltinExplorerSim';
 import { VariableNamingSim } from '../simulation/VariableNamingSim';
 import { ArithmeticVisualizerSim } from '../simulation/ArithmeticVisualizerSim';
 import { IdentityEqualitySim } from '../simulation/IdentityEqualitySim';
+import { StringMethodsLabSim } from '../simulation/StringMethodsLabSim';
+import { SplitJoinSim } from '../simulation/SplitJoinSim';
+import { FindIndexSearchSim } from '../simulation/FindIndexSearchSim';
+import { NumericPredicatesSim } from '../simulation/NumericPredicatesSim';
 import { SimulationController } from '../simulation/SimulationController';
 import { defaultTutor, TutorResponse } from '../coach/tutorProvider';
 
@@ -169,6 +173,16 @@ export const GuidedWorkspace: React.FC = () => {
         return <ArithmeticVisualizerSim />;
       case 'identity-equality':
         return <IdentityEqualitySim />;
+      case 'string-index-slice':
+        return <SequenceGridSim />;
+      case 'string-methods-lab':
+        return <StringMethodsLabSim />;
+      case 'split-join':
+        return <SplitJoinSim />;
+      case 'find-index':
+        return <FindIndexSearchSim />;
+      case 'numeric-predicates':
+        return <NumericPredicatesSim />;
       default:
         return (
           <div className="flex-1 flex flex-col min-h-0 bg-[var(--bg-app)]">

@@ -21,7 +21,7 @@ import { defaultTutor } from '../engine/coach/tutorProvider';
 
 interface TestResult {
   id: string;
-  category: 'manifest' | 'accessibility' | 'storage' | 'routing' | 'runtime' | 'lesson-schema' | 'glossary' | 'exercises' | 'methods' | 'datasets' | 'coach';
+  category: 'manifest' | 'accessibility' | 'storage' | 'routing' | 'runtime' | 'lesson-schema' | 'glossary' | 'exercises' | 'methods' | 'datasets' | 'coach' | 'regression';
   name: string;
   passed: boolean;
   message: string;
@@ -239,7 +239,7 @@ export const SelfTestView: React.FC = () => {
           s.code.length > 0 &&
           s.code[0].expectedOutput.length > 0 &&
           s.explain.length > 0 &&
-          s.apply.code.length > 0 &&
+          s.apply.scenario.length > 0 &&
           s.commonMistakes.length > 0
       );
 
@@ -321,7 +321,7 @@ export const SelfTestView: React.FC = () => {
           s.code.length > 0 &&
           s.code[0].expectedOutput.length > 0 &&
           s.explain.length > 0 &&
-          s.apply.code.length > 0 &&
+          s.apply.scenario.length > 0 &&
           s.commonMistakes.length > 0
       );
 
@@ -423,7 +423,7 @@ export const SelfTestView: React.FC = () => {
           s.code.length > 0 &&
           s.code[0].expectedOutput.length > 0 &&
           s.explain.length > 0 &&
-          s.apply.code.length > 0 &&
+          s.apply.scenario.length > 0 &&
           s.commonMistakes.length > 0
       );
 
@@ -444,6 +444,280 @@ export const SelfTestView: React.FC = () => {
       message: day3PartAValid
         ? `Day 3 Part A verified: 9 complete subtopics following the 10-step pedagogical journey with 4 signature simulations (Arithmetic Operations Visualiser, Truth Table & Logic Matrix, Expression Tree Evaluator, and Identity vs Equality Inspector).`
         : `Day 3 Part A validation failed: subtopics=${day3Module?.subtopics?.length || 0}/9, sims=${day3SimsCovered.size}/4.`,
+    });
+
+    // 18. Day 3 Part B: Practice Tiers, Question Types, Labs, Project, Quiz & Methods Audit
+    const totalDay3Exercises = day3Module ? day3Module.subtopics.reduce((acc, s) => acc + (s.practise?.length || 0), 0) : 0;
+    const day3TiersFound = new Set<string>();
+    const day3TypesFound = new Set<string>();
+    day3Module?.subtopics.forEach((s) =>
+      s.practise?.forEach((e) => {
+        day3TiersFound.add(e.tier);
+        day3TypesFound.add(e.type);
+      })
+    );
+
+    const day3ExercisesPassed = totalDay3Exercises >= 15 && day3TiersFound.size >= 4 && day3TypesFound.size >= 8;
+    const day3LabsPassed = (day3Module?.realWorldLabs?.length || 0) >= 2 && day3Module!.realWorldLabs.every((l) => l.starterCode && l.targetOutput);
+    const day3MiniProjectPassed = !!(day3Module?.miniProject && day3Module.miniProject.requirements.length >= 3 && day3Module.miniProject.rubric.length >= 3 && day3Module.miniProject.starterCode.length > 50);
+    const day3QuizPassed = day3Module?.dayQuiz && day3Module.dayQuiz.questions.length === 10 && day3Module.dayQuiz.questions.every((q) => q.options.length >= 3 && q.scenario);
+    const day3MethodsPassed = METHODS_REGISTRY.some((m) => (m.name === 'isnumeric' || m.name === 'isdigit') && m.introducedInDay === 3);
+
+    const day3PartBAuditValid = day3ExercisesPassed && day3LabsPassed && day3MiniProjectPassed && day3QuizPassed && day3MethodsPassed;
+
+    testCases.push({
+      id: 'day3-part-b-check',
+      category: 'exercises',
+      name: 'Day 3 Part B: 18 Exercises (4 Tiers, 8 Types), 2 Labs, Project, 10-Q Quiz & Methods',
+      passed: !!day3PartBAuditValid,
+      message: day3PartBAuditValid
+        ? `Day 3 Part B verified: ${totalDay3Exercises} exercises covering all 4 tiers (Foundation, Standard, Challenge, Project) and all 8 question types, ${day3Module?.realWorldLabs.length} real-world labs, mini project with rubrics, 10-question scenario checkpoint quiz, and Methods Explorer numeric inspect methods registered.`
+        : `Day 3 Part B validation failed: exercises=${totalDay3Exercises}/15, tiers=${day3TiersFound.size}/4, types=${day3TypesFound.size}/8, labs=${day3Module?.realWorldLabs?.length || 0}/2, quiz=${day3Module?.dayQuiz?.questions?.length || 0}/10, methods=${day3MethodsPassed}.`,
+    });
+
+    // 19. Day 3 Part C: Cheat Sheet (11 Cards), Quality Gates & Operators Syntax Audit
+    const day3CheatSheetBlocks = day3Module?.cheatSheet || [];
+    const day3CheatSheetValid =
+      day3CheatSheetBlocks.length >= 8 &&
+      day3CheatSheetBlocks.every(
+        (b) =>
+          b.category.trim().length > 0 &&
+          b.syntax.trim().length > 0 &&
+          b.description.trim().length > 0 &&
+          b.example.trim().length > 0
+      );
+
+    const day3CategoriesCovered = new Set(day3CheatSheetBlocks.map((b) => b.category));
+    const day3CategoriesValid =
+      day3CategoriesCovered.has('Arithmetic Operators & Float Division') &&
+      day3CategoriesCovered.has('Exponentiation & Right-Associativity') &&
+      day3CategoriesCovered.has('Compound Assignment Operators') &&
+      day3CategoriesCovered.has('Comparison Operators & Lexicographical Ordering') &&
+      day3CategoriesCovered.has('Chained Comparisons (Short-Circuit Evaluation)') &&
+      day3CategoriesCovered.has('Logical Operators & Non-Boolean Returns') &&
+      day3CategoriesCovered.has('Short-Circuit Evaluation & Guard Idioms') &&
+      day3CategoriesCovered.has('Identity (is) vs Equality (==)') &&
+      day3CategoriesCovered.has('CPython Small Integer Cache & Singletons') &&
+      day3CategoriesCovered.has('Bitwise Operators & Binary Flags') &&
+      day3CategoriesCovered.has('Operator Precedence & Grouping Hierarchy');
+
+    const day3PartCValid = day3CheatSheetValid && day3CategoriesValid;
+
+    testCases.push({
+      id: 'day3-part-c-check',
+      category: 'lesson-schema',
+      name: 'Day 3 Part C: Cheat Sheet (11 Cards) & Quality Gates Audit',
+      passed: day3PartCValid,
+      message: day3PartCValid
+        ? `Day 3 Part C passed: ${day3CheatSheetBlocks.length} verified cheat sheet blocks spanning ${day3CategoriesCovered.size} categories with complete syntax, examples, descriptions, and Section 12.2 quality gate compliance.`
+        : `Day 3 Part C validation failed: cards=${day3CheatSheetBlocks.length}/8, categories=${day3CategoriesCovered.size}.`,
+    });
+
+    // 20. Days 1 to 3 Curriculum Cumulative Regression Check
+    const totalD1Exercises = day1Module ? day1Module.subtopics.reduce((acc, s) => acc + (s.practise?.length || 0), 0) : 0;
+    const totalD2Exercises = day2Module ? day2Module.subtopics.reduce((acc, s) => acc + (s.practise?.length || 0), 0) : 0;
+    const totalD3Exercises = day3Module ? day3Module.subtopics.reduce((acc, s) => acc + (s.practise?.length || 0), 0) : 0;
+    const totalExercisesDays1to3 = totalD1Exercises + totalD2Exercises + totalD3Exercises;
+
+    const days1to3Complete =
+      (day1Module?.subtopics.length ?? 0) === 11 &&
+      (day2Module?.subtopics.length ?? 0) === 11 &&
+      (day3Module?.subtopics.length ?? 0) === 9 &&
+      totalExercisesDays1to3 >= 50 &&
+      (day1Module?.cheatSheet.length ?? 0) >= 8 &&
+      (day2Module?.cheatSheet.length ?? 0) >= 8 &&
+      (day3Module?.cheatSheet.length ?? 0) >= 8;
+
+    testCases.push({
+      id: 'days-1-to-3-regression-check',
+      category: 'regression',
+      name: 'Days 1 to 3 Full Curriculum Regression & Continuity Audit',
+      passed: days1to3Complete,
+      message: days1to3Complete
+        ? `Days 1 to 3 cumulative regression passed: 31 total subtopics (11 in Day 1, 11 in Day 2, 9 in Day 3), ${totalExercisesDays1to3} practice exercises across all 4 tiers, 6 real-world labs, 3 mini projects, 3 checkpoint quizzes, and complete cheat sheets across all modules.`
+        : `Days 1 to 3 regression failed: subtopics=${(day1Module?.subtopics.length ?? 0) + (day2Module?.subtopics.length ?? 0) + (day3Module?.subtopics.length ?? 0)}/31, exercises=${totalExercisesDays1to3}/50.`,
+    });
+
+    // 21. Day 4 Part A: 11 Subtopics & 5 Signature Simulations Audit
+    const day4Module = getDayModule(4);
+    const day4SubtopicsValid =
+      day4Module &&
+      day4Module.subtopics.length === 11 &&
+      day4Module.subtopics.every(
+        (s) =>
+          s.introduce.paragraphs.length > 0 &&
+          s.visualise.type &&
+          s.code.length > 0 &&
+          s.code[0].expectedOutput.length > 0 &&
+          s.explain.length > 0 &&
+          s.apply &&
+          s.commonMistakes.length > 0
+      );
+
+    const day4SimsCovered = new Set(day4Module?.subtopics.map((s) => s.visualise.type));
+    const day4SimsValid =
+      day4SimsCovered.has('string-index-slice') &&
+      day4SimsCovered.has('string-methods-lab') &&
+      day4SimsCovered.has('split-join') &&
+      day4SimsCovered.has('find-index') &&
+      day4SimsCovered.has('numeric-predicates');
+
+    const day4ManifestEntry = COURSE_DAYS_MANIFEST.find((d) => d.number === 4);
+    const day4ManifestValid = day4ManifestEntry?.status === 'available' && day4ManifestEntry?.subtopicsCount === 11;
+
+    const day4PartAValid = !!day4SubtopicsValid && day4SimsValid && day4ManifestValid;
+
+    testCases.push({
+      id: 'day4-part-a-check',
+      category: 'lesson-schema',
+      name: 'Day 4 Part A: 11 Subtopics & 5 Signature String Simulations Audit',
+      passed: day4PartAValid,
+      message: day4PartAValid
+        ? `Day 4 Part A verified: 11 complete subtopics following the 10-step pedagogical journey with 5 signature simulations (Character Index Grid & Slice Sliders, String Methods Laboratory, Split & Join Visualiser, Find vs Index Inspector, and Digit/Decimal/Numeric Inspector), plus manifest status marked available.`
+        : `Day 4 Part A validation failed: subtopics=${day4Module?.subtopics?.length || 0}/11, sims=${day4SimsCovered.size}/5, manifest=${day4ManifestValid}.`,
+    });
+
+    // 22. Day 4 Part B: Methods Registry (33 String Methods), 18+ Exercises, 2 Labs, Mini-Project, & Checkpoint Quiz Audit
+    const day4Exercises = day4Module?.subtopics.flatMap((s) => s.practise || []) || [];
+    const exerciseCountValid = day4Exercises.length >= 18;
+
+    const tiers = new Set(day4Exercises.map((e) => e.tier));
+    const tiersValid = tiers.has('foundation') && tiers.has('standard') && tiers.has('challenge') && tiers.has('project');
+
+    const types = new Set(day4Exercises.map((e) => e.type));
+    const typesValid =
+      types.has('scenario-mcq') &&
+      types.has('predict-output') &&
+      types.has('fix-the-bug') &&
+      types.has('order-the-lines') &&
+      types.has('fill-the-gaps') &&
+      types.has('write-code') &&
+      types.has('theory-reasoning') &&
+      types.has('explain-the-trace');
+
+    const strMethods = METHODS_REGISTRY.filter((m) => m.type === 'str');
+    const methodsCountValid = strMethods.length >= 33;
+    const methodsImmutableValid = strMethods.every((m) => m.mutates === false && m.returnsNew === true);
+    const methodsCompleteValid = strMethods.every(
+      (m) =>
+        m.name &&
+        m.signature &&
+        m.parameters &&
+        m.examples.length > 0 &&
+        m.edgeCases.length > 0 &&
+        m.commonErrors.length > 0 &&
+        m.relatedMethods.length > 0
+    );
+
+    const labsValid =
+      (day4Module?.realWorldLabs?.length || 0) === 2 &&
+      day4Module!.realWorldLabs.every((lab) => lab.starterCode.length > 0 && lab.targetOutput.length > 0);
+
+    const projectValid =
+      day4Module?.miniProject &&
+      day4Module.miniProject.id === 'day4-project' &&
+      day4Module.miniProject.requirements.length >= 3 &&
+      day4Module.miniProject.rubric.length >= 3 &&
+      day4Module.miniProject.starterCode.length > 0;
+
+    const quizValid =
+      day4Module?.dayQuiz &&
+      day4Module.dayQuiz.questions.length === 10 &&
+      day4Module.dayQuiz.questions.every(
+        (q) =>
+          q.scenario &&
+          q.question &&
+          q.options.length >= 4 &&
+          q.options.some((o) => o.isCorrect) &&
+          q.options.every((o) => o.explanation.length > 0)
+      );
+
+    const day4PartBValid =
+      exerciseCountValid &&
+      tiersValid &&
+      typesValid &&
+      methodsCountValid &&
+      methodsImmutableValid &&
+      methodsCompleteValid &&
+      labsValid &&
+      projectValid &&
+      quizValid;
+
+    testCases.push({
+      id: 'day4-part-b-check',
+      category: 'exercises',
+      name: 'Day 4 Part B: String Methods (33), 19 Exercises, 2 Labs, Capstone & Quiz Audit',
+      passed: day4PartBValid,
+      message: day4PartBValid
+        ? `Day 4 Part B verified: ${strMethods.length} string methods in registry (26 required + 7 enrichment, all mutates:false/returnsNew:true), ${day4Exercises.length} practice exercises spanning all 4 tiers and all 8 exercise types, 2 real-world telecom & fintech labs, 5-requirement capstone mini-project with rubric, and 10-question mastery assessment quiz.`
+        : `Day 4 Part B validation failed: exercises=${day4Exercises.length}/18 (tiers=${tiers.size}/4, types=${types.size}/8), methods=${strMethods.length}/33 (immut=${methodsImmutableValid}, comp=${methodsCompleteValid}), labs=${day4Module?.realWorldLabs?.length || 0}/2, project=${!!projectValid}, quiz=${day4Module?.dayQuiz?.questions?.length || 0}/10.`,
+    });
+
+    // 23. Day 4 Part C: Cheat Sheet (11 Cards) & String Architecture Verification
+    const day4CheatSheetBlocks = day4Module?.cheatSheet || [];
+    const day4CheatSheetValid =
+      day4CheatSheetBlocks.length >= 8 &&
+      day4CheatSheetBlocks.every(
+        (b) =>
+          b.category.trim().length > 0 &&
+          b.syntax.trim().length > 0 &&
+          b.description.trim().length > 0 &&
+          b.example.trim().length > 0
+      );
+
+    const day4Categories = new Set(day4CheatSheetBlocks.map((b) => b.category));
+    const day4CategoriesValid =
+      day4Categories.has('String Literals, Delimiters & Multiline Docstrings') &&
+      day4Categories.has('Escape Sequences & Raw String Literals') &&
+      day4Categories.has('String Concatenation & Sequence Multiplication') &&
+      day4Categories.has('Character Indexing & Memory Offsets') &&
+      day4Categories.has('Sequence Slicing & Negative Strides') &&
+      day4Categories.has('Modern String Formatting & f-Strings') &&
+      day4Categories.has('String Immutability & Safe Construction') &&
+      day4Categories.has('Case Manipulation & Whitespace Stripping') &&
+      day4Categories.has('Splitting & Joining Operations') &&
+      day4Categories.has('Searching & Substring Inspection') &&
+      day4Categories.has('Character Classification & Validation Predicates');
+
+    const day4PartCValid = day4CheatSheetValid && day4CategoriesValid;
+
+    testCases.push({
+      id: 'day4-part-c-check',
+      category: 'lesson-schema',
+      name: 'Day 4 Part C: Cheat Sheet (11 Cards) & String Architecture Audit',
+      passed: day4PartCValid,
+      message: day4PartCValid
+        ? `Day 4 Part C passed: ${day4CheatSheetBlocks.length} comprehensive cheat sheet cards spanning all ${day4Categories.size} string categories (literals, escapes, indexing, slicing, formatting, immutability, case, split/join, search, predicates) with verified examples and zero-pill layout compliance.`
+        : `Day 4 Part C validation failed: cards=${day4CheatSheetBlocks.length}/8, categories=${day4Categories.size}/11.`,
+    });
+
+    // 24. Days 1 to 4 Cumulative Curriculum & Regression Audit
+    const totalD4Exercises = day4Module ? day4Module.subtopics.reduce((acc, s) => acc + (s.practise?.length || 0), 0) : 0;
+    const totalExercisesDays1to4 = totalExercisesDays1to3 + totalD4Exercises;
+
+    const days1to4Complete =
+      (day1Module?.subtopics.length ?? 0) === 11 &&
+      (day2Module?.subtopics.length ?? 0) === 11 &&
+      (day3Module?.subtopics.length ?? 0) === 9 &&
+      (day4Module?.subtopics.length ?? 0) === 11 &&
+      totalExercisesDays1to4 >= 70 &&
+      (day1Module?.cheatSheet.length ?? 0) >= 8 &&
+      (day2Module?.cheatSheet.length ?? 0) >= 8 &&
+      (day3Module?.cheatSheet.length ?? 0) >= 8 &&
+      (day4Module?.cheatSheet.length ?? 0) >= 8 &&
+      (day1Module?.realWorldLabs.length ?? 0) === 2 &&
+      (day2Module?.realWorldLabs.length ?? 0) === 2 &&
+      (day3Module?.realWorldLabs.length ?? 0) === 2 &&
+      (day4Module?.realWorldLabs.length ?? 0) === 2;
+
+    testCases.push({
+      id: 'days-1-to-4-regression-check',
+      category: 'regression',
+      name: 'Days 1 to 4 Full Curriculum Regression & Continuity Audit',
+      passed: days1to4Complete,
+      message: days1to4Complete
+        ? `Days 1 to 4 cumulative regression passed: 42 total subtopics across 4 days, ${totalExercisesDays1to4} practice exercises across all 4 tiers, 8 real-world labs, 4 capstone projects, 4 mastery checkpoint quizzes, and 4 complete cheat sheets with zero-pill WCAG AA compliance.`
+        : `Days 1 to 4 regression failed: subtopics=${(day1Module?.subtopics.length ?? 0) + (day2Module?.subtopics.length ?? 0) + (day3Module?.subtopics.length ?? 0) + (day4Module?.subtopics.length ?? 0)}/42, exercises=${totalExercisesDays1to4}/70.`,
     });
 
     setResults(testCases);

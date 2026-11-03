@@ -63,7 +63,7 @@ export const COURSE_DAYS_MANIFEST: DayManifestItem[] = [
     summary: 'Sequence indexing, slicing, immutability, formatting (f-strings, format), escape characters, and 25+ string methods.',
     sourceUrl: 'https://github.com/Asabeneh/30-Days-Of-Python/tree/master/04_Day_Strings',
     prerequisites: [2, 3],
-    status: 'coming-soon',
+    status: 'available',
     tags: ['Strings', 'Slicing', 'Methods', 'Formatting', 'Immutability'],
   },
   {

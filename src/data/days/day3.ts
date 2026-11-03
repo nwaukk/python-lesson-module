@@ -153,7 +153,69 @@ if bool(user_opt_in):
 is_opted_in = user_opt_in == "True"  # Evaluates to False`,
         },
       ],
-      practise: [],
+      practise: [
+        {
+          id: 'd3-s1-ex1',
+          title: 'Truthy vs Falsy Evaluation in Admission Queue',
+          type: 'scenario-mcq',
+          tier: 'foundation',
+          points: 10,
+          contextScenario: 'Federal University of Technology Minna (FUTMINNA) admissions portal',
+          prompt: 'Which of the following expressions evaluates to False in Python?',
+          options: [
+            {
+              id: 'opt-1',
+              text: 'bool("False")',
+              explanation: 'Incorrect. "False" is a non-empty string of length 5, so bool() evaluates to True.',
+              isCorrect: false,
+            },
+            {
+              id: 'opt-2',
+              text: 'bool([0])',
+              explanation: 'Incorrect. [0] is a non-empty list containing one element, so bool() evaluates to True.',
+              isCorrect: false,
+            },
+            {
+              id: 'opt-3',
+              text: 'bool(0.0)',
+              explanation: 'Correct! Numeric zero of any type (0, 0.0, 0j) is inherently falsy in Python.',
+              isCorrect: true,
+            },
+            {
+              id: 'opt-4',
+              text: 'bool(" ")',
+              explanation: 'Incorrect. A single space string has a length of 1 and is non-empty, evaluating to True.',
+              isCorrect: false,
+            },
+          ],
+          hints: [
+            'Recall that non-empty sequences (strings, lists) always evaluate to True regardless of their text or numbers.',
+            'Look for the numerical zero representation among the choices.',
+            '0.0 is a floating-point zero, which evaluates to False.',
+          ],
+        },
+        {
+          id: 'd3-s1-ex2',
+          title: 'CPython Subclassing: bool is an int',
+          type: 'theory-reasoning',
+          tier: 'standard',
+          points: 15,
+          contextScenario: 'CPython Core Object Hierarchy Seminar at University of Ibadan',
+          prompt: 'Explain why issubclass(bool, int) returns True in Python, and describe the mathematical implications when evaluating expressions like True + True + 10.',
+          modelAnswer: 'In Python, the bool type was implemented as an explicit subclass of int for backward compatibility with older code where integers 1 and 0 were used for truth values. The singletons True and False behave numerically as 1 and 0 in mathematical operations. Therefore, True + True + 10 evaluates as 1 + 1 + 10 = 12.',
+          markingCriteria: [
+            { id: 'crit-1', label: 'Mentions that bool inherits from int and True/False correspond to 1/0', points: 5 },
+            { id: 'crit-2', label: 'Explains numerical arithmetic behavior (e.g. True + True + 10 = 12)', points: 5 },
+            { id: 'crit-3', label: 'Identifies backward compatibility with pre-bool Python as the architectural rationale', points: 5 },
+          ],
+          hints: [
+            'Think about how Python 2 and early Python handled booleans before True and False were keywords.',
+            'What integer values do True and False convert to when passed into int()?',
+            'Demonstrate how arithmetic operators treat boolean operands as integers.',
+          ],
+        },
+      ],
+      assess: [],
     },
 
     // ==========================================
@@ -181,7 +243,7 @@ is_opted_in = user_opt_in == "True"  # Evaluates to False`,
       visualise: {
         type: 'arithmetic-lab',
         title: 'Arithmetic & Division Operations Visualiser',
-        badge: 'interactive',
+        badge: 'simulation',
         description: 'Explore live addition, subtraction, multiplication, and floating-point division across customizable operands.',
         initialConfig: { valA: 17, valB: 5 },
       },
@@ -280,7 +342,77 @@ else:
           correctedCode: `total = f"₦{5000}"  # Or "₦" + str(5000)`,
         },
       ],
-      practise: [],
+      practise: [
+        {
+          id: 'd3-s2-ex1',
+          title: 'Floating-Point Division Guarantee',
+          type: 'predict-output',
+          tier: 'foundation',
+          points: 10,
+          contextScenario: 'Victoria Island Restaurant Bill Split',
+          prompt: 'What is the output of the following Python code snippet?\n\ntotal = 5000\nguests = 2\nshare = total / guests\nprint(type(share), share)',
+          options: [
+            {
+              id: 'opt-1',
+              text: "<class 'float'> 2500.0",
+              explanation: 'Correct! In Python 3, the standard division operator (/) always returns a float object, even when the division is exact.',
+              isCorrect: true,
+            },
+            {
+              id: 'opt-2',
+              text: "<class 'int'> 2500",
+              explanation: 'Incorrect. Standard division in Python 3 never returns an int.',
+              isCorrect: false,
+            },
+            {
+              id: 'opt-3',
+              text: "<class 'float'> 2500",
+              explanation: 'Incorrect. Floating point numbers in Python are printed with a decimal point (2500.0).',
+              isCorrect: false,
+            },
+            {
+              id: 'opt-4',
+              text: 'TypeError: unsupported operand types for /',
+              explanation: 'Incorrect. Both total and guests are integers, which support division.',
+              isCorrect: false,
+            },
+          ],
+          hints: [
+            'Remember Python 3\'s rule for the single forward slash (/) operator.',
+            'Standard division always produces a floating-point result, never an integer.',
+            'Floats print with at least one fractional digit (e.g. .0).',
+          ],
+        },
+        {
+          id: 'd3-s2-ex2',
+          title: 'Fix Airtime Top-Up Balance Calculation Bug',
+          type: 'fix-the-bug',
+          tier: 'standard',
+          points: 15,
+          contextScenario: 'MTN Airtime and Data Bundle Recharge Service, Lagos',
+          prompt: 'A customer care script attempts to add a promotional bonus string "1500" to an existing wallet balance of 3000, triggering a TypeError. Fix the bug to cast the bonus appropriately and print the updated balance: "Updated Balance: ₦4500".',
+          starterCode: `# Current balance and bonus
+balance = 3000
+bonus_str = "1500"
+
+# Fix the bug below to safely calculate total balance
+total_balance = balance + bonus_str
+print(f"Updated Balance: ₦{total_balance}")`,
+          solutionCode: `# Current balance and bonus
+balance = 3000
+bonus_str = "1500"
+
+# Fix the bug below to safely calculate total balance
+total_balance = balance + int(bonus_str)
+print(f"Updated Balance: ₦{total_balance}")`,
+          hints: [
+            'Notice that bonus_str is of type str, while balance is an int.',
+            'Python does not automatically convert strings to numbers during addition.',
+            'Use int(bonus_str) to convert the string literal into an integer before adding.',
+          ],
+        },
+      ],
+      assess: [],
     },
 
     // ==========================================
@@ -308,7 +440,7 @@ else:
       visualise: {
         type: 'arithmetic-lab',
         title: 'Floor Division & Modulus Architecture',
-        badge: 'interactive',
+        badge: 'simulation',
         description: 'Inspect floor division number lines and watch how negative quotients round towards negative infinity.',
         initialConfig: { valA: -7, valB: 2 },
       },
@@ -406,7 +538,71 @@ Loose Bags Remaining for Manual Stacking: 45 bags`,
     remainder = x % divisor`,
         },
       ],
-      practise: [],
+      practise: [
+        {
+          id: 'd3-s3-ex1',
+          title: 'Euler Floor Division & Modulus with Negative Numbers',
+          type: 'predict-output',
+          tier: 'challenge',
+          points: 20,
+          contextScenario: 'Subsea Petroleum Valve Reverse Angle Calibration, Niger Delta',
+          prompt: 'What exact numbers are printed by Python when running the following line?\n\nprint(-7 // 2, -7 % 2)',
+          options: [
+            {
+              id: 'opt-1',
+              text: '-4 1',
+              explanation: 'Correct! -7 / 2 = -3.5. Floor division rounds down towards negative infinity to -4. Then by Python modulus law r = a - (a // b) * b: r = -7 - (-4 * 2) = -7 - (-8) = 1.',
+              isCorrect: true,
+            },
+            {
+              id: 'opt-2',
+              text: '-3 -1',
+              explanation: 'Incorrect. This is C-style truncation towards zero, not Python floor division.',
+              isCorrect: false,
+            },
+            {
+              id: 'opt-3',
+              text: '-3 1',
+              explanation: 'Incorrect. -7 // 2 yields -4, not -3.',
+              isCorrect: false,
+            },
+            {
+              id: 'opt-4',
+              text: '-4 -1',
+              explanation: 'Incorrect. Modulus with a positive divisor b=2 always produces a positive remainder r in [0, b-1].',
+              isCorrect: false,
+            },
+          ],
+          hints: [
+            'Floor division // always rounds down towards negative infinity (the number line to the left).',
+            'Between -3 and -4, which number is more negative?',
+            'Use the formal modulus invariant: a = (a // b) * b + (a % b).',
+          ],
+        },
+        {
+          id: 'd3-s3-ex2',
+          title: '12-Hour Shift Clock Arithmetic',
+          type: 'order-the-lines',
+          tier: 'standard',
+          points: 15,
+          contextScenario: 'Lagos Emergency Medical Services 12-Hour Shift Roster',
+          prompt: 'Reorder the lines of code to compute the resulting clock hour after adding 14 hours to a 9:00 AM shift start time using modulo arithmetic.',
+          jumbledLines: [
+            { id: 'line-1', code: 'start_hour = 9', indent: 0 },
+            { id: 'line-2', code: 'shift_duration = 14', indent: 0 },
+            { id: 'line-3', code: 'raw_hour = (start_hour + shift_duration) % 12', indent: 0 },
+            { id: 'line-4', code: 'final_hour = 12 if raw_hour == 0 else raw_hour', indent: 0 },
+            { id: 'line-5', code: 'print(f"Shift handover at: {final_hour}:00")', indent: 0 },
+          ],
+          correctLineOrder: ['line-1', 'line-2', 'line-3', 'line-4', 'line-5'],
+          hints: [
+            'Initialize start_hour and shift_duration first.',
+            'Compute raw_hour using addition inside parentheses, then apply modulo 12.',
+            'Handle the 12-o\'clock edge case where 0 % 12 represents 12, then print the result.',
+          ],
+        },
+      ],
+      assess: [],
     },
 
     // ==========================================
@@ -525,7 +721,91 @@ Total Wealth Created: ₦4,627,073.92`,
           correctedCode: `result = (2 ** 3) ** 2  # Evaluates to 64`,
         },
       ],
-      practise: [],
+      practise: [
+        {
+          id: 'd3-s4-ex1',
+          title: 'Right-to-Left Exponentiation Associativity',
+          type: 'predict-output',
+          tier: 'challenge',
+          points: 20,
+          contextScenario: 'Supercomputing Cluster Processor Core Allocation',
+          prompt: 'What exact number does Python calculate and display for the following expression?\n\nresult = 2 ** 3 ** 2\nprint(result)',
+          options: [
+            {
+              id: 'opt-1',
+              text: '512',
+              explanation: 'Correct! Unlike most Python operators which evaluate left-to-right, the ** operator is right-associative. Python groups this expression as 2 ** (3 ** 2) = 2 ** 9 = 512.',
+              isCorrect: true,
+            },
+            {
+              id: 'opt-2',
+              text: '64',
+              explanation: 'Incorrect. (2 ** 3) ** 2 = 8 ** 2 = 64, but ** associates from right to left.',
+              isCorrect: false,
+            },
+            {
+              id: 'opt-3',
+              text: '36',
+              explanation: 'Incorrect. This would be (2 * 3) ** 2, which confuses multiplication with exponentiation.',
+              isCorrect: false,
+            },
+            {
+              id: 'opt-4',
+              text: '18',
+              explanation: 'Incorrect. Exponentiation is repeated multiplication, not simple factor multiplication.',
+              isCorrect: false,
+            },
+          ],
+          hints: [
+            'Check operator associativity: does ** evaluate left-to-right or right-to-left?',
+            'Right-associativity means evaluate 3 ** 2 first.',
+            'Now compute 2 raised to that resulting exponent.',
+          ],
+        },
+        {
+          id: 'd3-s4-ex2',
+          title: 'Solar Energy Capacitor Stored Joules Calculator',
+          type: 'write-code',
+          tier: 'standard',
+          points: 20,
+          contextScenario: 'Solar Microgrid Battery Inverter Lab, Kano State',
+          prompt: 'Write Python code that calculates the electrostatic energy stored in a high-capacity capacitor using the formula E = 0.5 * C * (V ** 2). Given capacitance c = 0.002 farads and voltage v = 240.0 volts, compute the energy in joules and print the formatted string: "Stored Energy: 57.60 J".',
+          starterCode: `# Capacitance in farads and voltage in volts
+c = 0.002
+v = 240.0
+
+# Calculate stored energy E = 0.5 * c * (v ** 2)
+# Print formatted: "Stored Energy: 57.60 J"
+`,
+          solutionCode: `c = 0.002
+v = 240.0
+
+energy = 0.5 * c * (v ** 2)
+print(f"Stored Energy: {energy:.2f} J")`,
+          testCases: [
+            {
+              id: 'tc-1',
+              label: 'Standard Inverter Capacitor: 0.002F at 240V',
+              setup: 'c = 0.002\nv = 240.0',
+              expected: 'Stored Energy: 57.60 J',
+              hidden: false,
+            },
+            {
+              id: 'tc-2',
+              label: 'Supercapacitor Bank: 0.05F at 48V',
+              setup: 'c = 0.05\nv = 48.0',
+              expected: 'Stored Energy: 57.60 J',
+              hidden: true,
+            },
+          ],
+          hints: [
+            'Use the exponentiation operator ** to square the voltage: (v ** 2).',
+            'Multiply 0.5 by c and by (v ** 2).',
+            'Format the output using f-string specification {energy:.2f} J.',
+          ],
+        },
+      ],
+      assess: [],
     },
 
     // ==========================================
@@ -652,7 +932,79 @@ Admission Screening Status: ELIGIBLE FOR POST-UTME`,
           correctedCode: `is_valid = int("42") > 10  # True`,
         },
       ],
-      practise: [],
+      practise: [
+        {
+          id: 'd3-s5-ex1',
+          title: 'Chained UTME Admission Score Range Validation',
+          type: 'fill-the-gaps',
+          tier: 'foundation',
+          points: 10,
+          contextScenario: 'Joint Admissions and Matriculation Board (JAMB) Cutoff Verification',
+          prompt: 'Complete the Python condition using chained comparisons to verify that candidate score is between 180 and 400 inclusive.',
+          gaps: [
+            {
+              id: 'gap-1',
+              beforeText: 'is_qualified = 180 ',
+              afterText: ' score ',
+              correctAnswer: '<=',
+              options: ['<=', '<', '==', '>='],
+            },
+            {
+              id: 'gap-2',
+              beforeText: 'score ',
+              afterText: ' 400',
+              correctAnswer: '<=',
+              options: ['<=', '<', '==', '>='],
+            },
+          ],
+          hints: [
+            'In Python, chained comparisons allow you to write mathematical ranges like min <= x <= max.',
+            'The minimum threshold is 180, so 180 <= score.',
+            'The maximum score is 400, so score <= 400.',
+          ],
+        },
+        {
+          id: 'd3-s5-ex2',
+          title: 'Unicode Lexicographical String Comparisons',
+          type: 'scenario-mcq',
+          tier: 'standard',
+          points: 15,
+          contextScenario: 'Abuja Electoral Register Alphabetical Sorting',
+          prompt: 'What is the evaluated boolean result of the expression "Abuja" < "abuja" in Python, and why?',
+          options: [
+            {
+              id: 'opt-1',
+              text: "True — because uppercase 'A' has an ASCII/Unicode code point (65) less than lowercase 'a' (97).",
+              explanation: "Correct! Python compares strings character-by-character according to Unicode ordinals. ord('A') is 65 while ord('a') is 97.",
+              isCorrect: true,
+            },
+            {
+              id: 'opt-2',
+              text: 'False — because lowercase letters always come before uppercase letters in computer alphabets.',
+              explanation: 'Incorrect. In standard ASCII and Unicode, uppercase letters (65-90) precede lowercase letters (97-122).',
+              isCorrect: false,
+            },
+            {
+              id: 'opt-3',
+              text: 'False — because both strings have the exact same spelling ignoring case.',
+              explanation: 'Incorrect. Python string comparisons are strictly case-sensitive.',
+              isCorrect: false,
+            },
+            {
+              id: 'opt-4',
+              text: 'TypeError — strings cannot be compared using inequality operators (<, >).',
+              explanation: 'Incorrect. Strings support lexicographical comparisons with <, <=, >, >=.',
+              isCorrect: false,
+            },
+          ],
+          hints: [
+            'String comparisons in Python compare ASCII / Unicode numeric values (ord()).',
+            'Does uppercase "A" have a smaller or larger numerical value than lowercase "a"?',
+            'ord("A") is 65 and ord("a") is 97. 65 < 97 is True.',
+          ],
+        },
+      ],
+      assess: [],
     },
 
     // ==========================================
@@ -776,7 +1128,84 @@ if status_code == 200 or 201:
           correctedCode: `if is_admin and is_active:`,
         },
       ],
-      practise: [],
+      practise: [
+        {
+          id: 'd3-s6-ex1',
+          title: 'Trace ATM Cash Dispense Authorization Conditions',
+          type: 'explain-the-trace',
+          tier: 'standard',
+          points: 15,
+          contextScenario: 'FirstBank Lagos ATM Authorization Pipeline',
+          prompt: 'Inspect the ATM transaction variables and compound authorization condition. Trace step-by-step how Python evaluates can_dispense and determine the final outcome.',
+          traceStepCode: `balance = 45000
+requested = 20000
+pin_valid = True
+daily_limit = 100000
+
+can_dispense = pin_valid and (requested <= balance) and (requested <= daily_limit)`,
+          traceQuestion: 'What is the boolean evaluation sequence for can_dispense?',
+          options: [
+            {
+              id: 'opt-1',
+              text: 'pin_valid evaluates to True -> (20000 <= 45000) evaluates to True -> (20000 <= 100000) evaluates to True -> can_dispense is True',
+              explanation: 'Correct! In a chain of and operators, Python evaluates left-to-right. Since all three expressions are True, none trigger early exit and the final result is True.',
+              isCorrect: true,
+            },
+            {
+              id: 'opt-2',
+              text: 'Python evaluates all three expressions concurrently without any guaranteed order.',
+              explanation: 'Incorrect. Python specifies strict left-to-right evaluation order.',
+              isCorrect: false,
+            },
+            {
+              id: 'opt-3',
+              text: 'Python stops at pin_valid and ignores the balance check.',
+              explanation: 'Incorrect. Because pin_valid is True, and requires testing subsequent conditions.',
+              isCorrect: false,
+            },
+            {
+              id: 'opt-4',
+              text: 'can_dispense evaluates to 100000 because and returns the last operand.',
+              explanation: 'Incorrect. The operands here are boolean comparisons (<=), not integers.',
+              isCorrect: false,
+            },
+          ],
+          hints: [
+            'Trace the variables: pin_valid is True, requested (20000) <= balance (45000) is True.',
+            'Is 20000 <= 100000 also True?',
+            'When every condition in an and chain evaluates to True, the result is True.',
+          ],
+        },
+        {
+          id: 'd3-s6-ex2',
+          title: 'The Classic "or 201" Truthiness Trap',
+          type: 'fix-the-bug',
+          tier: 'challenge',
+          points: 20,
+          contextScenario: 'Flutterwave Payment Gateway Webhook Verification',
+          prompt: 'A junior developer wrote: if status == 200 or 201:, expecting to match HTTP status 200 or 201. However, when status is 404, the condition incorrectly evaluates as truthy! Fix the code so it properly checks if status is either 200 or 201.',
+          starterCode: `status = 404
+
+# Buggy condition: evaluates "201" as a truthy integer!
+if status == 200 or 201:
+    print("Payment Verified")
+else:
+    print("Payment Failed")`,
+          solutionCode: `status = 404
+
+# Corrected condition: explicitly check status against both values
+if status == 200 or status == 201:
+    print("Payment Verified")
+else:
+    print("Payment Failed")`,
+          hints: [
+            'In Python, "or 201" does not link back to "status =="; it evaluates bool(201) independently.',
+            'Because 201 is non-zero, bool(201) is always True, making the entire condition always succeed.',
+            'Fix it by writing "status == 200 or status == 201" (or "status in (200, 201)").',
+          ],
+        },
+      ],
+      assess: [],
     },
 
     // ==========================================
@@ -896,7 +1325,69 @@ final_score = user_score or 50  # Overwrites 0 to 50!`,
 final_score = 50 if user_score is None else user_score  # Preserves 0`,
         },
       ],
-      practise: [],
+      practise: [
+        {
+          id: 'd3-s7-ex1',
+          title: 'Predict Non-Boolean Return Values in Short-Circuiting',
+          type: 'predict-output',
+          tier: 'standard',
+          points: 15,
+          contextScenario: 'Logistics App Default Dispatch Hub Fallback',
+          prompt: 'What exact string is printed by the following Python program?\n\nhub = None or "" or "Ikeja Dispatch" or "Lekki Dispatch"\nprint(hub)',
+          options: [
+            {
+              id: 'opt-1',
+              text: 'Ikeja Dispatch',
+              explanation: 'Correct! The or operator evaluates operands from left to right and immediately returns the FIRST truthy operand encountered without converting it to a boolean.',
+              isCorrect: true,
+            },
+            {
+              id: 'opt-2',
+              text: 'True',
+              explanation: 'Incorrect. Python\'s or operator does not convert its operands to booleans; it returns the actual truthy object.',
+              isCorrect: false,
+            },
+            {
+              id: 'opt-3',
+              text: 'Lekki Dispatch',
+              explanation: 'Incorrect. Short-circuiting stops immediately at the first truthy value ("Ikeja Dispatch") and never evaluates subsequent operands.',
+              isCorrect: false,
+            },
+            {
+              id: 'opt-4',
+              text: 'None',
+              explanation: 'Incorrect. None is falsy, so or moves on to evaluate subsequent operands.',
+              isCorrect: false,
+            },
+          ],
+          hints: [
+            'Python or returns the first truthy value it encounters.',
+            'None is falsy. The empty string "" is also falsy.',
+            '"Ikeja Dispatch" is a non-empty string, making it the first truthy value.',
+          ],
+        },
+        {
+          id: 'd3-s7-ex2',
+          title: 'Short-Circuiting as a ZeroDivisionError Shield',
+          type: 'theory-reasoning',
+          tier: 'challenge',
+          points: 20,
+          contextScenario: 'Automated Stock Inventory Rate of Sale, Onitsha Main Market',
+          prompt: 'Explain why the guard expression `b != 0 and (total / b) > 10` executes safely without crashing when b = 0, whereas `(total / b) > 10 and b != 0` immediately crashes with ZeroDivisionError.',
+          modelAnswer: 'Python evaluates and expressions strictly from left to right with short-circuiting. In `b != 0 and (total / b) > 10`, when b = 0, the first operand `0 != 0` evaluates to False. Because False and anything is always False, Python terminates evaluation immediately without ever executing the right operand `(total / b)`. In contrast, in `(total / b) > 10 and b != 0`, Python evaluates the division first, dividing by zero before reaching the safety check.',
+          markingCriteria: [
+            { id: 'crit-1', label: 'Explains left-to-right evaluation order and short-circuit termination on False', points: 7 },
+            { id: 'crit-2', label: 'Identifies that the right operand (total / b) is never executed when the guard is False', points: 7 },
+            { id: 'crit-3', label: 'Contrasts with the reversed expression where division by zero triggers before the check', points: 6 },
+          ],
+          hints: [
+            'Consider what short-circuiting means when the left operand of and is False.',
+            'Does Python evaluate the second operand if the first operand is already False?',
+            'What happens when the order is reversed?',
+          ],
+        },
+      ],
+      assess: [],
     },
 
     // ==========================================
@@ -1018,7 +1509,77 @@ if user_guess is 1000:  # Fails for integers outside cache!`,
           correctedCode: `if user_guess == 1000:`,
         },
       ],
-      practise: [],
+      practise: [
+        {
+          id: 'd3-s8-ex1',
+          title: 'List Equality vs Memory Identity',
+          type: 'scenario-mcq',
+          tier: 'standard',
+          points: 15,
+          contextScenario: 'Fintech Database Record Fingerprinting, Lagos',
+          prompt: 'Given the following list definitions:\n\nlist_a = [10, 20, 30]\nlist_b = [10, 20, 30]\n\nWhat do (list_a == list_b) and (list_a is list_b) evaluate to, respectively?',
+          options: [
+            {
+              id: 'opt-1',
+              text: 'True, False — because == tests equivalent contents, while is tests distinct memory addresses.',
+              explanation: 'Correct! The lists contain identical values so list_a == list_b is True. However, lists are mutable objects, so Python allocates two distinct heap memory containers, meaning list_a is list_b is False.',
+              isCorrect: true,
+            },
+            {
+              id: 'opt-2',
+              text: 'True, True — because Python caches lists with identical contents automatically.',
+              explanation: 'Incorrect. Python never caches mutable collections like lists.',
+              isCorrect: false,
+            },
+            {
+              id: 'opt-3',
+              text: 'False, False — because variable names are different.',
+              explanation: 'Incorrect. == compares element values regardless of identifier names.',
+              isCorrect: false,
+            },
+            {
+              id: 'opt-4',
+              text: 'False, True — because pointers match even when contents differ.',
+              explanation: 'Incorrect. Memory pointers are distinct for independently created lists.',
+              isCorrect: false,
+            },
+          ],
+          hints: [
+            'Remember: == checks value contents (__eq__), while is checks memory identity (id()).',
+            'Are lists mutable or immutable? (Lists are mutable).',
+            'Python does not cache or alias separately declared mutable objects.',
+          ],
+        },
+        {
+          id: 'd3-s8-ex2',
+          title: 'Fix Singleton None Comparison per PEP 8',
+          type: 'fix-the-bug',
+          tier: 'foundation',
+          points: 10,
+          contextScenario: 'PEP 8 Automated Linter Code Review, Paystack Lagos',
+          prompt: 'A code review bot flagged: "Comparison to None should be \'if cond is None:\'". Fix the condition to use the identity operator is instead of ==.',
+          starterCode: `def get_user_status(role):
+    # Buggy PEP 8 violation: using == with None
+    if role == None:
+        return "Unassigned Guest"
+    return f"Role: {role}"
+
+print(get_user_status(None))`,
+          solutionCode: `def get_user_status(role):
+    # Corrected PEP 8 pattern: using 'is None'
+    if role is None:
+        return "Unassigned Guest"
+    return f"Role: {role}"
+
+print(get_user_status(None))`,
+          hints: [
+            'PEP 8 specifies that comparisons to singletons, like None, should always be done with "is" or "is not".',
+            'Replace "role == None" with "role is None".',
+            'This guarantees testing the CPython memory singleton directly.',
+          ],
+        },
+      ],
+      assess: [],
     },
 
     // ==========================================
@@ -1129,18 +1690,714 @@ Gradient Warning: STEEP CLIMB - LOW GEAR`,
           correctedCode: `celsius = (fahrenheit - 32) * 5 / 9  # Correct formula`,
         },
       ],
-      practise: [],
+      practise: [
+        {
+          id: 'd3-s9-ex1',
+          title: "Heron's Formula for Triangle Area",
+          type: 'order-the-lines',
+          tier: 'standard',
+          points: 15,
+          contextScenario: 'Surveying Triangular Farmland in Ogun State',
+          prompt: "Reorder the lines of code to calculate the area of a triangle with side lengths a = 3, b = 4, and c = 5 using Heron's formula: s = (a + b + c) / 2 and area = (s * (s - a) * (s - b) * (s - c)) ** 0.5.",
+          jumbledLines: [
+            { id: 'line-1', code: 'a, b, c = 3.0, 4.0, 5.0', indent: 0 },
+            { id: 'line-2', code: 's = (a + b + c) / 2', indent: 0 },
+            { id: 'line-3', code: 'radicand = s * (s - a) * (s - b) * (s - c)', indent: 0 },
+            { id: 'line-4', code: 'area = radicand ** 0.5', indent: 0 },
+            { id: 'line-5', code: 'print(f"Triangle Area: {area:.2f} sq units")', indent: 0 },
+          ],
+          correctLineOrder: ['line-1', 'line-2', 'line-3', 'line-4', 'line-5'],
+          hints: [
+            'Initialize the three side lengths (a, b, c) first.',
+            'Compute the semi-perimeter s with parentheses around (a + b + c).',
+            'Calculate the product inside the square root before taking the power of 0.5.',
+          ],
+        },
+        {
+          id: 'd3-s9-ex2',
+          title: 'Civil Engineering 2D Euclidean Distance and Road Slope',
+          type: 'write-code',
+          tier: 'project',
+          points: 30,
+          contextScenario: 'Abuja to Kaduna Highway Realignment Telemetry',
+          prompt: 'Write Python code that calculates the 2D Euclidean distance d between coordinates (x1, y1) = (0, 0) and (x2, y2) = (300, 400) using d = (((x2 - x1)**2) + ((y2 - y1)**2)) ** 0.5. Then, given vertical elevation_gain = 25.0 meters, compute the road gradient slope percentage as (elevation_gain / d) * 100. Print the formatted output: "Distance: 500.00m | Slope: 5.00%".',
+          starterCode: `# Coordinate inputs (in meters)
+x1, y1 = 0, 0
+x2, y2 = 300, 400
+elevation_gain = 25.0
+
+# 1. Compute 2D Euclidean distance d using ** 2 and ** 0.5
+# 2. Compute road gradient slope = (elevation_gain / d) * 100
+# 3. Print: "Distance: 500.00m | Slope: 5.00%"
+`,
+          solutionCode: `x1, y1 = 0, 0
+x2, y2 = 300, 400
+elevation_gain = 25.0
+
+d = (((x2 - x1) ** 2) + ((y2 - y1) ** 2)) ** 0.5
+slope = (elevation_gain / d) * 100
+print(f"Distance: {d:.2f}m | Slope: {slope:.2f}%")`,
+          testCases: [
+            {
+              id: 'tc-1',
+              label: 'Standard 300x400 run with 25m rise',
+              setup: 'x1, y1 = 0, 0\nx2, y2 = 300, 400\nelevation_gain = 25.0',
+              expected: 'Distance: 500.00m | Slope: 5.00%',
+              hidden: false,
+            },
+            {
+              id: 'tc-2',
+              label: 'Extended 600x800 run with 50m rise',
+              setup: 'x1, y1 = 0, 0\nx2, y2 = 600, 800\nelevation_gain = 50.0',
+              expected: 'Distance: 1000.00m | Slope: 5.00%',
+              hidden: true,
+            },
+          ],
+          hints: [
+            'Use parentheses to ensure subtraction happens before squaring: (x2 - x1) ** 2.',
+            'Sum the squared deltas and raise the total sum to 0.5 to find the square root.',
+            'Divide elevation_gain by distance and multiply by 100, then format with .2f.',
+          ],
+        },
+      ],
+      assess: [],
     },
   ],
 
-  realWorldLabs: [],
+  realWorldLabs: [
+    {
+      id: 'd3-lab-geometry',
+      title: 'Lab 1: Land Survey & Geometric Property Calculator',
+      description: 'Perform high-precision survey calculations for a triangular land parcel in Lekki Phase 1 and a circular borehole, calculating perimeter, Heron\'s area, circle circumference, and cross-sectional area.',
+      domain: 'science',
+      starterCode: `# Lekki Phase 1 Triangular Land Parcel Dimensions (meters)
+side_a = 45.0
+side_b = 60.0
+side_c = 75.0
+
+# 1. Triangle Calculations using Heron's Formula
+perimeter_triangle = side_a + side_b + side_c
+s = perimeter_triangle / 2.0  # Semi-perimeter
+area_triangle = (s * (s - side_a) * (s - side_b) * (s - side_c)) ** 0.5
+
+# 2. Circular Water Borehole Dimensions (meters)
+radius_borehole = 3.5
+pi_approx = 3.141592653589793
+circumference_circle = 2 * pi_approx * radius_borehole
+area_circle = pi_approx * (radius_borehole ** 2)
+
+print("========================================")
+print("LEKKI LAND SURVEY & HYDROLOGY AUDIT")
+print(f"Triangle Perimeter: {perimeter_triangle:.2f} m")
+print(f"Triangle Area (Heron): {area_triangle:.2f} sq.m")
+print(f"Borehole Circumference: {circumference_circle:.2f} m")
+print(f"Borehole Cross-Section Area: {area_circle:.2f} sq.m")
+print("========================================")
+`,
+      targetOutput: `========================================
+LEKKI LAND SURVEY & HYDROLOGY AUDIT
+Triangle Perimeter: 180.00 m
+Triangle Area (Heron): 1350.00 sq.m
+Borehole Circumference: 21.99 m
+Borehole Cross-Section Area: 38.48 sq.m
+========================================`,
+    },
+    {
+      id: 'd3-lab-payroll',
+      title: 'Lab 2: Nigerian Payroll, Overtime Multiplier & Statutory Deductions',
+      description: 'Compute gross monthly salary, overtime pay with a 1.5x multiplier, statutory 8% pension deduction, 5% PAYE tax withholding, and net take-home pay for an offshore petroleum operations technician.',
+      domain: 'finance',
+      starterCode: `# Offshore Petroleum Operations Staff Payroll
+employee_name = "Tunde Adeleke"
+employee_id = "NNPC-OFF-4029"
+hourly_rate = 3500.00      # ₦3,500/hour
+regular_hours = 160.0      # Standard monthly hours
+overtime_hours = 24.0      # Extra offshore turnaround hours
+overtime_multiplier = 1.5  # Time-and-a-half
+
+# 1. Gross Earnings Calculation
+regular_pay = regular_hours * hourly_rate
+overtime_pay = overtime_hours * (hourly_rate * overtime_multiplier)
+gross_salary = regular_pay + overtime_pay
+
+# 2. Statutory Deductions (Section 14 Nigerian Labour Act)
+pension_rate = 0.08       # 8% Employee Contributory Pension Scheme (PENCOM)
+paye_tax_rate = 0.05      # 5% Basic PAYE withholding
+pension_deduction = gross_salary * pension_rate
+paye_deduction = gross_salary * paye_tax_rate
+total_deductions = pension_deduction + paye_deduction
+
+# 3. Net Take-Home Pay
+net_salary = gross_salary - total_deductions
+
+print("------------------------------------------")
+print(f"MONTHLY PAYSLIP: {employee_name} [{employee_id}]")
+print(f"Regular Pay (160h @ ₦{hourly_rate:,.2f}): ₦{regular_pay:,.2f}")
+print(f"Overtime Pay (24h @ 1.5x): ₦{overtime_pay:,.2f}")
+print(f"Gross Earnings: ₦{gross_salary:,.2f}")
+print(f"Pension Contribution (8%): -₦{pension_deduction:,.2f}")
+print(f"PAYE Tax Withholding (5%): -₦{paye_deduction:,.2f}")
+print(f"Total Statutory Deductions: -₦{total_deductions:,.2f}")
+print(f"Net Take-Home Pay: ₦{net_salary:,.2f}")
+print("------------------------------------------")
+`,
+      targetOutput: `------------------------------------------
+MONTHLY PAYSLIP: Tunde Adeleke [NNPC-OFF-4029]
+Regular Pay (160h @ ₦3,500.00): ₦560,000.00
+Overtime Pay (24h @ 1.5x): ₦126,000.00
+Gross Earnings: ₦686,000.00
+Pension Contribution (8%): -₦54,880.00
+PAYE Tax Withholding (5%): -₦34,300.00
+Total Statutory Deductions: -₦89,180.00
+Net Take-Home Pay: ₦596,820.00
+------------------------------------------`,
+    },
+  ],
+  miniProject: {
+    id: 'd3-project-geometric-calculator',
+    title: 'Multi-Formula Geometric & Engineering Calculator',
+    brief: 'Construct a command-line engineering calculation utility that computes triangle area, perimeter, circle properties, and slope distance using Python arithmetic operators.',
+    requirements: [
+      'Implement triangle area and perimeter calculations from dimensions using Heron\'s formula.',
+      'Calculate Euclidean distance between two 2D coordinates using the Pythagorean theorem with fractional exponent ** 0.5.',
+      'Compute weekly earnings including overtime multiplier with 1.5x hourly rate.',
+      'Format all numeric outputs to 2 decimal places using modern f-strings.',
+    ],
+    rubric: [
+      { criterion: 'Formula Accuracy: Uses correct arithmetic operators and operator precedence.', weight: 40 },
+      { criterion: 'Zero & Negative Guards: Validates non-zero denominators before division.', weight: 30 },
+      { criterion: 'Output Formatting: Clean string presentation with currency and measurement units.', weight: 30 },
+    ],
+    starterCode: `# Multi-Formula Geometric & Engineering Calculator
+# Part 1: Triangle Geometry
+base = 12.0
+height = 8.0
+triangle_area = 0.5 * base * height
+
+# Part 2: Circle Geometry
+radius = 7.0
+pi = 3.14159
+circle_area = pi * (radius ** 2)
+circle_circumference = 2 * pi * radius
+
+# Part 3: Euclidean Coordinate Distance
+x1, y1 = 10.0, 15.0
+x2, y2 = 40.0, 55.0
+distance = (((x2 - x1) ** 2) + ((y2 - y1) ** 2)) ** 0.5
+
+# Part 4: Display Summary Results
+print("========================================")
+print("GEOMETRIC & ENGINEERING REPORT")
+print(f"Triangle Area: {triangle_area:.2f} sq.m")
+print(f"Circle Area: {circle_area:.2f} sq.m | Circumference: {circle_circumference:.2f} m")
+print(f"Euclidean Distance: {distance:.2f} m")
+print("========================================")
+`,
+  },
   dayQuiz: {
     title: 'Day 3 Checkpoint Quiz: Operators & Expression Evaluation',
     passingScorePercentage: 80,
-    questions: [],
+    questions: [
+      {
+        id: 'd3-q1',
+        scenario: 'Python 3 Standard Division Invariant Inspection',
+        question: 'When evaluating the expression result = 10 / 2 in Python 3, what is the exact data type and value assigned to result?',
+        options: [
+          {
+            id: 'q1-a',
+            text: "<class 'float'> with value 5.0",
+            explanation: 'Correct! Standard division (/) in Python 3 always returns a float, even if the division divides evenly without a remainder.',
+            isCorrect: true,
+          },
+          {
+            id: 'q1-b',
+            text: "<class 'int'> with value 5",
+            explanation: 'Incorrect. Python 2 performed integer division on ints, but Python 3 guarantees that / always yields a float.',
+            isCorrect: false,
+          },
+          {
+            id: 'q1-c',
+            text: "<class 'float'> with value 5",
+            explanation: 'Incorrect. Floating point representations in Python display with a trailing decimal digit (5.0).',
+            isCorrect: false,
+          },
+          {
+            id: 'q1-d',
+            text: "<class 'int'> if both operands are ints, else <class 'float'>",
+            explanation: 'Incorrect. Standard division returns a float regardless of operand integer types.',
+            isCorrect: false,
+          },
+        ],
+        points: 10,
+      },
+      {
+        id: 'd3-q2',
+        scenario: 'Subsea Navigation Negative Coordinate Translation',
+        question: 'An oceanographic probe calculates a grid offset using integer floor division: offset = -11 // 3. What is the value of offset in Python?',
+        options: [
+          {
+            id: 'q2-a',
+            text: '-4 — because Python floor division rounds down towards negative infinity.',
+            explanation: 'Correct! -11 / 3 is approximately -3.667. Rounding down towards negative infinity yields -4.',
+            isCorrect: true,
+          },
+          {
+            id: 'q2-b',
+            text: '-3 — because integer division truncates decimal digits towards zero.',
+            explanation: 'Incorrect. Truncation towards zero is C behavior. Python strictly rounds towards negative infinity.',
+            isCorrect: false,
+          },
+          {
+            id: 'q2-c',
+            text: '-3.0 — floor division returns a float when operating on negative integers.',
+            explanation: 'Incorrect. When both operands are integers, // returns an integer.',
+            isCorrect: false,
+          },
+          {
+            id: 'q2-d',
+            text: 'TypeError — floor division cannot be applied to negative numbers.',
+            explanation: 'Incorrect. Negative numbers are fully supported in floor division.',
+            isCorrect: false,
+          },
+        ],
+        points: 10,
+      },
+      {
+        id: 'd3-q3',
+        scenario: 'Cryptographic Hash Buffer Remainder Algebra',
+        question: 'According to Python\'s mathematical modulo invariant a = (a // b) * b + (a % b), what does -11 % 3 evaluate to?',
+        options: [
+          {
+            id: 'q3-a',
+            text: '1 — because -11 = (-4 * 3) + 1.',
+            explanation: 'Correct! By definition, r = a - (a // b) * b. With a = -11 and b = 3: -11 - (-4 * 3) = -11 - (-12) = 1.',
+            isCorrect: true,
+          },
+          {
+            id: 'q3-b',
+            text: '-2 — because remainder takes the negative sign of the dividend.',
+            explanation: 'Incorrect. In Python, the remainder shares the sign of the divisor b. Since divisor 3 is positive, remainder must be >= 0.',
+            isCorrect: false,
+          },
+          {
+            id: 'q3-c',
+            text: '-1 — calculated by taking -11 modulo 3 directly.',
+            explanation: 'Incorrect. -1 would violate the invariant (-11 != -3 * 3 - 1).',
+            isCorrect: false,
+          },
+          {
+            id: 'q3-d',
+            text: '2 — calculated as the absolute remainder.',
+            explanation: 'Incorrect. 1 is the unique remainder satisfying the invariant with non-negative sign.',
+            isCorrect: false,
+          },
+        ],
+        points: 10,
+      },
+      {
+        id: 'd3-q4',
+        scenario: 'High-Performance Supercomputing Exponentiation Pipeline',
+        question: 'What is the evaluated result of the nested exponentiation expression: 2 ** 2 ** 3?',
+        options: [
+          {
+            id: 'q4-a',
+            text: '256 — because ** is right-associative, evaluating 2 ** (2 ** 3) = 2 ** 8 = 256.',
+            explanation: 'Correct! Exponentiation groups right-to-left in Python, meaning 2 ** 3 is calculated first.',
+            isCorrect: true,
+          },
+          {
+            id: 'q4-b',
+            text: '64 — because operators evaluate from left to right as (2 ** 2) ** 3 = 4 ** 3 = 64.',
+            explanation: 'Incorrect. Exponentiation is right-associative; it does not group left-to-right.',
+            isCorrect: false,
+          },
+          {
+            id: 'q4-c',
+            text: '512 — because 2 ** (3 ** 2).',
+            explanation: 'Incorrect. The operands are 2, 2, 3, which yields 2 ** (2 ** 3) = 2 ** 8 = 256.',
+            isCorrect: false,
+          },
+          {
+            id: 'q4-d',
+            text: '12 — because the powers are added together.',
+            explanation: 'Incorrect. Powers are not added when exponentiating power expressions.',
+            isCorrect: false,
+          },
+        ],
+        points: 10,
+      },
+      {
+        id: 'd3-q5',
+        scenario: 'Air Quality Index Telemetry Threshold Validation',
+        question: 'A telemetry script checks sensor readings using: 3 < 5 > 2. How does Python evaluate this chained comparison?',
+        options: [
+          {
+            id: 'q5-a',
+            text: 'As (3 < 5) and (5 > 2), evaluating to True.',
+            explanation: 'Correct! Chained comparisons in Python implicitly join the relational conditions with an logical and.',
+            isCorrect: true,
+          },
+          {
+            id: 'q5-b',
+            text: 'As (3 < 5) > 2, which becomes True > 2 -> 1 > 2 -> False.',
+            explanation: 'Incorrect. Python does NOT treat comparisons as left-associative boolean reductions like C or JavaScript.',
+            isCorrect: false,
+          },
+          {
+            id: 'q5-c',
+            text: 'It raises a SyntaxError because multiple inequalities cannot be chained.',
+            explanation: 'Incorrect. Chained comparisons are standard, idiomatic Python syntax.',
+            isCorrect: false,
+          },
+          {
+            id: 'q5-d',
+            text: 'It evaluates only the first comparison (3 < 5) and ignores the second.',
+            explanation: 'Incorrect. Both comparisons are evaluated unless short-circuiting stops on a False.',
+            isCorrect: false,
+          },
+        ],
+        points: 10,
+      },
+      {
+        id: 'd3-q6',
+        scenario: 'Microservices Default Configuration Resolver',
+        question: 'Consider the expression: title = "Python" or "Default". What is the exact value bound to title, and why?',
+        options: [
+          {
+            id: 'q6-a',
+            text: '"Python" — because or returns the first truthy operand without converting it to a bool.',
+            explanation: 'Correct! In Python, or returns the operand that determined truthiness; since "Python" is non-empty (truthy), it is returned immediately.',
+            isCorrect: true,
+          },
+          {
+            id: 'q6-b',
+            text: 'True — because logical or always returns a boolean True or False.',
+            explanation: 'Incorrect. Python\'s and and or operators return operand values, not strict booleans.',
+            isCorrect: false,
+          },
+          {
+            id: 'q6-c',
+            text: '"Default" — because or returns the last truthy operand.',
+            explanation: 'Incorrect. or terminates on the first truthy value encountered.',
+            isCorrect: false,
+          },
+          {
+            id: 'q6-d',
+            text: '"PythonDefault" — because strings are concatenated across logical operators.',
+            explanation: 'Incorrect. Logical operators do not concatenate strings.',
+            isCorrect: false,
+          },
+        ],
+        points: 10,
+      },
+      {
+        id: 'd3-q7',
+        scenario: 'Fintech Account Ledger Fingerprint Comparison',
+        question: 'Two ledger transactions are created independently: tx1 = [1000, "NGN"] and tx2 = [1000, "NGN"]. What do tx1 == tx2 and tx1 is tx2 evaluate to?',
+        options: [
+          {
+            id: 'q7-a',
+            text: 'True, False — == compares element values, while is tests memory identity.',
+            explanation: 'Correct! The lists have identical contents so tx1 == tx2 is True. Because lists are mutable, they are allocated at distinct memory addresses so tx1 is tx2 is False.',
+            isCorrect: true,
+          },
+          {
+            id: 'q7-b',
+            text: 'True, True — because Python interns all collections with identical elements.',
+            explanation: 'Incorrect. Mutable objects like lists are never interned or shared across independent declarations.',
+            isCorrect: false,
+          },
+          {
+            id: 'q7-c',
+            text: 'False, False — because tx1 and tx2 have different variable names.',
+            explanation: 'Incorrect. Variable names do not determine value equality.',
+            isCorrect: false,
+          },
+          {
+            id: 'q7-d',
+            text: 'False, True — values differ but memory addresses are reused.',
+            explanation: 'Incorrect. The values are completely identical, but memory addresses are distinct.',
+            isCorrect: false,
+          },
+        ],
+        points: 10,
+      },
+      {
+        id: 'd3-q8',
+        scenario: 'CPython Memory Architecture Optimization Seminar',
+        question: 'Why does a = 256; b = 256; a is b evaluate to True in CPython, but a = 1000; b = 1000; a is b may evaluate to False in the interactive REPL?',
+        options: [
+          {
+            id: 'q8-a',
+            text: 'CPython pre-allocates and caches small integers in the range [-5, 256] as shared singletons in heap memory.',
+            explanation: 'Correct! CPython maintains a global array of singleton integer objects for integers between -5 and 256 inclusive to boost performance.',
+            isCorrect: true,
+          },
+          {
+            id: 'q8-b',
+            text: 'Numbers larger than 256 cannot be compared with is because of 8-bit integer overflow.',
+            explanation: 'Incorrect. Python supports arbitrarily large integers without overflow; this is purely an internal caching optimization.',
+            isCorrect: false,
+          },
+          {
+            id: 'q8-c',
+            text: '1000 is a floating-point number in CPython memory, which is not hashable.',
+            explanation: 'Incorrect. 1000 is an integer, and integers are hashable.',
+            isCorrect: false,
+          },
+          {
+            id: 'q8-d',
+            text: 'The REPL randomly frees variables with values over 256 to conserve RAM.',
+            explanation: 'Incorrect. CPython garbage collection operates on reference counting, not value thresholds.',
+            isCorrect: false,
+          },
+        ],
+        points: 10,
+      },
+      {
+        id: 'd3-q9',
+        scenario: 'PEP 8 Style Guide Compliance and Sentinel Inspection',
+        question: 'According to the official PEP 8 style guide, how should you test whether a variable token is bound to None?',
+        options: [
+          {
+            id: 'q9-a',
+            text: 'Using "if token is None:" because None is a singleton object in Python.',
+            explanation: 'Correct! PEP 8 states that comparisons to singletons like None should always be done with is or is not, never equality operators.',
+            isCorrect: true,
+          },
+          {
+            id: 'q9-b',
+            text: 'Using "if token == None:" because == is more readable than is.',
+            explanation: 'Incorrect. Classes can override __eq__() and return misleading results; is guarantees testing the singleton directly.',
+            isCorrect: false,
+          },
+          {
+            id: 'q9-c',
+            text: 'Using "if bool(token) == None:" to convert token first.',
+            explanation: 'Incorrect. bool(None) returns False, and False == None is False.',
+            isCorrect: false,
+          },
+          {
+            id: 'q9-d',
+            text: 'Using "if type(token) == None:" to check its type.',
+            explanation: 'Incorrect. type(None) is NoneType, not None.',
+            isCorrect: false,
+          },
+        ],
+        points: 10,
+      },
+      {
+        id: 'd3-q10',
+        scenario: 'Algebraic Order of Operations Precedence Bug',
+        question: 'What is the evaluated output of the expression: print(-3 ** 2)?',
+        options: [
+          {
+            id: 'q1-a',
+            text: '-9 — because ** has higher precedence than unary -, evaluating as -(3 ** 2).',
+            explanation: 'Correct! In Python\'s operator precedence table, exponentiation (**) binds tighter than the unary negation (-) operator. Thus, 3 ** 2 is 9, and unary - negates it to -9.',
+            isCorrect: true,
+          },
+          {
+            id: 'q10-b',
+            text: '9 — because squaring any negative number always results in a positive number.',
+            explanation: 'Incorrect. To square -3, parentheses are required: (-3) ** 2 = 9.',
+            isCorrect: false,
+          },
+          {
+            id: 'q10-c',
+            text: 'TypeError — unary minus cannot be directly applied to a power expression.',
+            explanation: 'Incorrect. The expression is completely valid syntax.',
+            isCorrect: false,
+          },
+          {
+            id: 'q10-d',
+            text: '-6 — because -3 multiplied by 2 is -6.',
+            explanation: 'Incorrect. ** is exponentiation, not multiplication.',
+            isCorrect: false,
+          },
+        ],
+        points: 10,
+      },
+    ],
   },
 
-  cheatSheet: [],
+  cheatSheet: [
+    {
+      category: 'Arithmetic Operators & Float Division',
+      syntax: '+ , - , * , / , // , % , **',
+      description: 'Standard arithmetic operations. In Python 3+, true division (/) ALWAYS returns a float (e.g. 10 / 2 yields 5.0). Floor division (//) rounds down towards negative infinity (-7 // 2 yields -4). Modulo (%) calculates the remainder r = a - (b * (a // b)) and retains the sign of divisor b.',
+      example: `# True division always returns float:
+print(10 / 2)    # 5.0 (float, not int)
+print(7 / 2)     # 3.5
+
+# Floor division rounds towards negative infinity:
+print(7 // 2)    # 3
+print(-7 // 2)   # -4 (not -3! rounds down)
+
+# Modulo: sign matches divisor:
+print(7 % 2)     # 1
+print(-7 % 2)    # 1 (divisor 2 is positive)
+print(7 % -2)    # -1 (divisor -2 is negative)`,
+    },
+    {
+      category: 'Exponentiation & Right-Associativity',
+      syntax: 'base ** exponent (right-to-left evaluation)',
+      description: 'Python\'s power operator (**) is right-associative, evaluating right-to-left: 2 ** 3 ** 2 is 2 ** (3 ** 2) = 512, not (2 ** 3) ** 2 = 64. Furthermore, ** binds tighter than unary minus (-), so -3 ** 2 evaluates as -(3 ** 2) = -9. Use parentheses (-3) ** 2 to square negative numbers.',
+      example: `# Right-associative exponentiation:
+print(2 ** 3 ** 2)   # 512 (2 ** 9), NOT 64 ((2**3)**2)
+
+# Unary minus precedence trap:
+print(-3 ** 2)       # -9 (unary - has lower precedence than **)
+print((-3) ** 2)     # 9  (explicit parentheses override precedence)`,
+    },
+    {
+      category: 'Compound Assignment Operators',
+      syntax: '+= , -= , *= , /= , //= , %= , **=',
+      description: 'Compound assignment evaluates the right-hand expression first and updates the variable in-place. For immutable types (int, float, str), this creates and rebinds a new object. For mutable types (list), += invokes __iadd__() mutating in-place.',
+      example: `# Accumulating sales in Balogun Market:
+daily_sales = 120_000
+daily_sales += 45_000     # daily_sales = daily_sales + 45_000
+print(f"Total: ₦{daily_sales:,}")  # ₦165,000
+
+# Division compound assignment always casts to float:
+units = 20
+units /= 4
+print(units, type(units)) # 5.0 <class 'float'>`,
+    },
+    {
+      category: 'Comparison Operators & Lexicographical Ordering',
+      syntax: '== , != , < , > , <= , >=',
+      description: 'Compares operands and returns a strict boolean (True or False). Strings are compared character-by-character based on their Unicode code points (ord()). Python 3 strictly prohibits un-cast comparisons between incompatible types (e.g. "5" > 3 raises TypeError).',
+      example: `# Numeric comparisons:
+print(10 >= 10)       # True
+print(5.0 == 5)       # True (numeric values match)
+
+# Unicode lexicographical order:
+print("Apple" < "apple") # True (ord('A')=65 < ord('a')=97)
+print("Lagos" < "Kano")  # False ('L' > 'K')
+
+# Incompatible types raise TypeError:
+# print("5" > 3)        # TypeError: '>' not supported between 'str' and 'int'`,
+    },
+    {
+      category: 'Chained Comparisons (Short-Circuit Evaluation)',
+      syntax: 'low <= val <= high',
+      description: 'Python supports natural mathematical chaining such as a < b < c. CPython evaluates this internally as (a < b) and (b < c), but evaluates the middle term b exactly once. If the first comparison is False, subsequent comparisons short-circuit and are never evaluated.',
+      example: `jamb_score = 245
+
+# Elegant chained range check (evaluates score once):
+if 180 <= jamb_score <= 400:
+    print("Candidate qualifies for university admissions screening.")
+
+# Multi-step chained comparisons:
+x = 15
+print(10 < x < 20 < 100)  # True
+print(10 < x > 50)        # False (15 > 50 is False)`,
+    },
+    {
+      category: 'Logical Operators & Non-Boolean Returns',
+      syntax: 'and , or , not',
+      description: 'Logical operators in Python evaluate truthiness and return the determining operand, not necessarily True or False. "and" returns the first falsy operand, or the last operand if all are truthy. "or" returns the first truthy operand, or the last operand if all are falsy. "not" always returns a strict boolean.',
+      example: `# 'or' returns first truthy operand:
+print("Lagos" or "Default")    # 'Lagos'
+print("" or "Default")         # 'Default' (empty string is falsy)
+
+# 'and' returns first falsy operand or last operand:
+print(0 and "Nigeria")         # 0 (falsy)
+print("Amina" and 250)         # 250 (both truthy, returns last)
+
+# 'not' always returns strict boolean:
+print(not "Hello")             # False
+print(not 0)                   # True`,
+    },
+    {
+      category: 'Short-Circuit Evaluation & Guard Idioms',
+      syntax: 'guard and action() or value or fallback',
+      description: 'Short-circuit evaluation means Python stops evaluating logical expressions as soon as the outcome is certain. In A and B, if A is False, B is never executed. In A or B, if A is True, B is never executed. This enables clean guard expressions against ZeroDivisionError and NoneType errors.',
+      example: `# ZeroDivisionError guard idiom:
+count = 0
+total = 1500
+# Safe: (total / count) is never evaluated when count == 0
+avg = count != 0 and (total / count)
+print(avg)  # False (no ZeroDivisionError raised!)
+
+# Configuration fallback idiom:
+custom_port = None
+server_port = custom_port or 8080
+print(server_port)  # 8080`,
+    },
+    {
+      category: 'Identity (is) vs Equality (==)',
+      syntax: 'x == y (value equality) vs x is y (memory identity)',
+      description: 'Equality (==) invokes __eq__() to test whether two objects contain the same values. Identity (is) checks whether two variables reference the exact same memory address on the CPython heap (id(a) == id(b)). Two distinct mutable collections can be equal in value while having different identities.',
+      example: `# Mutable lists with identical contents:
+tx1 = ["TX-101", 5000]
+tx2 = ["TX-101", 5000]
+
+print(tx1 == tx2)  # True  (identical values)
+print(tx1 is tx2)  # False (distinct memory locations on heap)
+print(id(tx1) != id(tx2)) # True
+
+# Aliased reference points to identical address:
+tx3 = tx1
+print(tx3 is tx1)  # True  (same object identity)`,
+    },
+    {
+      category: 'CPython Small Integer Cache & Singletons',
+      syntax: '[-5, 256] cached integers & is None (PEP 8)',
+      description: 'CPython maintains a global pre-allocated array of singleton integer objects for numbers in the range [-5, 256]. Within this range, identical integers share memory addresses. Beyond this range, distinct objects may be allocated. Always use "is" or "is not" when checking for singletons like None, True, and False.',
+      example: `# CPython small integer cache [-5, 256]:
+a = 256
+b = 256
+print(a is b)  # True (interned singleton in CPython)
+
+# Outside cache (in REPL):
+large_a = 1000
+large_b = 1000
+print(large_a == large_b)  # True (equal values)
+# large_a is large_b may evaluate to False depending on code block
+
+# PEP 8 Sentinel check rule:
+user_session = None
+if user_session is None:   # ALWAYS use 'is None', never '== None'
+    print("No active session detected.")`,
+    },
+    {
+      category: 'Bitwise Operators & Binary Flags',
+      syntax: '& (AND), | (OR), ^ (XOR), ~ (NOT), << (Left Shift), >> (Right Shift)',
+      description: 'Bitwise operators manipulate the underlying binary representation of integers using two\'s complement arithmetic. << n shifts bits left (multiplying by 2**n). >> n shifts bits right (floor dividing by 2**n). Widely used for permission masks, network packet flags, and cryptographic primitives.',
+      example: `PERM_READ    = 0b100  # 4
+PERM_WRITE   = 0b010  # 2
+PERM_EXECUTE = 0b001  # 1
+
+# Combine permissions using bitwise OR:
+user_perms = PERM_READ | PERM_WRITE  # 0b110 (6)
+
+# Test permission using bitwise AND:
+can_write = bool(user_perms & PERM_WRITE)
+print(f"Write permission granted: {can_write}")  # True
+
+# Bit shifting:
+print(7 << 2)   # 28 (7 * 2^2)
+print(28 >> 2)  # 7  (28 // 2^2)`,
+    },
+    {
+      category: 'Operator Precedence & Grouping Hierarchy',
+      syntax: '() > ** > unary +,-,~ > *,/,//,% > +,- > <<,>> > & > ^ > | > comparisons > not > and > or',
+      description: 'Python resolves multi-operator expressions using a rigorous precedence hierarchy. Parentheses () have highest priority. Exponentiation (**) is right-associative. Arithmetic precedes comparisons, and comparisons precede logical operators. PEP 8 strongly recommends using explicit parentheses to avoid ambiguity.',
+      example: `# Multi-operator evaluation:
+# 1. 3 ** 2 = 9
+# 2. 4 * 9 = 36
+# 3. 10 + 36 = 46
+# 4. 46 - 6 = 40
+result = 10 + 4 * 3 ** 2 - 6
+print(result)  # 40
+
+# PEP 8 clarity: explicit parentheses clarify intent
+clean_result = 10 + (4 * (3 ** 2)) - 6
+print(clean_result == result)  # True`,
+    },
+  ],
 
   sourceNotes: [
     'Derived from Asabeneh Yetayeh\'s 30 Days of Python Day 3 curriculum with modern Python 3.12 visual enhancements.',

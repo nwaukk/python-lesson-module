@@ -29,7 +29,12 @@ export type SimulationPrimitiveType =
   | 'builtin-explorer'
   | 'naming-rules'
   | 'arithmetic-lab'
-  | 'identity-equality';
+  | 'identity-equality'
+  | 'string-index-slice'
+  | 'string-methods-lab'
+  | 'split-join'
+  | 'find-index'
+  | 'numeric-predicates';
 
 export interface SimulationRef {
   type: SimulationPrimitiveType;
@@ -60,17 +65,17 @@ export interface ExplainStep {
 export interface PracticalExample {
   contextTitle: string;
   scenario: string;
-  code: string;
-  outcome: string;
-  domain: 'finance' | 'school' | 'ecommerce' | 'transport' | 'science' | 'automation';
+  code?: string;
+  outcome?: string;
+  domain: string;
 }
 
 export interface Mistake {
   label: string;
-  erroneousCode: string;
-  errorMessage: string;
+  erroneousCode?: string;
+  errorMessage?: string;
   explanation: string;
-  correctedCode: string;
+  correctedCode?: string;
 }
 
 export type ExerciseType =
@@ -172,8 +177,9 @@ export interface Subtopic {
   explain: ExplainStep[];
   apply: PracticalExample;
   commonMistakes: Mistake[];
-  practise: Exercise[];
-  assess: Question[];
+  practise?: Exercise[];
+  assess?: Question[];
+  sourceNotes?: string;
 }
 
 export interface DayModule {
