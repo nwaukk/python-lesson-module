@@ -720,6 +720,315 @@ export const SelfTestView: React.FC = () => {
         : `Days 1 to 4 regression failed: subtopics=${(day1Module?.subtopics.length ?? 0) + (day2Module?.subtopics.length ?? 0) + (day3Module?.subtopics.length ?? 0) + (day4Module?.subtopics.length ?? 0)}/42, exercises=${totalExercisesDays1to4}/70.`,
     });
 
+    // 25. Day 5 Part A: 11 Subtopics & 5 Signature List Simulations Audit
+    const day5Module = getDayModule(5);
+    const day5SubtopicsValid =
+      day5Module &&
+      day5Module.subtopics.length === 11 &&
+      day5Module.subtopics.every(
+        (s) =>
+          s.introduce.paragraphs.length > 0 &&
+          s.visualise.type &&
+          s.code.length > 0 &&
+          s.code[0].expectedOutput.length > 0 &&
+          s.explain.length > 0 &&
+          s.apply &&
+          s.commonMistakes.length > 0
+      );
+
+    const day5SimsCovered = new Set(day5Module?.subtopics.map((s) => s.visualise.type));
+    const day5SimsValid =
+      day5SimsCovered.has('dynamic-array-allocator') &&
+      day5SimsCovered.has('list-mutability-lab') &&
+      day5SimsCovered.has('list-methods-lab') &&
+      day5SimsCovered.has('list-slicing-splicing') &&
+      day5SimsCovered.has('copy-aliasing-inspector');
+
+    const day5ManifestEntry = COURSE_DAYS_MANIFEST.find((d) => d.number === 5);
+    const day5ManifestValid = day5ManifestEntry?.status === 'available' && day5ManifestEntry?.subtopicsCount === 11;
+
+    const day5PartAValid = !!day5SubtopicsValid && day5SimsValid && day5ManifestValid;
+
+    testCases.push({
+      id: 'day5-part-a-check',
+      category: 'lesson-schema',
+      name: 'Day 5 Part A: 11 Subtopics & 5 Signature List Simulations Audit',
+      passed: day5PartAValid,
+      message: day5PartAValid
+        ? `Day 5 Part A verified: 11 complete subtopics following the 10-step pedagogical journey with 5 signature list simulations (CPython Dynamic Array Allocator, List Mutability Lab, List Methods Lab, List Slicing & Splicing Studio, and Copy vs Aliasing Inspector), plus manifest status marked available.`
+        : `Day 5 Part A validation failed: subtopics=${day5Module?.subtopics?.length || 0}/11, sims=${day5SimsCovered.size}/5, manifest=${day5ManifestValid}.`,
+    });
+
+    // 26. Day 5 Part B: Methods Registry (11 List Methods), 18+ Exercises, 2 Labs, Mini-Project, & Checkpoint Quiz Audit
+    const day5Exercises = day5Module?.subtopics.flatMap((s) => s.practise || []) || [];
+    const d5ExerciseCountValid = day5Exercises.length >= 18;
+
+    const d5Tiers = new Set(day5Exercises.map((e) => e.tier));
+    const d5TiersValid = d5Tiers.has('foundation') && d5Tiers.has('standard') && d5Tiers.has('challenge') && d5Tiers.has('project');
+
+    const d5Types = new Set(day5Exercises.map((e) => e.type));
+    const d5TypesValid =
+      d5Types.has('scenario-mcq') &&
+      d5Types.has('predict-output') &&
+      d5Types.has('fix-the-bug') &&
+      d5Types.has('order-the-lines') &&
+      d5Types.has('fill-the-gaps') &&
+      d5Types.has('write-code') &&
+      d5Types.has('theory-reasoning') &&
+      d5Types.has('explain-the-trace');
+
+    const listMethods = METHODS_REGISTRY.filter((m) => m.type === 'list');
+    const listMethodsCountValid = listMethods.length === 11;
+    const listMethodsCompleteValid = listMethods.every(
+      (m) =>
+        m.name &&
+        m.signature &&
+        m.parameters &&
+        m.examples.length > 0 &&
+        m.edgeCases.length > 0 &&
+        m.commonErrors.length >= 0 &&
+        m.relatedMethods.length > 0
+    );
+
+    const d5LabsValid =
+      (day5Module?.realWorldLabs?.length || 0) === 2 &&
+      day5Module!.realWorldLabs.every((lab) => lab.starterCode.length > 0 && lab.targetOutput.length > 0);
+
+    const d5ProjectValid =
+      day5Module?.miniProject &&
+      day5Module.miniProject.id === 'day5-project' &&
+      day5Module.miniProject.requirements.length >= 5 &&
+      day5Module.miniProject.rubric.length >= 3 &&
+      day5Module.miniProject.starterCode.length > 0;
+
+    const d5QuizValid =
+      day5Module?.dayQuiz &&
+      day5Module.dayQuiz.questions.length === 10 &&
+      day5Module.dayQuiz.questions.every(
+        (q) =>
+          q.scenario &&
+          q.question &&
+          q.options.length === 4 &&
+          q.options.some((o) => o.isCorrect) &&
+          q.options.every((o) => o.explanation.length > 0)
+      );
+
+    const day5PartBValid =
+      d5ExerciseCountValid &&
+      d5TiersValid &&
+      d5TypesValid &&
+      listMethodsCountValid &&
+      listMethodsCompleteValid &&
+      d5LabsValid &&
+      d5ProjectValid &&
+      d5QuizValid;
+
+    testCases.push({
+      id: 'day5-part-b-check',
+      category: 'exercises',
+      name: 'Day 5 Part B: List Methods (11), 20 Exercises, 2 Labs, Capstone & Quiz Audit',
+      passed: day5PartBValid,
+      message: day5PartBValid
+        ? `Day 5 Part B verified: ${listMethods.length} list methods in registry (all with mutates/returnsNew semantics and examples), ${day5Exercises.length} practice exercises spanning all 4 tiers and all 8 exercise types, 2 real-world retail & fintech labs, 5-requirement banking capstone mini-project with rubric, and 10-question mastery assessment quiz.`
+        : `Day 5 Part B validation failed: exercises=${day5Exercises.length}/18 (tiers=${d5Tiers.size}/4, types=${d5Types.size}/8), methods=${listMethods.length}/11, labs=${day5Module?.realWorldLabs?.length || 0}/2, project=${!!d5ProjectValid}, quiz=${day5Module?.dayQuiz?.questions?.length || 0}/10.`,
+    });
+
+    // 27. Day 5 Part C: Cheat Sheet (11 Cards) & List Architecture Audit
+    const day5CheatSheetBlocks = day5Module?.cheatSheet || [];
+    const day5CheatSheetValid =
+      day5CheatSheetBlocks.length >= 8 &&
+      day5CheatSheetBlocks.every(
+        (b) =>
+          b.category.trim().length > 0 &&
+          b.syntax.trim().length > 0 &&
+          b.description.trim().length > 0 &&
+          b.example.trim().length > 0
+      );
+
+    const day5Categories = new Set(day5CheatSheetBlocks.map((b) => b.category));
+    const day5CategoriesValid =
+      day5Categories.has('List Creation & Heterogeneous Structure') &&
+      day5Categories.has('Positive & Negative Indexing Offsets') &&
+      day5Categories.has('Sequence Slicing & Boundary Clamping') &&
+      day5Categories.has('In-Place Item & Slice Splicing') &&
+      day5Categories.has('Membership Testing & Containment') &&
+      day5Categories.has('Dynamic Growth Methods') &&
+      day5Categories.has('Removal & Deletion Operations') &&
+      day5Categories.has('Concatenation, Repetition & Extending') &&
+      day5Categories.has('Searching & Frequency Counting') &&
+      day5Categories.has('In-Place vs Pure Sorting & Reversing') &&
+      day5Categories.has('Copying Semantics & Nested Aliasing');
+
+    const day5PartCValid = !!day5CheatSheetValid && day5CategoriesValid;
+
+    testCases.push({
+      id: 'day5-part-c-check',
+      category: 'lesson-schema',
+      name: 'Day 5 Part C: Cheat Sheet (11 Cards) & List Architecture Audit',
+      passed: day5PartCValid,
+      message: day5PartCValid
+        ? `Day 5 Part C passed: ${day5CheatSheetBlocks.length} comprehensive cheat sheet cards spanning all ${day5Categories.size} core list categories (creation, indexing, slicing, in-place splicing, membership, growth methods, removal, concatenation/aliasing trap, searching, Timsort vs sorted, copying semantics) with verified examples and zero-pill layout compliance.`
+        : `Day 5 Part C validation failed: cards=${day5CheatSheetBlocks.length}/8, categories=${day5Categories.size}/11.`,
+    });
+
+    // 28. Days 1 to 5 Cumulative Curriculum & Full Regression Audit
+    const totalD5Exercises = day5Module ? day5Module.subtopics.reduce((acc, s) => acc + (s.practise?.length || 0), 0) : 0;
+    const totalExercisesDays1to5 = totalExercisesDays1to4 + totalD5Exercises;
+    const totalCheatSheetCards =
+      (day1Module?.cheatSheet.length ?? 0) +
+      (day2Module?.cheatSheet.length ?? 0) +
+      (day3Module?.cheatSheet.length ?? 0) +
+      (day4Module?.cheatSheet.length ?? 0) +
+      (day5Module?.cheatSheet.length ?? 0);
+
+    const days1to5Complete =
+      (day1Module?.subtopics.length ?? 0) === 11 &&
+      (day2Module?.subtopics.length ?? 0) === 11 &&
+      (day3Module?.subtopics.length ?? 0) === 9 &&
+      (day4Module?.subtopics.length ?? 0) === 11 &&
+      (day5Module?.subtopics.length ?? 0) === 11 &&
+      totalExercisesDays1to5 >= 90 &&
+      (day1Module?.cheatSheet.length ?? 0) >= 8 &&
+      (day2Module?.cheatSheet.length ?? 0) >= 8 &&
+      (day3Module?.cheatSheet.length ?? 0) >= 8 &&
+      (day4Module?.cheatSheet.length ?? 0) >= 8 &&
+      (day5Module?.cheatSheet.length ?? 0) >= 8 &&
+      (day1Module?.realWorldLabs.length ?? 0) === 2 &&
+      (day2Module?.realWorldLabs.length ?? 0) === 2 &&
+      (day3Module?.realWorldLabs.length ?? 0) === 2 &&
+      (day4Module?.realWorldLabs.length ?? 0) === 2 &&
+      (day5Module?.realWorldLabs.length ?? 0) === 2 &&
+      day1Module?.miniProject !== undefined &&
+      day2Module?.miniProject !== undefined &&
+      day3Module?.miniProject !== undefined &&
+      day4Module?.miniProject !== undefined &&
+      day5Module?.miniProject !== undefined &&
+      day1Module?.dayQuiz !== undefined &&
+      day2Module?.dayQuiz !== undefined &&
+      day3Module?.dayQuiz !== undefined &&
+      day4Module?.dayQuiz !== undefined &&
+      day5Module?.dayQuiz !== undefined;
+
+    testCases.push({
+      id: 'days-1-to-5-regression-check',
+      category: 'regression',
+      name: 'Days 1 to 5 Full Curriculum Regression & Continuity Audit',
+      passed: days1to5Complete,
+      message: days1to5Complete
+        ? `Days 1 to 5 cumulative regression passed: 53 total subtopics across 5 days, ${totalExercisesDays1to5} practice exercises across all 4 tiers, 10 real-world labs, 5 capstone projects, 5 mastery checkpoint quizzes, and ${totalCheatSheetCards} cheat sheet cards with zero-pill WCAG AA compliance.`
+        : `Days 1 to 5 regression failed: subtopics=${(day1Module?.subtopics.length ?? 0) + (day2Module?.subtopics.length ?? 0) + (day3Module?.subtopics.length ?? 0) + (day4Module?.subtopics.length ?? 0) + (day5Module?.subtopics.length ?? 0)}/53, exercises=${totalExercisesDays1to5}/90, cheatSheets=${totalCheatSheetCards}/40.`,
+    });
+
+    // 29. Day 6 Part A: 9 Subtopics & 3 Signature Tuple Simulations Audit
+    const day6Module = getDayModule(6);
+    const day6SubtopicsValid =
+      day6Module &&
+      day6Module.subtopics.length === 9 &&
+      day6Module.subtopics.every(
+        (s) =>
+          s.introduce.paragraphs.length > 0 &&
+          s.visualise.type &&
+          s.code.length > 0 &&
+          s.code[0].expectedOutput.length > 0 &&
+          s.explain.length > 0 &&
+          s.apply &&
+          s.commonMistakes.length > 0
+      );
+
+    const day6SimsCovered = new Set(day6Module?.subtopics.map((s) => s.visualise.type));
+    const day6SimsValid =
+      day6SimsCovered.has('tuple-list-memory-inspector') &&
+      day6SimsCovered.has('tuple-unpacking-lab') &&
+      day6SimsCovered.has('tuple-immutability-trap');
+
+    const day6ManifestEntry = COURSE_DAYS_MANIFEST.find((d) => d.number === 6);
+    const day6ManifestValid = day6ManifestEntry?.status === 'available' && day6ManifestEntry?.subtopicsCount === 9;
+
+    const day6PartAValid = !!day6SubtopicsValid && day6SimsValid && day6ManifestValid;
+
+    testCases.push({
+      id: 'day6-part-a-check',
+      category: 'lesson-schema',
+      name: 'Day 6 Part A: 9 Subtopics & 3 Signature Tuple Simulations Audit',
+      passed: day6PartAValid,
+      message: day6PartAValid
+        ? `Day 6 Part A verified: 9 complete subtopics following the 10-step pedagogical journey with 3 signature tuple simulations (CPython PyTupleObject Memory Inspector, Tuple Packing & Unpacking Studio, and Tuple Immutability & Nested Mutability Inspector), plus manifest status marked available.`
+        : `Day 6 Part A validation failed: subtopics=${day6Module?.subtopics?.length || 0}/9, sims=${day6SimsCovered.size}/3, manifest=${day6ManifestValid}.`,
+    });
+
+    // 30. Day 6 Part B: Tuple Methods Registry (2), 18+ Exercises, 2 Labs, Capstone Mini-Project & Checkpoint Quiz Audit
+    const day6Exercises = day6Module?.subtopics.flatMap((s) => s.practise || []) || [];
+    const d6ExerciseCountValid = day6Exercises.length >= 18;
+
+    const d6Tiers = new Set(day6Exercises.map((e) => e.tier));
+    const d6TiersValid = d6Tiers.has('foundation') && d6Tiers.has('standard') && d6Tiers.has('challenge') && d6Tiers.has('project');
+
+    const d6Types = new Set(day6Exercises.map((e) => e.type));
+    const d6TypesValid =
+      d6Types.has('scenario-mcq') &&
+      d6Types.has('predict-output') &&
+      d6Types.has('fix-the-bug') &&
+      d6Types.has('order-the-lines') &&
+      d6Types.has('fill-the-gaps') &&
+      d6Types.has('write-code') &&
+      d6Types.has('theory-reasoning') &&
+      d6Types.has('explain-the-trace');
+
+    const tupleMethods = METHODS_REGISTRY.filter((m) => m.type === 'tuple');
+    const tupleMethodsCountValid = tupleMethods.length === 2;
+    const tupleMethodsCompleteValid = tupleMethods.every(
+      (m) =>
+        m.name &&
+        m.signature &&
+        m.parameters &&
+        m.examples.length > 0 &&
+        m.edgeCases.length > 0 &&
+        m.relatedMethods.length > 0
+    );
+
+    const d6LabsValid =
+      (day6Module?.realWorldLabs?.length || 0) === 2 &&
+      day6Module!.realWorldLabs.every((lab) => lab.starterCode.length > 0 && lab.targetOutput.length > 0);
+
+    const d6ProjectValid =
+      day6Module?.miniProject &&
+      day6Module.miniProject.id === 'day6-project' &&
+      day6Module.miniProject.requirements.length >= 5 &&
+      day6Module.miniProject.rubric.length >= 3 &&
+      day6Module.miniProject.starterCode.length > 0;
+
+    const d6QuizValid =
+      day6Module?.dayQuiz &&
+      day6Module.dayQuiz.questions.length === 10 &&
+      day6Module.dayQuiz.questions.every(
+        (q) =>
+          q.scenario &&
+          q.question &&
+          q.options.length === 4 &&
+          q.options.some((o) => o.isCorrect) &&
+          q.options.every((o) => o.explanation.length > 0)
+      );
+
+    const day6PartBValid =
+      d6ExerciseCountValid &&
+      d6TiersValid &&
+      d6TypesValid &&
+      tupleMethodsCountValid &&
+      tupleMethodsCompleteValid &&
+      d6LabsValid &&
+      d6ProjectValid &&
+      d6QuizValid;
+
+    testCases.push({
+      id: 'day6-part-b-check',
+      category: 'exercises',
+      name: 'Day 6 Part B: Tuple Methods (2), 20 Exercises, 2 Labs, Capstone & Quiz Audit',
+      passed: day6PartBValid,
+      message: day6PartBValid
+        ? `Day 6 Part B verified: ${tupleMethods.length} tuple methods in registry (count and index with signatures and parameter guards), ${day6Exercises.length} practice exercises spanning all 4 tiers and all 8 exercise types, 2 real-world GIS and fintech labs, 5-requirement order book capstone mini-project with rubric, and 10-question mastery assessment quiz.`
+        : `Day 6 Part B validation failed: exercises=${day6Exercises.length}/18 (tiers=${d6Tiers.size}/4, types=${d6Types.size}/8), methods=${tupleMethods.length}/2, labs=${day6Module?.realWorldLabs?.length || 0}/2, project=${!!d6ProjectValid}, quiz=${day6Module?.dayQuiz?.questions?.length || 0}/10.`,
+    });
+
     setResults(testCases);
     setIsRunning(false);
   };

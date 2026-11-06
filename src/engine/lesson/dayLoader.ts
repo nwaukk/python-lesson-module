@@ -11,6 +11,8 @@ import { DAY_1_MODULE } from '../../data/days/day1';
 import { DAY_2_MODULE } from '../../data/days/day2';
 import { DAY_3_MODULE } from '../../data/days/day3';
 import { DAY_4_MODULE } from '../../data/days/day4';
+import { DAY_5_MODULE } from '../../data/days/day5';
+import { DAY_6_MODULE } from '../../data/days/day6';
 
 export function getDayModule(dayNumber: number): DayModule {
   if (dayNumber === 0) {
@@ -37,6 +39,16 @@ export function getDayModule(dayNumber: number): DayModule {
   // If Day 4, return the fully authored DAY_4_MODULE
   if (dayNumber === 4) {
     return DAY_4_MODULE;
+  }
+
+  // If Day 5, return the fully authored DAY_5_MODULE
+  if (dayNumber === 5) {
+    return DAY_5_MODULE;
+  }
+
+  // If Day 6, return the fully authored DAY_6_MODULE
+  if (dayNumber === 6) {
+    return DAY_6_MODULE;
   }
 
   // Placeholder module for Days 2–30

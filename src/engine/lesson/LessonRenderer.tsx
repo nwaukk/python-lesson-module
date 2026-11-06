@@ -516,7 +516,9 @@ export const LessonRenderer: React.FC<Props> = ({
                 Day {dayModule.number} Mastery Checklist &amp; Knowledge Wrap-up
               </h3>
               <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                {dayModule.number === 4
+                {dayModule.number === 5
+                  ? 'Congratulations on finishing Day 5! You have mastered Python lists from CPython dynamic array pointer tables and memory over-allocation to in-place slice splicing, all 11 core methods, Timsort mechanics, and shallow vs deep copying.'
+                  : dayModule.number === 4
                   ? 'Congratulations on finishing Day 4! You have mastered Python strings from memory representation, zero-based and negative indexing, and slicing to modern f-strings, safe immutability patterns, and 33 essential string methods.'
                   : dayModule.number === 3
                   ? 'Congratulations on finishing Day 3! You have mastered arithmetic, relational, boolean logic, short-circuiting, object identity (is) vs equality (==), and operator precedence.'
@@ -547,7 +549,42 @@ export const LessonRenderer: React.FC<Props> = ({
                 Key Technical Vocabulary
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                {dayModule.number === 4 ? (
+                {dayModule.number === 5 ? (
+                  <>
+                    <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="font-bold text-[var(--text-main)]">CPython Dynamic Array</div>
+                      <div className="text-[var(--text-muted)] text-[11px]">Lists are contiguous 64-bit pointer arrays (PyObject** ob_item), not linked nodes.</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="font-bold text-[var(--text-main)]">Over-Allocation Formula</div>
+                      <div className="text-[var(--text-muted)] text-[11px]">Geometric expansion new_allocated = newsize + (newsize &gt;&gt; 3) + (newsize &lt; 9 ? 3 : 6) powers amortized O(1) appends.</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="font-bold text-[var(--text-main)]">In-Place Mutability</div>
+                      <div className="text-[var(--text-muted)] text-[11px]">Item reassignments (lst[i] = x) mutate the internal buffer; the container id(lst) remains constant.</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="font-bold text-[var(--text-main)]">Slice Splicing</div>
+                      <div className="text-[var(--text-muted)] text-[11px]">lst[a:b] = seq replaces an entire index range with an iterable, expanding or contracting the buffer dynamically.</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="font-bold text-[var(--text-main)]">In-Place Methods Return None</div>
+                      <div className="text-[var(--text-muted)] text-[11px]">append(), extend(), insert(), remove(), sort(), reverse() mutate in-place and return None. Never reassign lst = lst.sort()!</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="font-bold text-[var(--text-main)]">Linear O(N) Shifts</div>
+                      <div className="text-[var(--text-muted)] text-[11px]">insert(0, x) and pop(0) shift all subsequent pointers in memory; use collections.deque for O(1) head operations.</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="font-bold text-[var(--text-main)]">Timsort Algorithm</div>
+                      <div className="text-[var(--text-muted)] text-[11px]">Adaptive O(N log N) hybrid mergesort/insertionsort with stable key-projection and reverse flags.</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="font-bold text-[var(--text-main)]">Aliasing vs Deep Copying</div>
+                      <div className="text-[var(--text-muted)] text-[11px]">b = a creates an alias; b = a.copy() copies outer pointers; copy.deepcopy() isolates nested mutable lists recursively.</div>
+                    </div>
+                  </>
+                ) : dayModule.number === 4 ? (
                   <>
                     <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
                       <div className="font-bold text-[var(--text-main)]">Unicode Code Points</div>
@@ -881,6 +918,53 @@ export const LessonRenderer: React.FC<Props> = ({
                 className="w-full mt-2 py-3 rounded-xl bg-[var(--accent-primary)] hover:bg-[var(--accent-hover)] text-[var(--accent-on)] font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-colors"
               >
                 <span>Continue to Day 5: Lists</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          ) : dayModule.number === 5 ? (
+            <div className="p-5 rounded-2xl border border-[var(--accent-primary)]/40 bg-gradient-to-br from-[var(--bg-surface)] to-[var(--accent-subtle)]/20 space-y-3 shadow-md">
+              <div className="flex items-center justify-between">
+                <span className="eyebrow-label text-[10px] text-[var(--accent-primary)]">
+                  NEXT UP IN 30 DAYS OF PYTHON
+                </span>
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[var(--bg-app)] text-[var(--text-muted)] border border-[var(--border-subtle)]">
+                  BEGINNER • 60 MINS
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-base font-bold text-[var(--text-main)] mb-1">
+                  Day 6 — Tuples (Immutability, Memory Efficiency &amp; Sequence Unpacking) ★
+                </h3>
+                <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+                  Now that you understand mutable lists, contrast them with Python's fixed immutable sequence type: Tuples. Learn why immutability provides data integrity, zero over-allocation memory compactness, tuple packing and starred unpacking, and dictionary key hashability.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[var(--text-muted)] pt-1">
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-[var(--bg-app)]/80 border border-[var(--border-subtle)]">
+                  <span className="text-[var(--accent-primary)] font-bold">→</span>
+                  <span>Tuple Immutability &amp; Defensive Integrity</span>
+                </div>
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-[var(--bg-app)]/80 border border-[var(--border-subtle)]">
+                  <span className="text-[var(--accent-primary)] font-bold">→</span>
+                  <span>Memory Compactness vs Dynamic List Arrays</span>
+                </div>
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-[var(--bg-app)]/80 border border-[var(--border-subtle)]">
+                  <span className="text-[var(--accent-primary)] font-bold">→</span>
+                  <span>Tuple Packing &amp; Starred Unpacking (a, *b, c)</span>
+                </div>
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-[var(--bg-app)]/80 border border-[var(--border-subtle)]">
+                  <span className="text-[var(--accent-primary)] font-bold">→</span>
+                  <span>Hashability &amp; Composite Dictionary Keys</span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => selectDay(6)}
+                className="w-full mt-2 py-3 rounded-xl bg-[var(--accent-primary)] hover:bg-[var(--accent-hover)] text-[var(--accent-on)] font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-colors"
+              >
+                <span>Continue to Day 6: Tuples</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>

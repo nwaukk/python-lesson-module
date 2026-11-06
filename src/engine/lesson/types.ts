@@ -34,7 +34,15 @@ export type SimulationPrimitiveType =
   | 'string-methods-lab'
   | 'split-join'
   | 'find-index'
-  | 'numeric-predicates';
+  | 'numeric-predicates'
+  | 'dynamic-array-allocator'
+  | 'list-mutability-lab'
+  | 'list-methods-lab'
+  | 'list-slicing-splicing'
+  | 'copy-aliasing-inspector'
+  | 'tuple-list-memory-inspector'
+  | 'tuple-unpacking-lab'
+  | 'tuple-immutability-trap';
 
 export interface SimulationRef {
   type: SimulationPrimitiveType;

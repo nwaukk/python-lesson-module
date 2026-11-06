@@ -61,6 +61,14 @@ import { StringMethodsLabSim } from '../simulation/StringMethodsLabSim';
 import { SplitJoinSim } from '../simulation/SplitJoinSim';
 import { FindIndexSearchSim } from '../simulation/FindIndexSearchSim';
 import { NumericPredicatesSim } from '../simulation/NumericPredicatesSim';
+import { DynamicArrayAllocatorSim } from '../simulation/DynamicArrayAllocatorSim';
+import { ListMutabilitySim } from '../simulation/ListMutabilitySim';
+import { ListMethodsLabSim } from '../simulation/ListMethodsLabSim';
+import { ListSlicingSplicingSim } from '../simulation/ListSlicingSplicingSim';
+import { CopyAliasingSim } from '../simulation/CopyAliasingSim';
+import { TupleListMemorySim } from '../simulation/TupleListMemorySim';
+import { TupleUnpackingSim } from '../simulation/TupleUnpackingSim';
+import { TupleImmutabilityTrapSim } from '../simulation/TupleImmutabilityTrapSim';
 import { SimulationController } from '../simulation/SimulationController';
 import { defaultTutor, TutorResponse } from '../coach/tutorProvider';
 
@@ -183,6 +191,22 @@ export const GuidedWorkspace: React.FC = () => {
         return <FindIndexSearchSim />;
       case 'numeric-predicates':
         return <NumericPredicatesSim />;
+      case 'dynamic-array-allocator':
+        return <DynamicArrayAllocatorSim />;
+      case 'list-mutability-lab':
+        return <ListMutabilitySim />;
+      case 'list-methods-lab':
+        return <ListMethodsLabSim />;
+      case 'list-slicing-splicing':
+        return <ListSlicingSplicingSim />;
+      case 'copy-aliasing-inspector':
+        return <CopyAliasingSim />;
+      case 'tuple-list-memory-inspector':
+        return <TupleListMemorySim />;
+      case 'tuple-unpacking-lab':
+        return <TupleUnpackingSim />;
+      case 'tuple-immutability-trap':
+        return <TupleImmutabilityTrapSim />;
       default:
         return (
           <div className="flex-1 flex flex-col min-h-0 bg-[var(--bg-app)]">
