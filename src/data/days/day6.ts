@@ -1967,7 +1967,205 @@ export const DAY_6_MODULE: DayModule = {
       }
     ]
   },
-  "cheatSheet": [],
+  "cheatSheet": [
+    {
+      "category": "Tuple Creation, Literal Syntax & The Comma Rule",
+      "syntax": "t = () | t = (item,) | t = (a, b, c) | t = tuple(iterable)",
+      "description": "Tuples are ordered, immutable, heterogeneous sequence containers. In Python, commas construct tuples, not parentheses. A single-element tuple strictly requires a trailing comma: (x,); writing (x) without a comma is treated as a parenthesized expression of type x. Empty tuples are created with () or tuple(). Passing an iterable to tuple() freezes its elements into a contiguous read-only pointer table.",
+      "example": `# Empty and single-element tuples
+empty_t = ()
+single_num = (42,)     # <class 'tuple'>
+not_a_tuple = (42)     # <class 'int'>!
+
+# Heterogeneous tuple
+server_spec = ("10.0.0.1", 8080, True, ("SSL", "TLSv1.3"))
+
+# Constructing from iterables
+vowels = tuple("aeiou")
+range_tuple = tuple(range(5))
+print("Single item type:", type(single_num))
+print("Vowels tuple:    ", vowels)
+print("Range tuple:     ", range_tuple)`
+    },
+    {
+      "category": "Positive & Negative Indexing Offsets",
+      "syntax": "item = t[i] | last = t[-1]",
+      "description": "Tuples provide random-access reads in constant O(1) time via pointer arithmetic: base + (i * 8 bytes). Positive indexing ranges from 0 to len(t) - 1. Negative indexing ranges from -1 down to -len(t). Crucial Watch-out: Out-of-bounds indexing raises IndexError: tuple index out of range. Always verify index boundaries with 0 <= i < len(t).",
+      "example": `currencies = ("NGN", "USD", "GBP", "EUR", "GHS")
+
+# Head and tail access in O(1)
+first = currencies[0]    # 'NGN'
+last = currencies[-1]    # 'GHS'
+second_last = currencies[-2]  # 'EUR'
+print(f"First: {first}, Last: {last}, Penultimate: {second_last}")
+
+# Defensive boundary guard
+idx = 10
+if 0 <= idx < len(currencies):
+    print("Found:", currencies[idx])
+else:
+    print(f"Index {idx} out of range! Range: [0, {len(currencies)-1}]")`
+    },
+    {
+      "category": "Tuple Slicing & Boundary Clamping",
+      "syntax": "sub_t = t[start:stop[:step]] | reversed_t = t[::-1]",
+      "description": "Slicing extracts a sub-sequence from start (inclusive) to stop (exclusive) advancing by step. Slicing a tuple ALWAYS produces a brand-new tuple object. Unlike single-item indexing, slicing never raises IndexError—boundaries are automatically clamped to [0, len]. A negative step (e.g. [::-1]) reverses the tuple.",
+      "example": `nodes = ("node-01", "node-02", "node-03", "node-04", "node-05")
+
+# Sub-tuple extraction
+primary_cluster = nodes[0:3]    # ('node-01', 'node-02', 'node-03')
+secondary_cluster = nodes[3:]   # ('node-04', 'node-05')
+
+# Negative stride reversal
+reversed_nodes = nodes[::-1]
+
+# Automatic boundary clamping
+safe_slice = nodes[2:999]       # ('node-03', 'node-04', 'node-05')
+print("Primary: ", primary_cluster)
+print("Reversed:", reversed_nodes)
+print("Clamped: ", safe_slice)`
+    },
+    {
+      "category": "Strict Immutability & Reassignment Rejection",
+      "syntax": "t[i] = val  # Raises TypeError: 'tuple' object does not support item assignment",
+      "description": "The defining property of tuples is immutability. Once allocated, the internal pointer table is write-protected in memory. Item reassignments (t[0] = x), deletions (del t[0]), and mutating methods (.append, .sort, .extend) do not exist and raise exceptions. To update data, use the Convert-Mutate-Freeze pattern.",
+      "example": `coords = (6.5244, 3.3792)
+
+try:
+    coords[0] = 7.0000
+except TypeError as err:
+    print("Caught expected immutability rejection:")
+    print(" ", err)
+
+# Tuples do not have .append() or .sort()
+has_append = hasattr(coords, "append")
+print("Has .append() method:", has_append)  # False`
+    },
+    {
+      "category": "Nested Mutable Containers & The += Paradox",
+      "syntax": "t[1].append(val)  # Succeeds! | t[1] += [val]  # Raises TypeError yet mutates!",
+      "description": "Tuples provide shallow immutability: the tuple's OWN internal pointer slots cannot change, but mutable objects pointed to (such as lists) CAN mutate in-place without changing their pointer address! The Augmented Assignment Paradox: t[1] += [val] evaluates INPLACE_ADD (mutating the list), then STORE_SUBSCR (raising TypeError on the tuple). The list is mutated despite the error!",
+      "example": `# 1. Mutating nested list succeeds
+session = ("USR-901", ["VIEW_DASHBOARD", "SETTINGS"])
+session[1].append("TRANSFER_FUNDS")
+print("Session mutated:", session)
+
+# 2. The Augmented Assignment Paradox
+sample = (10, [20, 30])
+try:
+    sample[1] += [40]
+except TypeError as err:
+    print("Paradox error caught:", err)
+
+# The list WAS still mutated!
+print("sample after += error:", sample)  # (10, [20, 30, 40])`
+    },
+    {
+      "category": "Convert-Mutate-Freeze Idiom",
+      "syntax": "lst = list(t) -> lst.mutate() -> t = tuple(lst)",
+      "description": "The standard Python pattern for updating immutable sequences: 1) Convert tuple to list with list(t); 2) Apply needed mutations (.append, .insert, .remove, .sort); 3) Freeze the result back into an immutable tuple with tuple(lst). This provides full editing flexibility while keeping the published container immutable.",
+      "example": `directors = ("Bello", "Chidi", "Adewale")
+
+# Step 1: Unfreeze into mutable list
+temp_list = list(directors)
+
+# Step 2: Mutate in-place
+temp_list.append("Zainab")
+temp_list.sort()
+
+# Step 3: Freeze back into immutable tuple
+directors = tuple(temp_list)
+print("Updated Directors Registry:", directors)`
+    },
+    {
+      "category": "Sequence Unpacking & Starred Expressions",
+      "syntax": "a, b = t | head, *middle, tail = t | *prefix, last = t",
+      "description": "Tuple destructuring assigns sequence items directly into variables. In 1-to-1 unpacking, the variable count must match sequence length or Python raises ValueError. PEP 3132 extended starred unpacking (*rest) captures any number of intermediate or leading elements into a Python list container. Only ONE starred target is permitted per assignment.",
+      "example": `# 1. Exact 1-to-1 unpacking
+user = ("Amina", 28, "Fintech Lead")
+name, age, role = user
+print(f"User: {name}, Age: {age}, Role: {role}")
+
+# 2. Starred middle collection (middle is a list!)
+scores = (98, 85, 91, 74, 88, 95)
+highest, *middle_scores, lowest = scores
+print("Highest:", highest)
+print("Middle: ", middle_scores)  # [85, 91, 74, 88]
+print("Lowest: ", lowest)
+
+# 3. Starred prefix collection
+*path_dirs, file_name = ("var", "log", "nginx", "access.log")
+print("Path:", path_dirs, "| File:", file_name)`
+    },
+    {
+      "category": "Tuple Packing & Atomic Variable Swapping",
+      "syntax": "t = 1, 2, 3 | a, b = b, a | return x, y, z",
+      "description": "Listing multiple comma-separated values automatically packs them into a tuple. Atomic swapping (a, b = b, a) evaluates the right-hand expressions onto the evaluation stack as an anonymous tuple before writing to left-hand targets, eliminating the need for temporary variables. Functions returning multiple values implicitly return a packed tuple.",
+      "example": `# 1. Implicit packing without parentheses
+point = 10, 20, 30
+print("Packed point:", point, "Type:", type(point))
+
+# 2. Atomic variable swap without temporary variable
+x, y = "USD", "NGN"
+x, y = y, x
+print(f"Swapped: x={x}, y={y}")
+
+# 3. Multi-value function returns
+def min_max_avg(numbers):
+    return min(numbers), max(numbers), sum(numbers) / len(numbers)
+
+low, high, mean = min_max_avg([10, 20, 30, 40])
+print(f"Low: {low}, High: {high}, Mean: {mean}")`
+    },
+    {
+      "category": "Hashability & Composite Dictionary Keys",
+      "syntax": "dict_key = (lat, lon) | hash(t)",
+      "description": "Dictionary and set keys must be hashable. Lists are mutable and unhashable (TypeError: unhashable type: 'list'). Tuples are hashable IF AND ONLY IF every element inside them is also hashable. If a tuple contains a nested mutable list, hash(t) raises TypeError. Composite tuple keys allow fast O(1) multi-dimensional lookups.",
+      "example": `# Composite tuple keys in dictionary
+cross_rates = {
+    ("USD", "NGN"): 1550.00,
+    ("GBP", "NGN"): 1980.50,
+    ("EUR", "NGN"): 1680.25,
+}
+
+pair = ("USD", "NGN")
+print(f"FX Rate for {pair}: ₦{cross_rates[pair]}")
+
+# Hashability check
+pure_tuple = ("NGN", 2026, True)
+print("Hash of pure tuple:", hash(pure_tuple))
+
+# Unhashable tuple containing a list:
+mixed_tuple = ("NGN", [1, 2])
+try:
+    hash(mixed_tuple)
+except TypeError as err:
+    print("Rejected hash on mixed tuple:", err)`
+    },
+    {
+      "category": "Tuple Methods & CPython Memory Footprint",
+      "syntax": "t.count(val) | t.index(val[, start[, stop]]) | sys.getsizeof(t)",
+      "description": "Tuples have exactly TWO built-in methods: count(val) (linear O(N) frequency search) and index(val) (returns first index or raises ValueError). Tuples have zero over-allocation slack (unlike lists which allocate extra capacity for append), consuming fewer bytes. CPython caches deallocated small tuples (up to 20 items) in an internal freelist for fast allocation.",
+      "example": `import sys
+
+events = ("LOGIN", "VIEW", "TRANSFER", "LOGIN", "LOGOUT", "LOGIN")
+
+# 1. count() never raises an error
+print("LOGIN count: ", events.count("LOGIN"))   # 3
+print("DELETE count:", events.count("DELETE"))  # 0
+
+# 2. index() with defensive membership guard
+if "TRANSFER" in events:
+    print("First TRANSFER at index:", events.index("TRANSFER"))
+
+# 3. sys.getsizeof() comparison
+items = list(range(10))
+t_items = tuple(items)
+print(f"Tuple size (10 items): {sys.getsizeof(t_items)} bytes")
+print(f"List size  (10 items): {sys.getsizeof(items)} bytes")
+print(f"List overhead: +{sys.getsizeof(items) - sys.getsizeof(t_items)} bytes")`
+    }
+  ],
   "sourceNotes": [
     "Source attribution: Asabeneh Yetayeh's '30 Days of Python' (Day 6 - Tuples).",
     "Covers tuple creation, comma rule, indexing, slicing, immutability, sequence unpacking, starred expressions, packing, hashability, and memory efficiency."

@@ -69,6 +69,10 @@ import { CopyAliasingSim } from '../simulation/CopyAliasingSim';
 import { TupleListMemorySim } from '../simulation/TupleListMemorySim';
 import { TupleUnpackingSim } from '../simulation/TupleUnpackingSim';
 import { TupleImmutabilityTrapSim } from '../simulation/TupleImmutabilityTrapSim';
+import { VennDiagramSim } from '../simulation/VennDiagramSim';
+import { HashSetTableSim } from '../simulation/HashSetTableSim';
+import { CompactDictMemorySim } from '../simulation/CompactDictMemorySim';
+import { DictMutationFlowSim } from '../simulation/DictMutationFlowSim';
 import { SimulationController } from '../simulation/SimulationController';
 import { defaultTutor, TutorResponse } from '../coach/tutorProvider';
 
@@ -207,6 +211,14 @@ export const GuidedWorkspace: React.FC = () => {
         return <TupleUnpackingSim />;
       case 'tuple-immutability-trap':
         return <TupleImmutabilityTrapSim />;
+      case 'venn-diagram-simulator':
+        return <VennDiagramSim />;
+      case 'hash-set-table-inspector':
+        return <HashSetTableSim />;
+      case 'compact-dict-memory-inspector':
+        return <CompactDictMemorySim />;
+      case 'dict-mutation-flow-sim':
+        return <DictMutationFlowSim />;
       default:
         return (
           <div className="flex-1 flex flex-col min-h-0 bg-[var(--bg-app)]">

@@ -42,7 +42,11 @@ export type SimulationPrimitiveType =
   | 'copy-aliasing-inspector'
   | 'tuple-list-memory-inspector'
   | 'tuple-unpacking-lab'
-  | 'tuple-immutability-trap';
+  | 'tuple-immutability-trap'
+  | 'venn-diagram-simulator'
+  | 'hash-set-table-inspector'
+  | 'compact-dict-memory-inspector'
+  | 'dict-mutation-flow-sim';
 
 export interface SimulationRef {
   type: SimulationPrimitiveType;

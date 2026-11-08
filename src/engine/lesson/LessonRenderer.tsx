@@ -516,7 +516,9 @@ export const LessonRenderer: React.FC<Props> = ({
                 Day {dayModule.number} Mastery Checklist &amp; Knowledge Wrap-up
               </h3>
               <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                {dayModule.number === 5
+                {dayModule.number === 6
+                  ? 'Congratulations on finishing Day 6! You have mastered Python tuples from fixed contiguous pointer tables and the single-element comma rule to strict immutability, extended starred destructuring, atomic swapping, hashable composite dictionary keys, and CPython freelist memory efficiency.'
+                  : dayModule.number === 5
                   ? 'Congratulations on finishing Day 5! You have mastered Python lists from CPython dynamic array pointer tables and memory over-allocation to in-place slice splicing, all 11 core methods, Timsort mechanics, and shallow vs deep copying.'
                   : dayModule.number === 4
                   ? 'Congratulations on finishing Day 4! You have mastered Python strings from memory representation, zero-based and negative indexing, and slicing to modern f-strings, safe immutability patterns, and 33 essential string methods.'
@@ -549,7 +551,42 @@ export const LessonRenderer: React.FC<Props> = ({
                 Key Technical Vocabulary
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                {dayModule.number === 5 ? (
+                {dayModule.number === 6 ? (
+                  <>
+                    <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="font-bold text-[var(--text-main)]">PyTupleObject Pointers</div>
+                      <div className="text-[var(--text-muted)] text-[11px]">Tuples are contiguous 64-bit pointer arrays allocated with zero over-allocation slack buffer.</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="font-bold text-[var(--text-main)]">Single-Element Comma Rule</div>
+                      <div className="text-[var(--text-muted)] text-[11px]">(x,) creates a 1-tuple; writing (x) without a comma is a grouping expression of type x.</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="font-bold text-[var(--text-main)]">Strict Immutability</div>
+                      <div className="text-[var(--text-muted)] text-[11px]">t[0] = x raises TypeError; internal reference slots cannot be rebound, deleted, or extended.</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="font-bold text-[var(--text-main)]">Augmented Assignment Paradox</div>
+                      <div className="text-[var(--text-muted)] text-[11px]">t[1] += [...] mutates the inner list via INPLACE_ADD, then raises TypeError on STORE_SUBSCR.</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="font-bold text-[var(--text-main)]">Convert-Mutate-Freeze</div>
+                      <div className="text-[var(--text-muted)] text-[11px]">Idiomatic pattern: list(t) -&gt; apply mutations in-place -&gt; tuple(lst) to freeze data integrity.</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="font-bold text-[var(--text-main)]">Extended Starred Unpacking</div>
+                      <div className="text-[var(--text-muted)] text-[11px]">head, *rest, tail = seq captures residual items into a standard Python list container.</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="font-bold text-[var(--text-main)]">Atomic Variable Swap</div>
+                      <div className="text-[var(--text-muted)] text-[11px]">a, b = b, a evaluates right-hand values onto the PVM stack before binding left-hand targets.</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="font-bold text-[var(--text-main)]">Composite Dict Keys</div>
+                      <div className="text-[var(--text-muted)] text-[11px]">Tuples of immutable items are hashable; enable O(1) multi-dimensional hash table lookups.</div>
+                    </div>
+                  </>
+                ) : dayModule.number === 5 ? (
                   <>
                     <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
                       <div className="font-bold text-[var(--text-main)]">CPython Dynamic Array</div>
@@ -965,6 +1002,53 @@ export const LessonRenderer: React.FC<Props> = ({
                 className="w-full mt-2 py-3 rounded-xl bg-[var(--accent-primary)] hover:bg-[var(--accent-hover)] text-[var(--accent-on)] font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-colors"
               >
                 <span>Continue to Day 6: Tuples</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          ) : dayModule.number === 6 ? (
+            <div className="p-5 rounded-2xl border border-[var(--accent-primary)]/40 bg-gradient-to-br from-[var(--bg-surface)] to-[var(--accent-subtle)]/20 space-y-3 shadow-md">
+              <div className="flex items-center justify-between">
+                <span className="eyebrow-label text-[10px] text-[var(--accent-primary)]">
+                  NEXT UP IN 30 DAYS OF PYTHON
+                </span>
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[var(--bg-app)] text-[var(--text-muted)] border border-[var(--border-subtle)]">
+                  BEGINNER • 55 MINS
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-base font-bold text-[var(--text-main)] mb-1">
+                  Day 7 — Sets (Unordered Unique Collections, Hashing &amp; Venn Operations) ★
+                </h3>
+                <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+                  Now that you understand ordered sequences (strings, lists, tuples), step into Python's foundational unordered collection: Sets. Discover hash table uniqueness, automatic deduplication, and mathematical Venn set operations.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[var(--text-muted)] pt-1">
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-[var(--bg-app)]/80 border border-[var(--border-subtle)]">
+                  <span className="text-[var(--accent-primary)] font-bold">→</span>
+                  <span>Hash Table Uniqueness &amp; Fast O(1) Lookups</span>
+                </div>
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-[var(--bg-app)]/80 border border-[var(--border-subtle)]">
+                  <span className="text-[var(--accent-primary)] font-bold">→</span>
+                  <span>Set Deduplication &amp; set() Constructor Grammar</span>
+                </div>
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-[var(--bg-app)]/80 border border-[var(--border-subtle)]">
+                  <span className="text-[var(--accent-primary)] font-bold">→</span>
+                  <span>Mathematical Venn Operations (&amp;, |, -, ^)</span>
+                </div>
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-[var(--bg-app)]/80 border border-[var(--border-subtle)]">
+                  <span className="text-[var(--accent-primary)] font-bold">→</span>
+                  <span>Set Mutability vs Immutable Frozensets</span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => selectDay(7)}
+                className="w-full mt-2 py-3 rounded-xl bg-[var(--accent-primary)] hover:bg-[var(--accent-hover)] text-[var(--accent-on)] font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-colors"
+              >
+                <span>Continue to Day 7: Sets</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
