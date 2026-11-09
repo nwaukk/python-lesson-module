@@ -149,10 +149,20 @@ export const QuizModal: React.FC<Props> = ({ assessment, onClose }) => {
                 {currentQuestion.options.map((opt) => {
                   const isSelected = answers[currentQuestion.id] === opt.id;
                   return (
-                    <div
+                    <button
+                      type="button"
                       key={opt.id}
                       onClick={() => handleSelectOption(currentQuestion.id, opt.id)}
-                      className={`p-3.5 rounded-xl border cursor-pointer flex items-center justify-between gap-3 text-xs font-mono transition-all ${
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          handleSelectOption(currentQuestion.id, opt.id);
+                        }
+                      }}
+                      role="radio"
+                      aria-checked={isSelected}
+                      tabIndex={0}
+                      className={`w-full text-left p-3.5 rounded-xl border cursor-pointer flex items-center justify-between gap-3 text-xs font-mono transition-all ${
                         isSelected
                           ? 'border-[var(--accent-primary)] bg-[var(--accent-subtle)] text-[var(--accent-primary)] ring-1 ring-[var(--accent-primary)]'
                           : 'border-[var(--border-subtle)] bg-[var(--bg-app)] text-[var(--text-main)] hover:border-[var(--border-strong)]'
@@ -173,7 +183,7 @@ export const QuizModal: React.FC<Props> = ({ assessment, onClose }) => {
                       >
                         {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                       </div>
-                    </div>
+                    </button>
                   );
                 })}
               </div>

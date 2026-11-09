@@ -178,7 +178,7 @@ export const GlobalSearch: React.FC<Props> = ({ isOpen, onClose }) => {
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-semibold text-[var(--text-main)]">{item.title}</span>
-                        <span className="text-[10px] px-1.5 py-0.2 rounded-full uppercase tracking-wider font-semibold border border-[var(--border-subtle)] text-[var(--text-dim)]">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-md uppercase tracking-wider font-semibold border border-[var(--border-subtle)] text-[var(--text-dim)]">
                           {item.badge}
                         </span>
                       </div>

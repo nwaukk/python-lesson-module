@@ -46,7 +46,9 @@ export type SimulationPrimitiveType =
   | 'venn-diagram-simulator'
   | 'hash-set-table-inspector'
   | 'compact-dict-memory-inspector'
-  | 'dict-mutation-flow-sim';
+  | 'dict-mutation-flow-sim'
+  | 'grade-boundaries'
+  | 'truthiness-sorter';
 
 export interface SimulationRef {
   type: SimulationPrimitiveType;

@@ -287,7 +287,7 @@ export const AppearanceStudio: React.FC = () => {
                     );
                   })}
                   {/* Custom Hex Picker */}
-                  <label className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-xs cursor-pointer">
+                  <label className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-xs cursor-pointer">
                     <input
                       type="color"
                       value={settings.customColors.accent}
@@ -904,7 +904,7 @@ export const AppearanceStudio: React.FC = () => {
           <div className="mt-8 pt-5 border-t border-[var(--border-subtle)]">
             <div className="flex items-center justify-between mb-3">
               <span className="eyebrow-label">Live Appearance Preview</span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--accent-subtle)] text-[var(--accent-primary)] font-bold">
+              <span className="text-[10px] px-2 py-0.5 rounded-md bg-[var(--accent-subtle)] text-[var(--accent-primary)] font-bold">
                 Dynamic
               </span>
             </div>

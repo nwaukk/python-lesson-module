@@ -73,6 +73,8 @@ import { VennDiagramSim } from '../simulation/VennDiagramSim';
 import { HashSetTableSim } from '../simulation/HashSetTableSim';
 import { CompactDictMemorySim } from '../simulation/CompactDictMemorySim';
 import { DictMutationFlowSim } from '../simulation/DictMutationFlowSim';
+import { GradeBoundariesSim } from '../simulation/GradeBoundariesSim';
+import { TruthinessSorterSim } from '../simulation/TruthinessSorterSim';
 import { SimulationController } from '../simulation/SimulationController';
 import { defaultTutor, TutorResponse } from '../coach/tutorProvider';
 
@@ -219,6 +221,10 @@ export const GuidedWorkspace: React.FC = () => {
         return <CompactDictMemorySim />;
       case 'dict-mutation-flow-sim':
         return <DictMutationFlowSim />;
+      case 'grade-boundaries':
+        return <GradeBoundariesSim />;
+      case 'truthiness-sorter':
+        return <TruthinessSorterSim />;
       default:
         return (
           <div className="flex-1 flex flex-col min-h-0 bg-[var(--bg-app)]">

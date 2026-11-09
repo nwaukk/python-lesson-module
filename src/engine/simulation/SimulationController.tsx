@@ -50,6 +50,11 @@ export const SimulationController: React.FC<Props> = ({
 }) => {
   return (
     <div className="px-4 py-2 border-b border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] flex flex-wrap items-center justify-between gap-2 shrink-0">
+      {/* Live Region for Screen Readers */}
+      <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {title} — Step {currentStep} of {totalSteps}
+      </div>
+
       {/* Title & Badge */}
       <div className="flex items-center gap-2">
         <span

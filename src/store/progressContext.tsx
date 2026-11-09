@@ -33,6 +33,8 @@ const DEFAULT_PROGRESS: UserProgress = {
 interface ProgressContextValue {
   progress: UserProgress;
   isFallbackStorage: boolean;
+  isDayCompleted: (day: number) => boolean;
+  toggleDayCompleted: (day: number) => void;
   isSubtopicCompleted: (day: number, subtopic: number) => boolean;
   toggleSubtopicCompleted: (day: number, subtopic: number) => void;
   isSubtopicBookmarked: (day: number, subtopic: number) => boolean;
@@ -83,6 +85,31 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [progress.lastStudiedDate]);
 
+  const isDayCompleted = useCallback(
+    (day: number) => {
+      if (progress.completedDays.includes(day)) return true;
+      let allCompleted = true;
+      for (let s = 0; s < 10; s++) {
+        if (!progress.completedSubtopics.includes(`${day}_${s}`)) {
+          allCompleted = false;
+          break;
+        }
+      }
+      return allCompleted;
+    },
+    [progress.completedDays, progress.completedSubtopics]
+  );
+
+  const toggleDayCompleted = useCallback((day: number) => {
+    setProgress((prev) => {
+      const isCompleted = prev.completedDays.includes(day);
+      const updatedDays = isCompleted
+        ? prev.completedDays.filter((d) => d !== day)
+        : [...prev.completedDays, day];
+      return { ...prev, completedDays: updatedDays };
+    });
+  }, []);
+
   const isSubtopicCompleted = useCallback(
     (day: number, subtopic: number) => {
       return progress.completedSubtopics.includes(`${day}_${subtopic}`);
@@ -94,10 +121,32 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const key = `${day}_${subtopic}`;
     setProgress((prev) => {
       const exists = prev.completedSubtopics.includes(key);
-      const updated = exists
+      const updatedSubtopics = exists
         ? prev.completedSubtopics.filter((k) => k !== key)
         : [...prev.completedSubtopics, key];
-      return { ...prev, completedSubtopics: updated };
+
+      // Auto-sync completedDays
+      let allTenDone = true;
+      for (let s = 0; s < 10; s++) {
+        const subKey = `${day}_${s}`;
+        if (!updatedSubtopics.includes(subKey)) {
+          allTenDone = false;
+          break;
+        }
+      }
+
+      let updatedDays = [...prev.completedDays];
+      if (allTenDone && !updatedDays.includes(day)) {
+        updatedDays.push(day);
+      } else if (!allTenDone && updatedDays.includes(day)) {
+        updatedDays = updatedDays.filter((d) => d !== day);
+      }
+
+      return {
+        ...prev,
+        completedSubtopics: updatedSubtopics,
+        completedDays: updatedDays,
+      };
     });
   }, []);
 
@@ -190,6 +239,8 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     () => ({
       progress,
       isFallbackStorage,
+      isDayCompleted,
+      toggleDayCompleted,
       isSubtopicCompleted,
       toggleSubtopicCompleted,
       isSubtopicBookmarked,
@@ -207,6 +258,8 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     [
       progress,
       isFallbackStorage,
+      isDayCompleted,
+      toggleDayCompleted,
       isSubtopicCompleted,
       toggleSubtopicCompleted,
       isSubtopicBookmarked,

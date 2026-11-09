@@ -80,7 +80,7 @@ export const TopBar: React.FC<Props> = ({ onOpenSearch }) => {
                 <span className="font-bold text-sm tracking-tight text-[var(--text-main)]">
                   Python Visual Lab
                 </span>
-                <span className="text-[10px] px-1.5 py-0.2 rounded-full font-bold bg-[var(--accent-subtle)] text-[var(--accent-primary)] border border-[var(--accent-primary)]/20">
+                <span className="text-[10px] px-1.5 py-0.5 rounded-md font-bold bg-[var(--accent-subtle)] text-[var(--accent-primary)] border border-[var(--accent-primary)]/20">
                   v2.0
                 </span>
               </div>

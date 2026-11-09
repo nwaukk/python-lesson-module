@@ -155,6 +155,20 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const densityMult = settings.density === 'compact' ? '0.85' : settings.density === 'spacious' ? '1.2' : '1.0';
     root.style.setProperty('--spacing-density', densityMult);
 
+    // Motion Mode (Section 6 & Section 12.2)
+    let isReduced = false;
+    if (settings.motionMode === 'reduced' || settings.motionMode === 'off') {
+      isReduced = true;
+    } else if (settings.motionMode === 'system') {
+      isReduced = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }
+    root.setAttribute('data-motion', settings.motionMode);
+    if (isReduced) {
+      root.classList.add('reduce-motion');
+    } else {
+      root.classList.remove('reduce-motion');
+    }
+
     // Body class for dark / light
     if (isDark) {
       document.body.classList.add('dark');

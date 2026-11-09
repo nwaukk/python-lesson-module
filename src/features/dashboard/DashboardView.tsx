@@ -37,7 +37,7 @@ export const DashboardView: React.FC = () => {
             <span className="eyebrow-label text-[11px] text-[var(--accent-primary)] font-bold">
               INTERACTIVE 30 DAYS OF PYTHON
             </span>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--accent-subtle)] text-[var(--accent-primary)] font-bold">
+            <span className="text-xs px-2 py-0.5 rounded-md bg-[var(--accent-subtle)] text-[var(--accent-primary)] font-bold">
               v2.0 Visual Lab
             </span>
           </div>
@@ -169,7 +169,7 @@ export const DashboardView: React.FC = () => {
                     <span className="font-mono text-xs font-bold text-[var(--accent-primary)]">
                       Day {day.number.toString().padStart(2, '0')}
                     </span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-app)] text-[var(--text-dim)]">
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-app)] text-[var(--text-dim)]">
                       {day.estimatedMinutes} mins
                     </span>
                   </div>
@@ -215,7 +215,7 @@ export const DashboardView: React.FC = () => {
                     <span className="font-mono text-xs font-bold text-[var(--accent-primary)]">
                       Day {day.number}
                     </span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-app)] text-[var(--text-dim)]">
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-app)] text-[var(--text-dim)]">
                       {day.estimatedMinutes} mins
                     </span>
                   </div>
@@ -261,7 +261,7 @@ export const DashboardView: React.FC = () => {
                     <span className="font-mono text-xs font-bold text-[var(--accent-primary)]">
                       Day {day.number}
                     </span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-app)] text-[var(--text-dim)]">
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-app)] text-[var(--text-dim)]">
                       {day.estimatedMinutes} mins
                     </span>
                   </div>

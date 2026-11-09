@@ -55,8 +55,25 @@ export const ConsolePanel: React.FC = () => {
         </div>
       </div>
 
-      {/* Output Stream Content */}
-      <div className="flex-1 p-3 overflow-y-auto space-y-2 select-text">
+      {/* Output Stream Content with Live Region Announcement */}
+      <div
+        className="flex-1 p-3 overflow-y-auto space-y-2 select-text"
+        role="region"
+        aria-live="polite"
+        aria-atomic="false"
+        aria-label="Python Terminal Output Stream"
+      >
+        {/* Invisible live region for screen readers */}
+        <div className="sr-only" aria-live="assertive" aria-atomic="true">
+          {isExecuting
+            ? 'Executing Python script...'
+            : lastError
+            ? `Execution failed: ${lastError.name}. ${lastError.friendlyExplanation}`
+            : stdout
+            ? `Python output: ${stdout}`
+            : ''}
+        </div>
+
         {!stdout && !stderr && !isExecuting && (
           <div className="text-[var(--text-dim)] italic py-4 text-center">
             Click "Run Code" or "Step" to execute and see standard output here.

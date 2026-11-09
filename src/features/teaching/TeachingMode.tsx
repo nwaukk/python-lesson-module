@@ -87,7 +87,7 @@ export const TeachingMode: React.FC = () => {
         ) : (
           <div className="max-w-4xl w-full p-8 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl space-y-6">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-mono font-bold px-3 py-1 rounded-full bg-sky-500/15 text-sky-400 border border-sky-500/30">
+              <span className="text-sm font-mono font-bold px-3 py-1 rounded-md bg-sky-500/15 text-sky-400 border border-sky-500/30">
                 Topic {activeSubtopicIndex + 1} of {manifest.subtopicsCount}
               </span>
               <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">

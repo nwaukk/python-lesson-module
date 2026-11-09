@@ -315,7 +315,7 @@ export const DataTypesVisualizerSim: React.FC = () => {
 
             <div className="flex items-center gap-2 shrink-0">
               <span
-                className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${
+                className={`px-2.5 py-1 rounded-md text-[11px] font-bold border ${
                   activeType.isMutable
                     ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
                     : 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'

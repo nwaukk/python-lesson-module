@@ -92,7 +92,7 @@ export const GlossaryView: React.FC = () => {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <h3 className="font-bold text-base text-[var(--text-main)]">{item.term}</h3>
-                <span className="text-[10px] px-2 py-0.5 rounded-full font-mono uppercase bg-[var(--bg-app)] border border-[var(--border-subtle)] text-[var(--text-dim)]">
+                <span className="text-[10px] px-2 py-0.5 rounded-md font-mono uppercase bg-[var(--bg-app)] border border-[var(--border-subtle)] text-[var(--text-dim)]">
                   {item.category}
                 </span>
               </div>

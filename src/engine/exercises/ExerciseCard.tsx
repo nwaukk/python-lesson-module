@@ -228,10 +228,20 @@ export const ExerciseCard: React.FC<Props> = ({ exercise: initialExercise, onGra
                 const showExplanation = isSelected || solutionUnlocked;
 
                 return (
-                  <div
+                  <button
+                    type="button"
                     key={opt.id}
                     onClick={() => handleSelectOption(opt.id)}
-                    className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleSelectOption(opt.id);
+                      }
+                    }}
+                    role="button"
+                    aria-pressed={isSelected}
+                    tabIndex={0}
+                    className={`w-full text-left p-3.5 rounded-xl border cursor-pointer transition-all ${
                       isSelected
                         ? opt.isCorrect
                           ? 'border-emerald-500/40 bg-emerald-500/10'
@@ -268,7 +278,7 @@ export const ExerciseCard: React.FC<Props> = ({ exercise: initialExercise, onGra
                         {opt.explanation}
                       </p>
                     )}
-                  </div>
+                  </button>
                 );
               })}
             </div>

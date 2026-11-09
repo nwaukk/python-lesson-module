@@ -459,7 +459,7 @@ export const LessonRenderer: React.FC<Props> = ({
                     DAY {dayModule.number} COMPREHENSIVE QUIZ
                   </span>
                 </div>
-                <span className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold">
+                <span className="text-xs font-mono px-2.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 font-bold">
                   {dayModule.dayQuiz.questions.length} Questions • 80% to Pass
                 </span>
               </div>
@@ -506,7 +506,7 @@ export const LessonRenderer: React.FC<Props> = ({
                   DAY {dayModule.number} COMPLETE SUMMARY
                 </span>
               </div>
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-[var(--accent-subtle)] text-[var(--accent-primary)] font-bold">
+              <span className="text-xs px-2.5 py-0.5 rounded-md bg-[var(--accent-subtle)] text-[var(--accent-primary)] font-bold">
                 {totalSubtopics} Subtopics • ~{dayModule.estimatedMinutes} Mins Mastered
               </span>
             </div>

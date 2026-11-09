@@ -152,3 +152,32 @@ code, pre, kbd {
   color: #f59e0b;
   border: 1px solid rgba(245, 158, 11, 0.3);
 }
+
+/* Reduced Motion Compliance (Section 6 & Section 12.2) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html.reduce-motion *,
+html.reduce-motion *::before,
+html.reduce-motion *::after,
+html[data-motion='reduced'] *,
+html[data-motion='off'] * {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Safe area insets for mobile viewports (Section 5) */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+

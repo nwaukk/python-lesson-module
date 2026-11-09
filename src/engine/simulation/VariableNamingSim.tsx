@@ -221,7 +221,7 @@ export const VariableNamingSim: React.FC = () => {
             </div>
 
             <span
-              className={`px-3 py-1 rounded-full text-xs font-bold uppercase font-mono border ${
+              className={`px-3 py-1 rounded-md text-xs font-bold uppercase font-mono border ${
                 analysis.status === 'valid'
                   ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
                   : analysis.status === 'pep8_warning'
