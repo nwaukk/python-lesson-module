@@ -75,6 +75,26 @@ import { CompactDictMemorySim } from '../simulation/CompactDictMemorySim';
 import { DictMutationFlowSim } from '../simulation/DictMutationFlowSim';
 import { GradeBoundariesSim } from '../simulation/GradeBoundariesSim';
 import { TruthinessSorterSim } from '../simulation/TruthinessSorterSim';
+import { IterationTimelineSim } from '../simulation/IterationTimelineSim';
+import { RangeSliderSim } from '../simulation/RangeSliderSim';
+import { NestedLoopGridSim } from '../simulation/NestedLoopGridSim';
+import { InfiniteLoopSafetySim } from '../simulation/InfiniteLoopSafetySim';
+import { CallStackFramesSim } from '../simulation/CallStackFramesSim';
+import { ScopeFinderSim } from '../simulation/ScopeFinderSim';
+import { PrintVsReturnSim } from '../simulation/PrintVsReturnSim';
+import { ArgumentMatcherSim } from '../simulation/ArgumentMatcherSim';
+import { ImportSimulatorSim } from '../simulation/ImportSimulatorSim';
+import { ModuleExplorerSim } from '../simulation/ModuleExplorerSim';
+import { SeededRandomLabSim } from '../simulation/SeededRandomLabSim';
+import { ComprehensionPipelineSim } from '../simulation/ComprehensionPipelineSim';
+import { LambdaEvaluatorSim } from '../simulation/LambdaEvaluatorSim';
+import { DictSetCompLabSim } from '../simulation/DictSetCompLabSim';
+import { MapFilterReduceSim } from '../simulation/MapFilterReduceSim';
+import { ClosureScopeSim } from '../simulation/ClosureScopeSim';
+import { DecoratorWrapperSim } from '../simulation/DecoratorWrapperSim';
+import { TracebackAnatomySim } from '../simulation/TracebackAnatomySim';
+import { ErrorClassifierSim } from '../simulation/ErrorClassifierSim';
+import { DebuggingWorkflowSim } from '../simulation/DebuggingWorkflowSim';
 import { SimulationController } from '../simulation/SimulationController';
 import { defaultTutor, TutorResponse } from '../coach/tutorProvider';
 
@@ -225,6 +245,46 @@ export const GuidedWorkspace: React.FC = () => {
         return <GradeBoundariesSim />;
       case 'truthiness-sorter':
         return <TruthinessSorterSim />;
+      case 'iteration-timeline':
+        return <IterationTimelineSim />;
+      case 'range-slider':
+        return <RangeSliderSim />;
+      case 'nested-loop-grid':
+        return <NestedLoopGridSim />;
+      case 'infinite-loop-safety':
+        return <InfiniteLoopSafetySim />;
+      case 'call-stack-frames':
+        return <CallStackFramesSim />;
+      case 'scope-finder':
+        return <ScopeFinderSim />;
+      case 'print-vs-return':
+        return <PrintVsReturnSim />;
+      case 'argument-matcher':
+        return <ArgumentMatcherSim />;
+      case 'import-simulator':
+        return <ImportSimulatorSim />;
+      case 'module-explorer':
+        return <ModuleExplorerSim />;
+      case 'seeded-random-lab':
+        return <SeededRandomLabSim />;
+      case 'comprehension-pipeline':
+        return <ComprehensionPipelineSim />;
+      case 'lambda-evaluator':
+        return <LambdaEvaluatorSim />;
+      case 'dict-set-comp-lab':
+        return <DictSetCompLabSim />;
+      case 'map-filter-reduce-sim':
+        return <MapFilterReduceSim />;
+      case 'closure-scope-sim':
+        return <ClosureScopeSim />;
+      case 'decorator-wrapper-sim':
+        return <DecoratorWrapperSim />;
+      case 'traceback-anatomy-sim':
+        return <TracebackAnatomySim />;
+      case 'error-classifier-sim':
+        return <ErrorClassifierSim />;
+      case 'debugging-workflow-sim':
+        return <DebuggingWorkflowSim />;
       default:
         return (
           <div className="flex-1 flex flex-col min-h-0 bg-[var(--bg-app)]">

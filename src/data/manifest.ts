@@ -132,12 +132,12 @@ export const COURSE_DAYS_MANIFEST: DayManifestItem[] = [
     number: 10,
     title: 'Loops',
     level: 'intermediate',
-    subtopicsCount: 8,
-    estimatedMinutes: 80,
-    summary: 'Iteration mechanics: while loops, for-in loops, range generators, break, continue, pass, and loop else clauses.',
+    subtopicsCount: 9,
+    estimatedMinutes: 85,
+    summary: 'Iteration mechanics: while loops, for-in loops, range generators, break, continue, pass, loop else clauses, and nested loops.',
     sourceUrl: 'https://github.com/Asabeneh/30-Days-Of-Python/tree/master/10_Day_Loops',
     prerequisites: [9],
-    status: 'coming-soon',
+    status: 'available',
     tags: ['Loops', 'Range', 'Iteration', 'Control Flow'],
   },
   {
@@ -149,7 +149,7 @@ export const COURSE_DAYS_MANIFEST: DayManifestItem[] = [
     summary: 'Modular programming: definition, arguments, defaults, *args, **kwargs, return values, call stack frames, and LEGB scope.',
     sourceUrl: 'https://github.com/Asabeneh/30-Days-Of-Python/tree/master/11_Day_Functions',
     prerequisites: [10],
-    status: 'coming-soon',
+    status: 'available',
     tags: ['Functions', 'Call Stack', 'Scope', 'Arguments', 'Recursion'],
   },
   {
@@ -161,7 +161,7 @@ export const COURSE_DAYS_MANIFEST: DayManifestItem[] = [
     summary: 'Code organisation: import syntax, standard library modules (math, random, statistics, datetime), custom modules, and __name__.',
     sourceUrl: 'https://github.com/Asabeneh/30-Days-Of-Python/tree/master/12_Day_Modules',
     prerequisites: [11],
-    status: 'coming-soon',
+    status: 'available',
     tags: ['Modules', 'Imports', 'Standard Library', 'Namespaces'],
   },
   {
@@ -173,7 +173,7 @@ export const COURSE_DAYS_MANIFEST: DayManifestItem[] = [
     summary: 'Concise expressions: list/set/dict comprehensions, conditional filtering, anonymous lambda functions, and anonymous sorting.',
     sourceUrl: 'https://github.com/Asabeneh/30-Days-Of-Python/tree/master/13_Day_List_comprehension',
     prerequisites: [11],
-    status: 'coming-soon',
+    status: 'available',
     tags: ['Comprehensions', 'Lambdas', 'Functional', 'Expressions'],
   },
   {
@@ -185,7 +185,7 @@ export const COURSE_DAYS_MANIFEST: DayManifestItem[] = [
     summary: 'First-class functions: map, filter, reduce pipelines, lexical closures, nonlocal scope, and @decorator wrapping.',
     sourceUrl: 'https://github.com/Asabeneh/30-Days-Of-Python/tree/master/14_Day_Higher_order_functions',
     prerequisites: [11, 13],
-    status: 'coming-soon',
+    status: 'available',
     tags: ['Higher-Order', 'Closures', 'Decorators', 'Pipelines'],
   },
   {
@@ -197,7 +197,7 @@ export const COURSE_DAYS_MANIFEST: DayManifestItem[] = [
     summary: 'Demystifying errors: reading tracebacks, diagnosing SyntaxError, NameError, TypeError, ValueError, KeyError, and debugging.',
     sourceUrl: 'https://github.com/Asabeneh/30-Days-Of-Python/tree/master/15_Day_Python_type_errors',
     prerequisites: [2, 11],
-    status: 'coming-soon',
+    status: 'available',
     tags: ['Exceptions', 'Tracebacks', 'Debugging', 'Error Types'],
   },
   {

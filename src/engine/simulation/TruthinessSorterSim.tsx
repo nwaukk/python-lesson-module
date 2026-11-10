@@ -135,6 +135,8 @@ export const TruthinessSorterSim: React.FC = () => {
         {/* Verification Summary Banner */}
         {isVerified && (
           <div
+            role="status"
+            aria-live="polite"
             className={`p-4 rounded-2xl border flex items-center justify-between text-xs font-sans transition-all ${
               totalCorrect === totalPlaced && unplaced.length === 0
                 ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-200'
@@ -188,6 +190,7 @@ export const TruthinessSorterSim: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => placeItem(item, 'truthy')}
+                      aria-label={`Classify ${item.display} (${item.type}) as Truthy`}
                       className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/30 transition-colors ml-1"
                       title="Classify as Truthy"
                     >
@@ -196,6 +199,7 @@ export const TruthinessSorterSim: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => placeItem(item, 'falsy')}
+                      aria-label={`Classify ${item.display} (${item.type}) as Falsy`}
                       className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-500/15 text-rose-300 hover:bg-rose-500/30 transition-colors"
                       title="Classify as Falsy"
                     >

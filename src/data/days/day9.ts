@@ -2227,7 +2227,140 @@ print("Evaluation Result:", engine.evaluate_applicant(candidate))
       }
     ]
   },
-  cheatSheet: [],
+  cheatSheet: [
+    {
+      category: "Basic if Statement & Indented Suite",
+      syntax: "if condition:\n    statement_1\n    statement_2",
+      description: "Evaluates a boolean test expression. If True, the 4-space indented suite executes. If False, the block is skipped entirely. Single '=' assignment is forbidden inside if headers (SyntaxError); always use '==' for equality.",
+      example: `# 1. Standard equality and comparison
+temperature = 29
+if temperature > 25:
+    print("High temperature alert")
+
+# 2. Mandatory colon and 4-space indentation
+role = "admin"
+if role == "admin":
+    print("Admin dashboard unlocked")`
+    },
+    {
+      category: "Binary Branching (if ... else) & Mutual Exclusion",
+      syntax: "if condition:\n    true_branch()\nelse:\n    false_branch()",
+      description: "Guarantees mutually exclusive binary execution: exactly one branch runs (never both, never neither). The 'else:' clause takes no condition and must align vertically with its matching 'if'.",
+      example: `balance = 12000.0
+withdrawal = 15000.0
+
+if withdrawal <= balance:
+    print("Approved")
+else:
+    print("Declined: Insufficient funds")`
+    },
+    {
+      category: "Multi-Way Sequential Branching (if ... elif ... else)",
+      syntax: "if cond_1:\n    ...\nelif cond_2:\n    ...\nelse:\n    ...",
+      description: "Evaluates conditions strictly from top to bottom. The moment any branch evaluates to True, its block executes and the rest of the ladder is short-circuited and skipped.",
+      example: `http_status = 404
+
+if http_status == 200:
+    msg = "OK"
+elif http_status == 404:
+    msg = "Not Found"
+elif http_status == 500:
+    msg = "Server Error"
+else:
+    msg = "Unknown"`
+    },
+    {
+      category: "Sequential Order & Overlapping Thresholds (WAEC Rule)",
+      syntax: "if x >= 75: ... elif x >= 70: ... elif x >= 40: ...",
+      description: "When testing inclusive minimum thresholds (>= or >), order conditions descending from highest to lowest. Placing lower thresholds first (e.g., >= 40 before >= 75) intercepts high scores and creates unreachable dead code.",
+      example: `# CORRECT: Descending thresholds
+score = 88
+if score >= 75:
+    grade = "A1"
+elif score >= 65:
+    grade = "B3"
+elif score >= 40:
+    grade = "E8"
+else:
+    grade = "F9"`
+    },
+    {
+      category: "Ternary Conditional Expressions (Inline Short-Hand)",
+      syntax: "result = value_if_true if condition else value_if_false",
+      description: "An inline expression (not a statement) that evaluates to a value. The 'else' clause is strictly mandatory. Ideal for concise variable assignments, f-strings, and safe division.",
+      example: `balance = -50.0
+status = "Active" if balance >= 0 else "Overdrawn"
+
+# Safe division guard
+count = 0
+avg = 100 / count if count > 0 else 0.0`
+    },
+    {
+      category: "Nested Conditionals & Flat Guard Clauses",
+      syntax: "if not valid_1: return error_1\nif not valid_2: return error_2\nreturn success()",
+      description: "Deeply nested if blocks ('Pyramid of Doom') increase cyclomatic complexity. Refactor by inverting failure conditions into early-return guard clauses so the happy path remains unindented.",
+      example: `def transfer(has_acct, kyc_ok, bal, amt):
+    if not has_acct:
+        return "ERROR: No account"
+    if not kyc_ok:
+        return "ERROR: KYC required"
+    if bal < amt:
+        return "ERROR: Insufficient funds"
+    return "SUCCESS"`
+    },
+    {
+      category: "Logical Operators (and, or, not) & Precedence",
+      syntax: "not > and > or  |  (cond_a or cond_b) and not cond_c",
+      description: "Combines boolean expressions. Precedence order is 'not' highest, then 'and', then 'or'. Always repeat the variable in 'or' checks (x == 'a' or x == 'b', never x == 'a' or 'b') and use parentheses for clarity.",
+      example: `role = "editor"
+# Correct: explicit variable or membership test
+is_privileged = role == "admin" or role == "superadmin"
+is_privileged_alt = role in ("admin", "superadmin")
+
+# Explicit precedence grouping
+if (is_weekend or is_holiday) and not has_ticket:
+    print("Closed")`
+    },
+    {
+      category: "Short-Circuit Evaluation & Defensive Guarding",
+      syntax: "if guard_check and risky_operation: ...",
+      description: "Python evaluates 'and' / 'or' left-to-right and stops once the result is determined. In 'A and B', if A is falsy, B is never evaluated—protecting against ZeroDivisionError, IndexError, or KeyError.",
+      example: `items = []
+# Safe: len(items) > 0 is False, so items[0] is never accessed!
+if items and items[0] == "ADMIN":
+    print("Admin first")
+
+count = 0
+if count != 0 and (100 / count) > 5:
+    print("Safe division")`
+    },
+    {
+      category: "Python Truth Value Testing (bool() Protocol)",
+      syntax: "Falsy: None, False, 0, 0.0, '', (), [], {}, set(), range(0)",
+      description: "Any object can be tested in an if statement via __bool__() and __len__(). Empty containers and numeric zeros are falsy; all non-zero numbers and non-empty containers (including '0', 'False', and [0]) are truthy.",
+      example: `cart = []
+if not cart:          # Idiomatic PEP 8 check
+    print("Cart empty")
+
+# Classic truthiness traps:
+print(bool("False"))  # True (non-empty str)
+print(bool([0]))      # True (1 element)
+print(bool(" "))      # True (1 whitespace char)`
+    },
+    {
+      category: "Structural Pattern Matching (match / case — Python 3.10+)",
+      syntax: "match subject:\n    case ['CMD', arg] if arg > 0:\n        ...\n    case _:\n        ...",
+      description: "Enrichment (beyond source): Python 3.10+ structural pattern matching destructures sequences, binds variables, and supports 'if' guards. Never falls through—'break' is unnecessary and illegal.",
+      example: `def route(cmd):
+    match cmd:
+        case ["QUIT"]:
+            return "Exiting"
+        case ["FLY", alt] if alt > 0:
+            return f"Climbing to {alt}m"
+        case _:
+            return "Unknown command"`
+    }
+  ],
   sourceNotes: [
     "Source attribution: Asabeneh Yetayeh's '30 Days of Python' (Day 9 - Conditionals).",
     "Covers if, if-else, if-elif-else, conditional expressions (ternary), nested blocks, logical operators (and, or, not), truth value testing (bool protocol), WAEC grade boundaries simulation, and Python 3.10+ match/case enrichment."

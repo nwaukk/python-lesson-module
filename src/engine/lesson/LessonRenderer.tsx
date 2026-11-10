@@ -516,7 +516,9 @@ export const LessonRenderer: React.FC<Props> = ({
                 Day {dayModule.number} Mastery Checklist &amp; Knowledge Wrap-up
               </h3>
               <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                {dayModule.number === 6
+                {dayModule.number === 9
+                  ? 'Congratulations on finishing Day 9! You have mastered Python conditionals from basic if/elif/else branching and WAEC-style descending threshold ordering to ternary expressions, guard clauses, short-circuit protection, the bool() truthiness protocol, and Python 3.10+ match/case pattern matching.'
+                  : dayModule.number === 6
                   ? 'Congratulations on finishing Day 6! You have mastered Python tuples from fixed contiguous pointer tables and the single-element comma rule to strict immutability, extended starred destructuring, atomic swapping, hashable composite dictionary keys, and CPython freelist memory efficiency.'
                   : dayModule.number === 5
                   ? 'Congratulations on finishing Day 5! You have mastered Python lists from CPython dynamic array pointer tables and memory over-allocation to in-place slice splicing, all 11 core methods, Timsort mechanics, and shallow vs deep copying.'
@@ -551,7 +553,34 @@ export const LessonRenderer: React.FC<Props> = ({
                 Key Technical Vocabulary
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                {dayModule.number === 6 ? (
+                {dayModule.number === 9 ? (
+                  <>
+                    <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="font-bold text-[var(--text-main)]">Sequential elif Short-Circuit</div>
+                      <div className="text-[var(--text-muted)] text-[11px]">Conditions evaluate top-to-bottom; the first True branch executes and bypasses all remaining clauses.</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="font-bold text-[var(--text-main)]">Descending Threshold Rule</div>
+                      <div className="text-[var(--text-muted)] text-[11px]">Test highest &gt;= thresholds first (e.g., 75 before 40) so broad lower checks do not create dead code.</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="font-bold text-[var(--text-main)]">Guard Clauses</div>
+                      <div className="text-[var(--text-muted)] text-[11px]">Early-return defensive checks that reject invalid states up front to flatten deep nesting.</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="font-bold text-[var(--text-main)]">Ternary Expression</div>
+                      <div className="text-[var(--text-muted)] text-[11px]">Inline value_if_true if cond else value_if_false expression requiring a mandatory else clause.</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="font-bold text-[var(--text-main)]">Short-Circuit Guarding</div>
+                      <div className="text-[var(--text-muted)] text-[11px]">and stops on falsy; or stops on truthy—preventing ZeroDivisionError and IndexError on the right.</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="font-bold text-[var(--text-main)]">Truthiness &amp; bool() Protocol</div>
+                      <div className="text-[var(--text-muted)] text-[11px]">Empty containers &amp; 0 are falsy; non-empty containers &amp; strings (&apos;False&apos;, [0]) are truthy.</div>
+                    </div>
+                  </>
+                ) : dayModule.number === 6 ? (
                   <>
                     <div className="p-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--border-subtle)]">
                       <div className="font-bold text-[var(--text-main)]">PyTupleObject Pointers</div>

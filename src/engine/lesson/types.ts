@@ -48,7 +48,27 @@ export type SimulationPrimitiveType =
   | 'compact-dict-memory-inspector'
   | 'dict-mutation-flow-sim'
   | 'grade-boundaries'
-  | 'truthiness-sorter';
+  | 'truthiness-sorter'
+  | 'iteration-timeline'
+  | 'range-slider'
+  | 'nested-loop-grid'
+  | 'infinite-loop-safety'
+  | 'call-stack-frames'
+  | 'scope-finder'
+  | 'print-vs-return'
+  | 'argument-matcher'
+  | 'import-simulator'
+  | 'module-explorer'
+  | 'seeded-random-lab'
+  | 'comprehension-pipeline'
+  | 'lambda-evaluator'
+  | 'dict-set-comp-lab'
+  | 'map-filter-reduce-sim'
+  | 'closure-scope-sim'
+  | 'decorator-wrapper-sim'
+  | 'traceback-anatomy-sim'
+  | 'error-classifier-sim'
+  | 'debugging-workflow-sim';
 
 export interface SimulationRef {
   type: SimulationPrimitiveType;

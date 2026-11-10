@@ -87,9 +87,10 @@ export const GradeBoundariesSim: React.FC = () => {
           {/* Order Toggle */}
           <div className="p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-3">
             <span className="eyebrow-label text-xs">ELIF CHAIN ORDER MODE</span>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2" role="group" aria-label="Elif Chain Order Mode">
               <button
                 type="button"
+                aria-pressed={mode === 'correct'}
                 onClick={() => setMode('correct')}
                 className={`px-3 py-2.5 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-2 ${
                   mode === 'correct'
@@ -103,6 +104,7 @@ export const GradeBoundariesSim: React.FC = () => {
 
               <button
                 type="button"
+                aria-pressed={mode === 'broken'}
                 onClick={() => setMode('broken')}
                 className={`px-3 py-2.5 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-2 ${
                   mode === 'broken'
@@ -119,16 +121,19 @@ export const GradeBoundariesSim: React.FC = () => {
           {/* Score Slider */}
           <div className="p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-2">
             <div className="flex items-center justify-between">
-              <span className="eyebrow-label text-xs">CANDIDATE EXAM SCORE</span>
+              <label htmlFor="waec-score-slider" className="eyebrow-label text-xs">CANDIDATE EXAM SCORE</label>
               <span className="font-mono text-base font-extrabold text-[var(--accent-primary)]">
                 {score} / 100
               </span>
             </div>
             <input
+              id="waec-score-slider"
               type="range"
               min="0"
               max="100"
               value={score}
+              aria-label="Candidate Exam Score"
+              aria-valuetext={`${score} out of 100 — Grade ${activeGrade}`}
               onChange={(e) => setScore(parseInt(e.target.value, 10))}
               className="w-full accent-[var(--accent-primary)] cursor-pointer"
             />
@@ -145,6 +150,8 @@ export const GradeBoundariesSim: React.FC = () => {
 
         {/* Verdict Banner */}
         <div
+          role="status"
+          aria-live="polite"
           className={`p-4 rounded-2xl border flex items-center justify-between gap-4 transition-all ${
             isMisgraded
               ? 'border-rose-500/50 bg-rose-500/15 text-rose-200'
