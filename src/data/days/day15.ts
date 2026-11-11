@@ -1217,7 +1217,65 @@ def process_batch(records):
       },
     ],
   },
-  cheatSheet: [],
+  cheatSheet: [
+    {
+      category: 'Reading Tracebacks Bottom-Up (most recent call last)',
+      syntax: 'Traceback (most recent call last):\n  File "...", line N, in fn\nExceptionType: message',
+      description: 'Read tracebacks from the bottom Exception line upward. The bottom frame is where the error surfaced; callers above show where invalid data entered.',
+      example: `try:
+    int("bad")
+except ValueError as err:
+    print(type(err).__name__, "->", err)`,
+    },
+    {
+      category: 'SyntaxError & IndentationError (Parse-Time)',
+      syntax: 'if cond:\n    stmt  # 4-space indent',
+      description: 'Grammar and indentation errors are caught by Python’s parser before any line executes (so try/except in the same file cannot catch them). Always check line N-1 for unclosed ( or [.',
+      example: `src = "x = (1 + 2)"
+compile(src, "<check>", "exec")
+print("Syntax valid!")`,
+    },
+    {
+      category: 'NameError & UnboundLocalError (Scope & Naming)',
+      syntax: 'name = "default"  # init before if\ndef fn(x): return x + 1',
+      description: 'NameError means an identifier is missing in LEGB scopes (typo or uninitialized branch). UnboundLocalError occurs when a function reads a variable before assigning to it locally.',
+      example: `status = "guest"
+if True:
+    status = "admin"
+print(status)`,
+    },
+    {
+      category: 'TypeError vs ValueError',
+      syntax: 'TypeError:  int(None) / "5" + 2\nValueError: int("abc") / math.sqrt(-1)',
+      description: 'TypeError = wrong object type (or shadowing built-ins like list = [...]). ValueError = right type (e.g., str), but unparseable or out-of-domain content.',
+      example: `def safe_int(v, default=0):
+    try:
+        return int(v)
+    except (ValueError, TypeError):
+        return default`,
+    },
+    {
+      category: 'IndexError, KeyError & AttributeError',
+      syntax: 'd.get("key", default)\nitems[-1] if items else None',
+      description: 'IndexError = out-of-bounds subscript; KeyError = missing dict key; AttributeError on NoneType = chaining onto an in-place method (like list.sort()) that returns None.',
+      example: `cfg = {"port": 8080}
+print(cfg.get("host", "localhost"))`,
+    },
+    {
+      category: 'ZeroDivisionError, ImportError & ModuleNotFoundError',
+      syntax: 'avg = sum(xs) / len(xs) if xs else 0.0',
+      description: 'Guard denominators before /, //, or %. ModuleNotFoundError means the module is missing on sys.path; ImportError means the module exists but the requested symbol does not.',
+      example: `def safe_pct(part, total):
+    return round(part / total * 100, 1) if total else 0.0`,
+    },
+    {
+      category: 'Systematic Debugging Workflow (repr, type, assert)',
+      syntax: 'print(repr(x), type(x).__name__)\nassert cond, "diagnostic"',
+      description: 'Follow Reproduce -> Isolate -> Inspect (repr/type) -> Fix -> Verify. repr() exposes hidden quotes and trailing whitespace; never silence bugs with bare except: pass.',
+      example: `x = "42 "
+print(repr(x), type(x).__name__)  # '42 ' str`,
+    },
+  ],
   sourceNotes: [
     'Primary curriculum reference: Asabeneh Yetayeh, 30 Days of Python — Day 15: Python Type Errors (https://github.com/Asabeneh/30-Days-Of-Python/tree/master/15_Day_Python_type_errors).',
     'Enhanced with bottom-up traceback reading, compile-time vs runtime classification, TypeError vs ValueError contrast, and repr()/type() debugging.',

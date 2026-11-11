@@ -209,7 +209,7 @@ export const COURSE_DAYS_MANIFEST: DayManifestItem[] = [
     summary: 'Temporal calculations: datetime, date, time, timedelta, strftime formatting, strptime parsing, and time zones (including WAT).',
     sourceUrl: 'https://github.com/Asabeneh/30-Days-Of-Python/tree/master/16_Day_Python_date_time',
     prerequisites: [12],
-    status: 'coming-soon',
+    status: 'available',
     tags: ['Datetime', 'Timedelta', 'Time Zones', 'Formatting'],
   },
   {
@@ -221,7 +221,7 @@ export const COURSE_DAYS_MANIFEST: DayManifestItem[] = [
     summary: 'Robust Python: try, except, else, finally blocks, raising custom errors, * unpacking operators, enumerate indexing, and zip pairing.',
     sourceUrl: 'https://github.com/Asabeneh/30-Days-Of-Python/tree/master/17_Day_Exception_handling',
     prerequisites: [15],
-    status: 'coming-soon',
+    status: 'available',
     tags: ['Try-Except', 'Unpacking', 'Zip', 'Enumerate', 'Error Handling'],
   },
   {
@@ -233,7 +233,7 @@ export const COURSE_DAYS_MANIFEST: DayManifestItem[] = [
     summary: 'Pattern matching with re: match, search, findall, sub, metacharacters, character classes, quantifiers, groups, and phone/email extraction.',
     sourceUrl: 'https://github.com/Asabeneh/30-Days-Of-Python/tree/master/18_Day_Regular_expressions',
     prerequisites: [4],
-    status: 'coming-soon',
+    status: 'available',
     tags: ['Regex', 'Pattern Matching', 'Extraction', 'Validation'],
   },
   {
@@ -245,7 +245,7 @@ export const COURSE_DAYS_MANIFEST: DayManifestItem[] = [
     summary: 'File I/O: open modes (r, w, a, x), with context managers, file cursors (seek, tell), JSON parsing, and CSV processing.',
     sourceUrl: 'https://github.com/Asabeneh/30-Days-Of-Python/tree/master/19_Day_File_handling',
     prerequisites: [8, 17],
-    status: 'coming-soon',
+    status: 'available',
     tags: ['Files', 'Context Managers', 'JSON', 'CSV', 'I/O'],
   },
   {
@@ -257,7 +257,7 @@ export const COURSE_DAYS_MANIFEST: DayManifestItem[] = [
     summary: 'Packaging ecosystem: PyPI, pip installation, requirements.txt, semantic versioning, and package inspection.',
     sourceUrl: 'https://github.com/Asabeneh/30-Days-Of-Python/tree/master/20_Day_Python_package_manager',
     prerequisites: [12],
-    status: 'coming-soon',
+    status: 'available',
     tags: ['Pip', 'PyPI', 'Dependencies', 'Requirements'],
   },
 
@@ -271,7 +271,7 @@ export const COURSE_DAYS_MANIFEST: DayManifestItem[] = [
     summary: 'Object-Oriented Programming: classes, __init__, self, instance vs class attributes, inheritance, polymorphism, and dunder methods.',
     sourceUrl: 'https://github.com/Asabeneh/30-Days-Of-Python/tree/master/21_Day_Classes_and_objects',
     prerequisites: [11],
-    status: 'coming-soon',
+    status: 'available',
     tags: ['OOP', 'Classes', 'Inheritance', 'Polymorphism', 'Dunder Methods'],
   },
   {
@@ -283,7 +283,7 @@ export const COURSE_DAYS_MANIFEST: DayManifestItem[] = [
     summary: 'HTML parsing: DOM tree traversal, CSS selectors, BeautifulSoup concepts, data extraction, ethics, and robots.txt.',
     sourceUrl: 'https://github.com/Asabeneh/30-Days-Of-Python/tree/master/22_Day_Web_scraping',
     prerequisites: [19],
-    status: 'coming-soon',
+    status: 'available',
     tags: ['Web Scraping', 'HTML', 'DOM', 'BeautifulSoup', 'Ethics'],
   },
   {

@@ -68,7 +68,28 @@ export type SimulationPrimitiveType =
   | 'decorator-wrapper-sim'
   | 'traceback-anatomy-sim'
   | 'error-classifier-sim'
-  | 'debugging-workflow-sim';
+  | 'debugging-workflow-sim'
+  | 'datetime-parts-sim'
+  | 'strftime-strptime-sim'
+  | 'timezone-timedelta-sim'
+  | 'try-except-flow-sim'
+  | 'packing-unpacking-sim'
+  | 'enumerate-zip-sim'
+  | 'regex-methods-sim'
+  | 'regex-quantifier-sim'
+  | 'regex-groups-sim'
+  | 'file-modes-sim'
+  | 'file-cursor-sim'
+  | 'structured-io-sim'
+  | 'pip-lifecycle-sim'
+  | 'semver-resolver-sim'
+  | 'package-anatomy-sim'
+  | 'class-instance-sim'
+  | 'inheritance-mro-sim'
+  | 'dunder-property-sim'
+  | 'dom-tree-sim'
+  | 'css-selector-sim'
+  | 'scraping-ethics-sim';
 
 export interface SimulationRef {
   type: SimulationPrimitiveType;

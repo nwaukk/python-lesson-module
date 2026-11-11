@@ -95,6 +95,27 @@ import { DecoratorWrapperSim } from '../simulation/DecoratorWrapperSim';
 import { TracebackAnatomySim } from '../simulation/TracebackAnatomySim';
 import { ErrorClassifierSim } from '../simulation/ErrorClassifierSim';
 import { DebuggingWorkflowSim } from '../simulation/DebuggingWorkflowSim';
+import { DatetimePartsSim } from '../simulation/DatetimePartsSim';
+import { StrftimeStrptimeSim } from '../simulation/StrftimeStrptimeSim';
+import { TimezoneTimedeltaSim } from '../simulation/TimezoneTimedeltaSim';
+import { TryExceptFlowSim } from '../simulation/TryExceptFlowSim';
+import { PackingUnpackingSim } from '../simulation/PackingUnpackingSim';
+import { EnumerateZipSim } from '../simulation/EnumerateZipSim';
+import { RegexMethodsSim } from '../simulation/RegexMethodsSim';
+import { RegexQuantifierSim } from '../simulation/RegexQuantifierSim';
+import { RegexGroupsSim } from '../simulation/RegexGroupsSim';
+import { FileModesSim } from '../simulation/FileModesSim';
+import { FileCursorSim } from '../simulation/FileCursorSim';
+import { StructuredIoSim } from '../simulation/StructuredIoSim';
+import { PipLifecycleSim } from '../simulation/PipLifecycleSim';
+import { SemverResolverSim } from '../simulation/SemverResolverSim';
+import { PackageAnatomySim } from '../simulation/PackageAnatomySim';
+import { ClassInstanceSim } from '../simulation/ClassInstanceSim';
+import { InheritanceMroSim } from '../simulation/InheritanceMroSim';
+import { DunderPropertySim } from '../simulation/DunderPropertySim';
+import { DomTreeSim } from '../simulation/DomTreeSim';
+import { CssSelectorSim } from '../simulation/CssSelectorSim';
+import { ScrapingEthicsSim } from '../simulation/ScrapingEthicsSim';
 import { SimulationController } from '../simulation/SimulationController';
 import { defaultTutor, TutorResponse } from '../coach/tutorProvider';
 
@@ -285,6 +306,48 @@ export const GuidedWorkspace: React.FC = () => {
         return <ErrorClassifierSim />;
       case 'debugging-workflow-sim':
         return <DebuggingWorkflowSim />;
+      case 'datetime-parts-sim':
+        return <DatetimePartsSim />;
+      case 'strftime-strptime-sim':
+        return <StrftimeStrptimeSim />;
+      case 'timezone-timedelta-sim':
+        return <TimezoneTimedeltaSim />;
+      case 'try-except-flow-sim':
+        return <TryExceptFlowSim />;
+      case 'packing-unpacking-sim':
+        return <PackingUnpackingSim />;
+      case 'enumerate-zip-sim':
+        return <EnumerateZipSim />;
+      case 'regex-methods-sim':
+        return <RegexMethodsSim />;
+      case 'regex-quantifier-sim':
+        return <RegexQuantifierSim />;
+      case 'regex-groups-sim':
+        return <RegexGroupsSim />;
+      case 'file-modes-sim':
+        return <FileModesSim />;
+      case 'file-cursor-sim':
+        return <FileCursorSim />;
+      case 'structured-io-sim':
+        return <StructuredIoSim />;
+      case 'pip-lifecycle-sim':
+        return <PipLifecycleSim />;
+      case 'semver-resolver-sim':
+        return <SemverResolverSim />;
+      case 'package-anatomy-sim':
+        return <PackageAnatomySim />;
+      case 'class-instance-sim':
+        return <ClassInstanceSim />;
+      case 'inheritance-mro-sim':
+        return <InheritanceMroSim />;
+      case 'dunder-property-sim':
+        return <DunderPropertySim />;
+      case 'dom-tree-sim':
+        return <DomTreeSim />;
+      case 'css-selector-sim':
+        return <CssSelectorSim />;
+      case 'scraping-ethics-sim':
+        return <ScrapingEthicsSim />;
       default:
         return (
           <div className="flex-1 flex flex-col min-h-0 bg-[var(--bg-app)]">
