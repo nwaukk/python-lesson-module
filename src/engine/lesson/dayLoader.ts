@@ -29,6 +29,13 @@ import { DAY_19_MODULE } from '../../data/days/day19';
 import { DAY_20_MODULE } from '../../data/days/day20';
 import { DAY_21_MODULE } from '../../data/days/day21';
 import { DAY_22_MODULE } from '../../data/days/day22';
+import { DAY_23_MODULE } from '../../data/days/day23';
+import { DAY_24_MODULE } from '../../data/days/day24';
+import { DAY_25_MODULE } from '../../data/days/day25';
+import { DAY_26_MODULE } from '../../data/days/day26';
+import { DAY_27_MODULE } from '../../data/days/day27';
+import { DAY_28_MODULE } from '../../data/days/day28';
+import { DAY_29_MODULE } from '../../data/days/day29';
 
 export function getDayModule(dayNumber: number): DayModule {
   if (dayNumber === 0) {
@@ -147,7 +154,42 @@ export function getDayModule(dayNumber: number): DayModule {
     return DAY_22_MODULE;
   }
 
-  // Placeholder module for Days 23–30
+  // If Day 23, return the fully authored DAY_23_MODULE
+  if (dayNumber === 23) {
+    return DAY_23_MODULE;
+  }
+
+  // If Day 24, return the fully authored DAY_24_MODULE
+  if (dayNumber === 24) {
+    return DAY_24_MODULE;
+  }
+
+  // If Day 25, return the fully authored DAY_25_MODULE
+  if (dayNumber === 25) {
+    return DAY_25_MODULE;
+  }
+
+  // If Day 26, return the fully authored DAY_26_MODULE
+  if (dayNumber === 26) {
+    return DAY_26_MODULE;
+  }
+
+  // If Day 27, return the fully authored DAY_27_MODULE
+  if (dayNumber === 27) {
+    return DAY_27_MODULE;
+  }
+
+  // If Day 28, return the fully authored DAY_28_MODULE
+  if (dayNumber === 28) {
+    return DAY_28_MODULE;
+  }
+
+  // If Day 29, return the fully authored DAY_29_MODULE
+  if (dayNumber === 29) {
+    return DAY_29_MODULE;
+  }
+
+  // Placeholder module for Day 30
   return {
     schemaVersion: 1,
     number: dayNumber,

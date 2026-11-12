@@ -295,7 +295,7 @@ export const COURSE_DAYS_MANIFEST: DayManifestItem[] = [
     summary: 'Project isolation: python -m venv, activation scripts on Windows/macOS/Linux, dependency isolation, and freeze workflows.',
     sourceUrl: 'https://github.com/Asabeneh/30-Days-Of-Python/tree/master/23_Day_Virtual_environment',
     prerequisites: [20],
-    status: 'coming-soon',
+    status: 'available',
     tags: ['Venv', 'Isolation', 'Environments', 'Tooling'],
   },
   {
@@ -307,7 +307,7 @@ export const COURSE_DAYS_MANIFEST: DayManifestItem[] = [
     summary: 'Numerical computing: descriptive statistics, NumPy ndarrays, multidimensional slicing, vectorisation, broadcasting, and matrix math.',
     sourceUrl: 'https://github.com/Asabeneh/30-Days-Of-Python/tree/master/24_Day_Statistics',
     prerequisites: [5, 12],
-    status: 'coming-soon',
+    status: 'available',
     tags: ['NumPy', 'Statistics', 'Arrays', 'Broadcasting', 'Vectorisation'],
   },
   {
@@ -319,7 +319,7 @@ export const COURSE_DAYS_MANIFEST: DayManifestItem[] = [
     summary: 'Data analysis: Series, DataFrames, indexing with loc/iloc, boolean masks, handling missing data, groupby aggregations, and joins.',
     sourceUrl: 'https://github.com/Asabeneh/30-Days-Of-Python/tree/master/25_Day_Pandas',
     prerequisites: [24],
-    status: 'coming-soon',
+    status: 'available',
     tags: ['Pandas', 'DataFrames', 'Data Wrangling', 'GroupBy', 'Analysis'],
   },
   {
@@ -331,7 +331,7 @@ export const COURSE_DAYS_MANIFEST: DayManifestItem[] = [
     summary: 'Web architectures: WSGI, Flask routes, HTTP methods (GET, POST), Jinja2 templating, and form handling simulation.',
     sourceUrl: 'https://github.com/Asabeneh/30-Days-Of-Python/tree/master/26_Day_Python_web',
     prerequisites: [11, 21],
-    status: 'coming-soon',
+    status: 'available',
     tags: ['Flask', 'Web', 'Routes', 'Templates', 'Jinja2'],
   },
   {
@@ -343,7 +343,7 @@ export const COURSE_DAYS_MANIFEST: DayManifestItem[] = [
     summary: 'NoSQL document databases: collections, BSON documents, PyMongo operations (CRUD), query operators, and schema design.',
     sourceUrl: 'https://github.com/Asabeneh/30-Days-Of-Python/tree/master/27_Day_Python_with_mongodb',
     prerequisites: [8, 19],
-    status: 'coming-soon',
+    status: 'available',
     tags: ['MongoDB', 'NoSQL', 'PyMongo', 'CRUD', 'Documents'],
   },
   {
@@ -355,7 +355,7 @@ export const COURSE_DAYS_MANIFEST: DayManifestItem[] = [
     summary: 'Consuming APIs: HTTP verbs, status codes, query strings, authentication headers, requests client simulation, and CORS.',
     sourceUrl: 'https://github.com/Asabeneh/30-Days-Of-Python/tree/master/28_Day_API',
     prerequisites: [19, 26],
-    status: 'coming-soon',
+    status: 'available',
     tags: ['APIs', 'HTTP', 'Requests', 'REST', 'Endpoints'],
   },
   {
@@ -367,7 +367,7 @@ export const COURSE_DAYS_MANIFEST: DayManifestItem[] = [
     summary: 'RESTful API construction: resource modelling, HTTP status codes, JSON serialization, payload validation, and idempotency.',
     sourceUrl: 'https://github.com/Asabeneh/30-Days-Of-Python/tree/master/29_Day_Building_API',
     prerequisites: [26, 28],
-    status: 'coming-soon',
+    status: 'available',
     tags: ['REST API', 'Flask API', 'Endpoints', 'Validation', 'Serialization'],
   },
   {

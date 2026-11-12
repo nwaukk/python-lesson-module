@@ -89,7 +89,28 @@ export type SimulationPrimitiveType =
   | 'dunder-property-sim'
   | 'dom-tree-sim'
   | 'css-selector-sim'
-  | 'scraping-ethics-sim';
+  | 'scraping-ethics-sim'
+  | 'venv-isolation-sim'
+  | 'venv-activation-sim'
+  | 'freeze-workflow-sim'
+  | 'ndarray-shape-sim'
+  | 'broadcasting-axis-sim'
+  | 'vectorised-stats-sim'
+  | 'dataframe-loc-iloc-sim'
+  | 'missing-data-sim'
+  | 'groupby-merge-sim'
+  | 'flask-routing-sim'
+  | 'jinja-template-sim'
+  | 'http-form-redirect-sim'
+  | 'mongodb-crud-sim'
+  | 'mongodb-query-sim'
+  | 'mongodb-agg-schema-sim'
+  | 'api-http-lifecycle-sim'
+  | 'api-requests-client-sim'
+  | 'api-auth-cors-sim'
+  | 'api-builder-router-sim'
+  | 'api-validation-serialization-sim'
+  | 'api-idempotency-pagination-sim';
 
 export interface SimulationRef {
   type: SimulationPrimitiveType;

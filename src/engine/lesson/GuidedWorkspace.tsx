@@ -116,6 +116,27 @@ import { DunderPropertySim } from '../simulation/DunderPropertySim';
 import { DomTreeSim } from '../simulation/DomTreeSim';
 import { CssSelectorSim } from '../simulation/CssSelectorSim';
 import { ScrapingEthicsSim } from '../simulation/ScrapingEthicsSim';
+import { VenvIsolationSim } from '../simulation/VenvIsolationSim';
+import { VenvActivationSim } from '../simulation/VenvActivationSim';
+import { FreezeWorkflowSim } from '../simulation/FreezeWorkflowSim';
+import { NdarrayShapeSim } from '../simulation/NdarrayShapeSim';
+import { BroadcastingAxisSim } from '../simulation/BroadcastingAxisSim';
+import { VectorisedStatsSim } from '../simulation/VectorisedStatsSim';
+import { DataFrameLocIlocSim } from '../simulation/DataFrameLocIlocSim';
+import { MissingDataSim } from '../simulation/MissingDataSim';
+import { GroupByMergeSim } from '../simulation/GroupByMergeSim';
+import { FlaskRoutingSim } from '../simulation/FlaskRoutingSim';
+import { JinjaTemplateSim } from '../simulation/JinjaTemplateSim';
+import { HttpFormRedirectSim } from '../simulation/HttpFormRedirectSim';
+import { MongoDbCrudSim } from '../simulation/MongoDbCrudSim';
+import { MongoDbQuerySim } from '../simulation/MongoDbQuerySim';
+import { MongoDbAggSchemaSim } from '../simulation/MongoDbAggSchemaSim';
+import { ApiHttpLifecycleSim } from '../simulation/ApiHttpLifecycleSim';
+import { ApiRequestsClientSim } from '../simulation/ApiRequestsClientSim';
+import { ApiAuthCorsSim } from '../simulation/ApiAuthCorsSim';
+import { ApiBuilderRouterSim } from '../simulation/ApiBuilderRouterSim';
+import { ApiValidationSerializationSim } from '../simulation/ApiValidationSerializationSim';
+import { ApiIdempotencyPaginationSim } from '../simulation/ApiIdempotencyPaginationSim';
 import { SimulationController } from '../simulation/SimulationController';
 import { defaultTutor, TutorResponse } from '../coach/tutorProvider';
 
@@ -348,6 +369,48 @@ export const GuidedWorkspace: React.FC = () => {
         return <CssSelectorSim />;
       case 'scraping-ethics-sim':
         return <ScrapingEthicsSim />;
+      case 'venv-isolation-sim':
+        return <VenvIsolationSim />;
+      case 'venv-activation-sim':
+        return <VenvActivationSim />;
+      case 'freeze-workflow-sim':
+        return <FreezeWorkflowSim />;
+      case 'ndarray-shape-sim':
+        return <NdarrayShapeSim />;
+      case 'broadcasting-axis-sim':
+        return <BroadcastingAxisSim />;
+      case 'vectorised-stats-sim':
+        return <VectorisedStatsSim />;
+      case 'dataframe-loc-iloc-sim':
+        return <DataFrameLocIlocSim />;
+      case 'missing-data-sim':
+        return <MissingDataSim />;
+      case 'groupby-merge-sim':
+        return <GroupByMergeSim />;
+      case 'flask-routing-sim':
+        return <FlaskRoutingSim />;
+      case 'jinja-template-sim':
+        return <JinjaTemplateSim />;
+      case 'http-form-redirect-sim':
+        return <HttpFormRedirectSim />;
+      case 'mongodb-crud-sim':
+        return <MongoDbCrudSim />;
+      case 'mongodb-query-sim':
+        return <MongoDbQuerySim />;
+      case 'mongodb-agg-schema-sim':
+        return <MongoDbAggSchemaSim />;
+      case 'api-http-lifecycle-sim':
+        return <ApiHttpLifecycleSim />;
+      case 'api-requests-client-sim':
+        return <ApiRequestsClientSim />;
+      case 'api-auth-cors-sim':
+        return <ApiAuthCorsSim />;
+      case 'api-builder-router-sim':
+        return <ApiBuilderRouterSim />;
+      case 'api-validation-serialization-sim':
+        return <ApiValidationSerializationSim />;
+      case 'api-idempotency-pagination-sim':
+        return <ApiIdempotencyPaginationSim />;
       default:
         return (
           <div className="flex-1 flex flex-col min-h-0 bg-[var(--bg-app)]">

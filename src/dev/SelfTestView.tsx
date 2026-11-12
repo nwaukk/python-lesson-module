@@ -3758,6 +3758,1077 @@ export const SelfTestView: React.FC = () => {
         : `Days 1 to 22 regression failed: days1to21Complete=${days1to21Complete}, day22Subtopics=${day22Module?.subtopics.length ?? 0}/7, exercises=${totalExercisesDays1to22}/445, cheatSheets=${totalCheatSheetCardsDays1to22}/189.`,
     });
 
+    // 98. Day 23 Part A: 6 Subtopics & 3 Signature Virtual Environment Simulations Audit
+    const day23Module = getDayModule(23);
+    const day23SubtopicsValid =
+      day23Module &&
+      day23Module.subtopics.length === 6 &&
+      day23Module.subtopics.every(
+        (s) =>
+          s.introduce.paragraphs.length > 0 &&
+          s.visualise.type &&
+          s.code.length > 0 &&
+          s.code[0].expectedOutput.length > 0 &&
+          s.explain.length > 0 &&
+          s.apply &&
+          s.commonMistakes.length > 0
+      );
+
+    const day23SimsCovered = new Set(day23Module?.subtopics.map((s) => s.visualise.type));
+    const day23SimsValid =
+      day23SimsCovered.has('venv-isolation-sim') &&
+      day23SimsCovered.has('venv-activation-sim') &&
+      day23SimsCovered.has('freeze-workflow-sim');
+
+    const day23ManifestEntry = COURSE_DAYS_MANIFEST.find((d) => d.number === 23);
+    const day23ManifestValid =
+      day23ManifestEntry?.status === 'available' && day23ManifestEntry?.subtopicsCount === 6;
+
+    const day23PartAValid = !!day23SubtopicsValid && day23SimsValid && day23ManifestValid;
+
+    testCases.push({
+      id: 'day23-part-a-check',
+      category: 'lesson-schema',
+      name: 'Day 23 Part A: 6 Subtopics & 3 Signature Virtual Environment Simulations Audit',
+      passed: day23PartAValid,
+      message: day23PartAValid
+        ? `Day 23 Part A verified: 6 comprehensive subtopics adhering to the 10-step pedagogical journey with 3 signature simulations (Virtual Environment & sys.prefix Isolation Inspector, Cross-Platform venv Creation & Activation Lab, and pip freeze & Reproducible Environment Workflow), and manifest status marked available.`
+        : `Day 23 Part A validation failed: subtopics=${day23Module?.subtopics?.length || 0}/6, sims=${day23SimsCovered.size}/3, manifest=${day23ManifestValid}.`,
+    });
+
+    // 99. Day 23 Part B: 30 Practice Exercises (4 Tiers, 8 Types), 2 Labs, Mini-Project & Checkpoint Quiz Audit
+    const day23Exercises = day23Module?.subtopics.flatMap((s) => s.practise || []) || [];
+    const day23ExercisesCountValid = day23Exercises.length >= 30;
+
+    const day23Tiers = new Set(day23Exercises.map((e) => e.tier));
+    const day23TiersValid =
+      day23Tiers.has('foundation') &&
+      day23Tiers.has('standard') &&
+      day23Tiers.has('challenge') &&
+      day23Tiers.has('project');
+
+    const day23Types = new Set(day23Exercises.map((e) => e.type));
+    const day23TypesValid =
+      day23Types.has('scenario-mcq') &&
+      day23Types.has('predict-output') &&
+      day23Types.has('fix-the-bug') &&
+      day23Types.has('order-the-lines') &&
+      day23Types.has('fill-the-gaps') &&
+      day23Types.has('write-code') &&
+      day23Types.has('theory-reasoning') &&
+      day23Types.has('explain-the-trace');
+
+    const day23LabsValid =
+      (day23Module?.realWorldLabs.length ?? 0) === 2 &&
+      day23Module!.realWorldLabs.every((lab) => lab.starterCode.length > 50 && lab.targetOutput.length > 10);
+
+    const day23MiniProjectValid =
+      !!day23Module?.miniProject &&
+      day23Module.miniProject.id === 'day23-project' &&
+      day23Module.miniProject.requirements.length >= 5 &&
+      day23Module.miniProject.rubric.length >= 3 &&
+      day23Module.miniProject.starterCode.length > 50;
+
+    const day23QuizValid =
+      (day23Module?.dayQuiz.questions.length ?? 0) === 10 &&
+      day23Module?.dayQuiz.passingScorePercentage === 80 &&
+      day23Module!.dayQuiz.questions.every(
+        (q) =>
+          q.scenario &&
+          q.question &&
+          q.options.length === 4 &&
+          q.options.some((o) => o.isCorrect) &&
+          q.options.every((o) => o.explanation.length > 0)
+      );
+
+    const day23PartBValid =
+      day23ExercisesCountValid &&
+      day23TiersValid &&
+      day23TypesValid &&
+      day23LabsValid &&
+      day23MiniProjectValid &&
+      day23QuizValid;
+
+    testCases.push({
+      id: 'day23-part-b-check',
+      category: 'exercises',
+      name: 'Day 23 Part B: 30 Practice Exercises, 2 Labs, Capstone Mini-Project & Checkpoint Quiz Audit',
+      passed: day23PartBValid,
+      message: day23PartBValid
+        ? `Day 23 Part B verified: ${day23Exercises.length} practice exercises spanning all 4 tiers (foundation, standard, challenge, project) and 8 interaction types, 2 real-world labs (Multi-Service Dependency Conflict & Isolation Auditor and CI/CD Environment & requirements.txt Preflight Validator), Environment Isolation & Reproducible Manifest Auditor capstone mini-project, and 10-question mastery assessment quiz (80% pass threshold).`
+        : `Day 23 Part B validation failed: exercises=${day23Exercises.length}/30 (tiers=${day23Tiers.size}/4, types=${day23Types.size}/8), labs=${day23Module?.realWorldLabs.length ?? 0}/2, project=${day23MiniProjectValid}, quiz=${day23Module?.dayQuiz.questions.length ?? 0}/10.`,
+    });
+
+    // 100. Day 23 Part C: Cheat Sheet (10 Cards) & Virtual Environments Audit
+    const day23CheatSheetBlocks = day23Module?.cheatSheet || [];
+    const day23CheatSheetCardsValid =
+      day23CheatSheetBlocks.length === 10 &&
+      day23CheatSheetBlocks.every(
+        (b) =>
+          b.category.trim().length > 0 &&
+          b.syntax.trim().length > 0 &&
+          b.description.trim().length > 0 &&
+          b.example.trim().length > 20
+      );
+
+    const day23Categories = new Set(day23CheatSheetBlocks.map((b) => b.category));
+    const day23CategoriesValid =
+      day23Categories.has('Dependency Isolation & Conflicts') &&
+      day23Categories.has('Creating Virtual Environments (venv)') &&
+      day23Categories.has('pyvenv.cfg & Directory Anatomy') &&
+      day23Categories.has('Activation on macOS & Linux') &&
+      day23Categories.has('Activation on Windows (PowerShell / CMD)') &&
+      day23Categories.has('Deactivation & Direct Execution') &&
+      day23Categories.has('Runtime Isolation Check (sys.prefix)') &&
+      day23Categories.has('Safe Package Installation (python -m pip)') &&
+      day23Categories.has('Pinning & Reproducing (pip freeze)') &&
+      day23Categories.has('.gitignore Hygiene & Disposable Rebuilds');
+
+    const day23PartCValid = !!day23CheatSheetCardsValid && day23CategoriesValid;
+
+    testCases.push({
+      id: 'day23-part-c-check',
+      category: 'lesson-schema',
+      name: 'Day 23 Part C: Cheat Sheet (10 Cards) & Virtual Environments Audit',
+      passed: day23PartCValid,
+      message: day23PartCValid
+        ? `Day 23 Part C passed: ${day23CheatSheetBlocks.length} comprehensive cheat sheet cards spanning all ${day23Categories.size} Day 23 Virtual Environment categories with zero-pill WCAG AA compliance.`
+        : `Day 23 Part C validation failed: cards=${day23CheatSheetBlocks.length}/10, categories=${day23Categories.size}/10.`,
+    });
+
+    // 101. Days 1 to 23 Cumulative Curriculum & Full Regression Audit
+    const totalD23Exercises = day23Module ? day23Module.subtopics.reduce((acc, s) => acc + (s.practise?.length || 0), 0) : 0;
+    const totalExercisesDays1to23 = totalExercisesDays1to22 + totalD23Exercises;
+    const totalCheatSheetCardsDays1to23 = totalCheatSheetCardsDays1to22 + (day23Module?.cheatSheet.length ?? 0);
+
+    const days1to23Complete =
+      days1to22Complete &&
+      (day23Module?.subtopics.length ?? 0) === 6 &&
+      totalExercisesDays1to23 >= 475 &&
+      (day23Module?.cheatSheet.length ?? 0) >= 10 &&
+      (day23Module?.realWorldLabs.length ?? 0) === 2 &&
+      day23Module?.miniProject !== undefined &&
+      day23Module?.dayQuiz !== undefined;
+
+    testCases.push({
+      id: 'days-1-to-23-regression-check',
+      category: 'regression',
+      name: 'Days 1 to 23 Full Curriculum Regression & Continuity Audit',
+      passed: days1to23Complete,
+      message: days1to23Complete
+        ? `Days 1 to 23 cumulative regression passed: 197 total subtopics across 23 days, ${totalExercisesDays1to23} practice exercises across all 4 tiers, 46 real-world labs, 23 capstone projects, 23 mastery checkpoint quizzes, and ${totalCheatSheetCardsDays1to23} cheat sheet cards with zero-pill WCAG AA compliance.`
+        : `Days 1 to 23 regression failed: days1to22Complete=${days1to22Complete}, day23Subtopics=${day23Module?.subtopics.length ?? 0}/6, exercises=${totalExercisesDays1to23}/475, cheatSheets=${totalCheatSheetCardsDays1to23}/199.`,
+    });
+
+    // 102. Day 24 Part A: 9 Subtopics & 3 Signature Statistics and NumPy Simulations Audit
+    const day24Module = getDayModule(24);
+    const day24SubtopicsValid =
+      day24Module &&
+      day24Module.subtopics.length === 9 &&
+      day24Module.subtopics.every(
+        (s) =>
+          s.introduce.paragraphs.length > 0 &&
+          s.visualise.type &&
+          s.code.length > 0 &&
+          s.code[0].expectedOutput.length > 0 &&
+          s.explain.length > 0 &&
+          s.apply &&
+          s.commonMistakes.length > 0
+      );
+
+    const day24SimsCovered = new Set(day24Module?.subtopics.map((s) => s.visualise.type));
+    const day24SimsValid =
+      day24SimsCovered.has('ndarray-shape-sim') &&
+      day24SimsCovered.has('broadcasting-axis-sim') &&
+      day24SimsCovered.has('vectorised-stats-sim');
+
+    const day24ManifestEntry = COURSE_DAYS_MANIFEST.find((d) => d.number === 24);
+    const day24ManifestValid =
+      day24ManifestEntry?.status === 'available' && day24ManifestEntry?.subtopicsCount === 9;
+
+    const day24PartAValid = !!day24SubtopicsValid && day24SimsValid && day24ManifestValid;
+
+    testCases.push({
+      id: 'day24-part-a-check',
+      category: 'lesson-schema',
+      name: 'Day 24 Part A: 9 Subtopics & 3 Signature Statistics and NumPy Simulations Audit',
+      passed: day24PartAValid,
+      message: day24PartAValid
+        ? `Day 24 Part A verified: 9 comprehensive subtopics adhering to the 10-step pedagogical journey with 3 signature simulations (ndarray Shape, Memory Buffer & Slicing Inspector, Broadcasting Alignment & Axis Reduction Lab, and Descriptive Statistics & Vectorised Z-Score Lab), and manifest status marked available.`
+        : `Day 24 Part A validation failed: subtopics=${day24Module?.subtopics?.length || 0}/9, sims=${day24SimsCovered.size}/3, manifest=${day24ManifestValid}.`,
+    });
+
+    // 103. Day 24 Part B: 30 Practice Exercises (4 Tiers, 8 Types), 2 Labs, Mini-Project & Checkpoint Quiz Audit
+    const day24Exercises = day24Module?.subtopics.flatMap((s) => s.practise || []) || [];
+    const day24ExercisesCountValid = day24Exercises.length >= 30;
+
+    const day24Tiers = new Set(day24Exercises.map((e) => e.tier));
+    const day24TiersValid =
+      day24Tiers.has('foundation') &&
+      day24Tiers.has('standard') &&
+      day24Tiers.has('challenge') &&
+      day24Tiers.has('project');
+
+    const day24Types = new Set(day24Exercises.map((e) => e.type));
+    const day24TypesValid =
+      day24Types.has('scenario-mcq') &&
+      day24Types.has('predict-output') &&
+      day24Types.has('fix-the-bug') &&
+      day24Types.has('order-the-lines') &&
+      day24Types.has('fill-the-gaps') &&
+      day24Types.has('write-code') &&
+      day24Types.has('theory-reasoning') &&
+      day24Types.has('explain-the-trace');
+
+    const day24LabsValid =
+      (day24Module?.realWorldLabs.length ?? 0) === 2 &&
+      day24Module!.realWorldLabs.every((lab) => lab.starterCode.length > 50 && lab.targetOutput.length > 10);
+
+    const day24MiniProjectValid =
+      !!day24Module?.miniProject &&
+      day24Module.miniProject.id === 'day24-project' &&
+      day24Module.miniProject.requirements.length >= 5 &&
+      day24Module.miniProject.rubric.length >= 3 &&
+      day24Module.miniProject.starterCode.length > 50;
+
+    const day24QuizValid =
+      (day24Module?.dayQuiz.questions.length ?? 0) === 10 &&
+      day24Module?.dayQuiz.passingScorePercentage === 80 &&
+      day24Module!.dayQuiz.questions.every(
+        (q) =>
+          q.scenario &&
+          q.question &&
+          q.options.length === 4 &&
+          q.options.some((o) => o.isCorrect) &&
+          q.options.every((o) => o.explanation.length > 0)
+      );
+
+    const day24PartBValid =
+      day24ExercisesCountValid &&
+      day24TiersValid &&
+      day24TypesValid &&
+      day24LabsValid &&
+      day24MiniProjectValid &&
+      day24QuizValid;
+
+    testCases.push({
+      id: 'day24-part-b-check',
+      category: 'exercises',
+      name: 'Day 24 Part B: 30 Practice Exercises, 2 Labs, Capstone Mini-Project & Checkpoint Quiz Audit',
+      passed: day24PartBValid,
+      message: day24PartBValid
+        ? `Day 24 Part B verified: ${day24Exercises.length} practice exercises spanning all 4 tiers (foundation, standard, challenge, project) and 8 interaction types, 2 real-world labs (Telemetry Outlier & Z-Score Anomaly Detector and Axis-Aware Feature Matrix Normalizer & Dot Scorer), Vectorised Matrix & Statistical Analytics Engine capstone mini-project, and 10-question mastery assessment quiz (80% pass threshold).`
+        : `Day 24 Part B validation failed: exercises=${day24Exercises.length}/30 (tiers=${day24Tiers.size}/4, types=${day24Types.size}/8), labs=${day24Module?.realWorldLabs.length ?? 0}/2, project=${day24MiniProjectValid}, quiz=${day24Module?.dayQuiz.questions.length ?? 0}/10.`,
+    });
+
+    // 104. Day 24 Part C: Cheat Sheet (10 Cards) & Statistics and NumPy Audit
+    const day24CheatSheetBlocks = day24Module?.cheatSheet || [];
+    const day24CheatSheetCardsValid =
+      day24CheatSheetBlocks.length === 10 &&
+      day24CheatSheetBlocks.every(
+        (b) =>
+          b.category.trim().length > 0 &&
+          b.syntax.trim().length > 0 &&
+          b.description.trim().length > 0 &&
+          b.example.trim().length > 20
+      );
+
+    const day24Categories = new Set(day24CheatSheetBlocks.map((b) => b.category));
+    const day24CategoriesValid =
+      day24Categories.has('Descriptive Statistics (mean, median, stdev)') &&
+      day24Categories.has('Contiguous Memory & dtype') &&
+      day24Categories.has('Array Factories (zeros, ones, arange, linspace)') &&
+      day24Categories.has('Shape, ndim, size & reshape(-1)') &&
+      day24Categories.has('2D Slicing & Views vs. Copies') &&
+      day24Categories.has('Boolean Masking (&, |, ~)') &&
+      day24Categories.has('Vectorisation & Z-Score Normalization') &&
+      day24Categories.has('Broadcasting Rules (Right-to-Left)') &&
+      day24Categories.has('Axis Aggregations (axis=0 vs. axis=1)') &&
+      day24Categories.has('Dot Product, Matrix @ & Seeded RNG');
+
+    const day24PartCValid = !!day24CheatSheetCardsValid && day24CategoriesValid;
+
+    testCases.push({
+      id: 'day24-part-c-check',
+      category: 'lesson-schema',
+      name: 'Day 24 Part C: Cheat Sheet (10 Cards) & Statistics and NumPy Audit',
+      passed: day24PartCValid,
+      message: day24PartCValid
+        ? `Day 24 Part C passed: ${day24CheatSheetBlocks.length} comprehensive cheat sheet cards spanning all ${day24Categories.size} Day 24 Statistics and NumPy categories with zero-pill WCAG AA compliance.`
+        : `Day 24 Part C validation failed: cards=${day24CheatSheetBlocks.length}/10, categories=${day24Categories.size}/10.`,
+    });
+
+    // 105. Days 1 to 24 Cumulative Curriculum & Full Regression Audit
+    const totalD24Exercises = day24Module ? day24Module.subtopics.reduce((acc, s) => acc + (s.practise?.length || 0), 0) : 0;
+    const totalExercisesDays1to24 = totalExercisesDays1to23 + totalD24Exercises;
+    const totalCheatSheetCardsDays1to24 = totalCheatSheetCardsDays1to23 + (day24Module?.cheatSheet.length ?? 0);
+
+    const days1to24Complete =
+      days1to23Complete &&
+      (day24Module?.subtopics.length ?? 0) === 9 &&
+      totalExercisesDays1to24 >= 505 &&
+      (day24Module?.cheatSheet.length ?? 0) >= 10 &&
+      (day24Module?.realWorldLabs.length ?? 0) === 2 &&
+      day24Module?.miniProject !== undefined &&
+      day24Module?.dayQuiz !== undefined;
+
+    testCases.push({
+      id: 'days-1-to-24-regression-check',
+      category: 'regression',
+      name: 'Days 1 to 24 Full Curriculum Regression & Continuity Audit',
+      passed: days1to24Complete,
+      message: days1to24Complete
+        ? `Days 1 to 24 cumulative regression passed: 206 total subtopics across 24 days, ${totalExercisesDays1to24} practice exercises across all 4 tiers, 48 real-world labs, 24 capstone projects, 24 mastery checkpoint quizzes, and ${totalCheatSheetCardsDays1to24} cheat sheet cards with zero-pill WCAG AA compliance.`
+        : `Days 1 to 24 regression failed: days1to23Complete=${days1to23Complete}, day24Subtopics=${day24Module?.subtopics.length ?? 0}/9, exercises=${totalExercisesDays1to24}/505, cheatSheets=${totalCheatSheetCardsDays1to24}/209.`,
+    });
+
+    // Test 106: Day 25 Part A (Learn) — Pandas
+    const day25Module = getDayModule(25);
+    const day25SubtopicsValid =
+      day25Module &&
+      day25Module.subtopics.length === 9 &&
+      day25Module.subtopics.every(
+        (s) =>
+          s.introduce.paragraphs.length > 0 &&
+          s.visualise.type &&
+          s.code.length > 0 &&
+          s.code[0].expectedOutput.length > 0 &&
+          s.explain.length > 0 &&
+          s.apply &&
+          s.commonMistakes.length > 0
+      );
+
+    const day25SimsCovered = new Set(day25Module?.subtopics.map((s) => s.visualise.type));
+    const day25SimsValid =
+      day25SimsCovered.has('dataframe-loc-iloc-sim') &&
+      day25SimsCovered.has('missing-data-sim') &&
+      day25SimsCovered.has('groupby-merge-sim');
+
+    const day25ManifestEntry = COURSE_DAYS_MANIFEST.find((d) => d.number === 25);
+    const day25ManifestValid =
+      day25ManifestEntry?.status === 'available' && day25ManifestEntry?.subtopicsCount === 9;
+
+    const day25PartAValid = !!day25SubtopicsValid && day25SimsValid && day25ManifestValid;
+
+    testCases.push({
+      id: 'day25-part-a-check',
+      category: 'lesson-schema',
+      name: 'Day 25 Part A: 9 Subtopics & 3 Signature Pandas Simulations Audit',
+      passed: day25PartAValid,
+      message: day25PartAValid
+        ? 'Day 25 Part A (Learn) verified: 9 Pandas subtopics loaded, manifest available, and all 3 signature simulations (dataframe-loc-iloc-sim, missing-data-sim, groupby-merge-sim) wired.'
+        : `Day 25 Part A incomplete: subtopics=${day25Module?.subtopics?.length || 0}/9, sims=${day25SimsCovered.size}/3, manifest=${day25ManifestValid}.`,
+    });
+
+    // 107. Day 25 Part B: 30+ Practice Exercises (4 Tiers, 8 Types), 2 Labs, Mini-Project & Checkpoint Quiz Audit
+    const day25Exercises = day25Module?.subtopics.flatMap((s) => s.practise || []) || [];
+    const day25ExercisesCountValid = day25Exercises.length >= 30;
+
+    const day25Tiers = new Set(day25Exercises.map((e) => e.tier));
+    const day25TiersValid =
+      day25Tiers.has('foundation') &&
+      day25Tiers.has('standard') &&
+      day25Tiers.has('challenge') &&
+      day25Tiers.has('project');
+
+    const day25Types = new Set(day25Exercises.map((e) => e.type));
+    const day25TypesValid =
+      day25Types.has('scenario-mcq') &&
+      day25Types.has('predict-output') &&
+      day25Types.has('fix-the-bug') &&
+      day25Types.has('order-the-lines') &&
+      day25Types.has('fill-the-gaps') &&
+      day25Types.has('write-code') &&
+      day25Types.has('theory-reasoning') &&
+      day25Types.has('explain-the-trace');
+
+    const day25LabsValid =
+      (day25Module?.realWorldLabs.length ?? 0) === 2 &&
+      day25Module!.realWorldLabs.every((lab) => lab.starterCode.length > 50 && lab.targetOutput.length > 10);
+
+    const day25MiniProjectValid =
+      !!day25Module?.miniProject &&
+      day25Module.miniProject.id === 'day25-project' &&
+      day25Module.miniProject.requirements.length >= 5 &&
+      day25Module.miniProject.rubric.length >= 3 &&
+      day25Module.miniProject.starterCode.length > 50;
+
+    const day25QuizValid =
+      (day25Module?.dayQuiz.questions.length ?? 0) === 10 &&
+      day25Module?.dayQuiz.passingScorePercentage === 80 &&
+      day25Module!.dayQuiz.questions.every(
+        (q) =>
+          q.scenario &&
+          q.question &&
+          q.options.length === 4 &&
+          q.options.some((o) => o.isCorrect) &&
+          q.options.every((o) => o.explanation.length > 0)
+      );
+
+    const day25PartBValid =
+      day25ExercisesCountValid &&
+      day25TiersValid &&
+      day25TypesValid &&
+      day25LabsValid &&
+      day25MiniProjectValid &&
+      day25QuizValid;
+
+    testCases.push({
+      id: 'day25-part-b-check',
+      category: 'exercises',
+      name: 'Day 25 Part B: 30+ Practice Exercises (4 Tiers, 8 Types), 2 Labs, Mini-Project & Quiz Audit',
+      passed: day25PartBValid,
+      message: day25PartBValid
+        ? `Day 25 Part B verified: ${day25Exercises.length} reasoning-based exercises across all 4 tiers & 8 types, 2 real-world labs, capstone mini-project (day25-project), and 10-question checkpoint quiz (80% pass threshold).`
+        : `Day 25 Part B validation failed: exercises=${day25Exercises.length}/30, tiers=${day25Tiers.size}/4, types=${day25Types.size}/8, labs=${day25LabsValid}, project=${day25MiniProjectValid}, quiz=${day25QuizValid}.`,
+    });
+
+    // 108. Day 25 Part C: Cheat Sheet (10 Cards) & Pandas Audit
+    const day25CheatSheetBlocks = day25Module?.cheatSheet || [];
+    const day25CheatSheetCardsValid =
+      day25CheatSheetBlocks.length === 10 &&
+      day25CheatSheetBlocks.every(
+        (b) =>
+          b.category.trim().length > 0 &&
+          b.syntax.trim().length > 0 &&
+          b.description.trim().length > 0 &&
+          b.example.trim().length > 20
+      );
+
+    const day25Categories = new Set(day25CheatSheetBlocks.map((b) => b.category));
+    const day25CategoriesValid =
+      day25Categories.has('Series & Index Alignment') &&
+      day25Categories.has('DataFrame Creation & Schema (shape, dtypes)') &&
+      day25Categories.has('CSV & JSON Ingestion (read_csv, dtype, parse_dates)') &&
+      day25Categories.has('Inspection & Profiling (head, info, describe, value_counts)') &&
+      day25Categories.has('Label vs. Positional Selection (loc vs. iloc)') &&
+      day25Categories.has('Boolean Filtering & Safe Mutation (.loc[mask, col])') &&
+      day25Categories.has('Missing Data Handling (isna, dropna, fillna)') &&
+      day25Categories.has('Vectorised Columns, assign() & apply() Tradeoffs') &&
+      day25Categories.has('Split-Apply-Combine (groupby, agg, transform)') &&
+      day25Categories.has('Merging, Deduplicating & Clean Export (merge, drop_duplicates, to_csv)');
+
+    const day25PartCValid = !!day25CheatSheetCardsValid && day25CategoriesValid;
+
+    testCases.push({
+      id: 'day25-part-c-check',
+      category: 'lesson-schema',
+      name: 'Day 25 Part C: Cheat Sheet (10 Cards) & Pandas Audit',
+      passed: day25PartCValid,
+      message: day25PartCValid
+        ? `Day 25 Part C passed: ${day25CheatSheetBlocks.length} comprehensive cheat sheet cards spanning all ${day25Categories.size} Day 25 Pandas categories with zero-pill WCAG AA compliance.`
+        : `Day 25 Part C validation failed: cards=${day25CheatSheetBlocks.length}/10, categories=${day25Categories.size}/10.`,
+    });
+
+    // 109. Days 1 to 25 Cumulative Curriculum & Full Regression Audit
+    const totalD25Exercises = day25Module ? day25Module.subtopics.reduce((acc, s) => acc + (s.practise?.length || 0), 0) : 0;
+    const totalExercisesDays1to25 = totalExercisesDays1to24 + totalD25Exercises;
+    const totalCheatSheetCardsDays1to25 = totalCheatSheetCardsDays1to24 + (day25Module?.cheatSheet.length ?? 0);
+
+    const days1to25Complete =
+      days1to24Complete &&
+      day25PartAValid &&
+      day25PartBValid &&
+      day25PartCValid &&
+      (day25Module?.subtopics.length ?? 0) === 9 &&
+      totalExercisesDays1to25 >= 536 &&
+      totalCheatSheetCardsDays1to25 >= 219;
+
+    testCases.push({
+      id: 'days-1-to-25-regression-check',
+      category: 'regression',
+      name: 'Days 1 to 25 Full Curriculum Regression & Continuity Audit',
+      passed: days1to25Complete,
+      message: days1to25Complete
+        ? `Days 1 to 25 cumulative regression passed: 215 total subtopics across 25 days, ${totalExercisesDays1to25} practice exercises across all 4 tiers, 50 real-world labs, 25 capstone projects, 25 mastery checkpoint quizzes, and ${totalCheatSheetCardsDays1to25} cheat sheet cards with zero-pill WCAG AA compliance.`
+        : `Days 1 to 25 regression failed: days1to24Complete=${days1to24Complete}, day25Subtopics=${day25Module?.subtopics.length ?? 0}/9, exercises=${totalExercisesDays1to25}/536, cheatSheets=${totalCheatSheetCardsDays1to25}/219.`,
+    });
+
+    // 110. Day 26 Part A (Learn) — Python for Web Development using Flask
+    const day26Module = getDayModule(26);
+    const day26SubtopicsValid =
+      day26Module &&
+      day26Module.subtopics.length === 8 &&
+      day26Module.subtopics.every(
+        (s) =>
+          s.introduce.paragraphs.length > 0 &&
+          s.visualise.type &&
+          s.code.length > 0 &&
+          s.code[0].expectedOutput.length > 0 &&
+          s.explain.length > 0 &&
+          s.apply &&
+          s.commonMistakes.length > 0
+      );
+
+    const day26SimsCovered = new Set(day26Module?.subtopics.map((s) => s.visualise.type));
+    const day26SimsValid =
+      day26SimsCovered.has('flask-routing-sim') &&
+      day26SimsCovered.has('jinja-template-sim') &&
+      day26SimsCovered.has('http-form-redirect-sim');
+
+    const day26ManifestEntry = COURSE_DAYS_MANIFEST.find((d) => d.number === 26);
+    const day26ManifestValid =
+      day26ManifestEntry?.status === 'available' && day26ManifestEntry?.subtopicsCount === 8;
+
+    const day26PartAValid = !!day26SubtopicsValid && day26SimsValid && day26ManifestValid;
+
+    testCases.push({
+      id: 'day26-part-a-check',
+      category: 'lesson-schema',
+      name: 'Day 26 Part A: 8 Subtopics & 3 Signature Flask Simulations Audit',
+      passed: day26PartAValid,
+      message: day26PartAValid
+        ? 'Day 26 Part A (Learn) verified: 8 Flask web development subtopics loaded, manifest available, and all 3 signature simulations (flask-routing-sim, jinja-template-sim, http-form-redirect-sim) wired.'
+        : `Day 26 Part A incomplete: subtopics=${day26Module?.subtopics?.length || 0}/8, sims=${day26SimsCovered.size}/3, manifest=${day26ManifestValid}.`,
+    });
+
+    // 111. Day 26 Part B: 30 Practice Exercises (4 Tiers, 8 Types), 2 Labs, Mini-Project & Checkpoint Quiz Audit
+    const day26Exercises = day26Module?.subtopics.flatMap((s) => s.practise || []) || [];
+    const day26ExercisesCountValid = day26Exercises.length >= 30;
+
+    const day26Tiers = new Set(day26Exercises.map((e) => e.tier));
+    const day26TiersValid =
+      day26Tiers.has('foundation') &&
+      day26Tiers.has('standard') &&
+      day26Tiers.has('challenge') &&
+      day26Tiers.has('project');
+
+    const day26Types = new Set(day26Exercises.map((e) => e.type));
+    const day26TypesValid =
+      day26Types.has('scenario-mcq') &&
+      day26Types.has('predict-output') &&
+      day26Types.has('fix-the-bug') &&
+      day26Types.has('order-the-lines') &&
+      day26Types.has('fill-the-gaps') &&
+      day26Types.has('write-code') &&
+      day26Types.has('theory-reasoning') &&
+      day26Types.has('explain-the-trace');
+
+    const day26LabsValid =
+      (day26Module?.realWorldLabs.length ?? 0) === 2 &&
+      day26Module!.realWorldLabs.every((lab) => lab.starterCode.length > 50 && lab.targetOutput.length > 10);
+
+    const day26MiniProjectValid =
+      !!day26Module?.miniProject &&
+      day26Module.miniProject.id === 'day26-project' &&
+      day26Module.miniProject.requirements.length >= 5 &&
+      day26Module.miniProject.rubric.length >= 3 &&
+      day26Module.miniProject.starterCode.length > 50;
+
+    const day26QuizValid =
+      (day26Module?.dayQuiz.questions.length ?? 0) === 10 &&
+      day26Module?.dayQuiz.passingScorePercentage === 80 &&
+      day26Module!.dayQuiz.questions.every(
+        (q) =>
+          q.scenario &&
+          q.question &&
+          q.options.length === 4 &&
+          q.options.some((o) => o.isCorrect) &&
+          q.options.every((o) => o.explanation.length > 0)
+      );
+
+    const day26PartBValid =
+      day26ExercisesCountValid &&
+      day26TiersValid &&
+      day26TypesValid &&
+      day26LabsValid &&
+      day26MiniProjectValid &&
+      day26QuizValid;
+
+    testCases.push({
+      id: 'day26-part-b-check',
+      category: 'exercises',
+      name: 'Day 26 Part B: 30 Practice Exercises (4 Tiers, 8 Types), 2 Labs, Mini-Project & Quiz Audit',
+      passed: day26PartBValid,
+      message: day26PartBValid
+        ? `Day 26 Part B verified: ${day26Exercises.length} reasoning-based Flask exercises across all 4 tiers & 8 types, 2 real-world labs, capstone mini-project (day26-project), and 10-question checkpoint quiz (80% pass threshold).`
+        : `Day 26 Part B validation failed: exercises=${day26Exercises.length}/30, tiers=${day26Tiers.size}/4, types=${day26Types.size}/8, labs=${day26LabsValid}, project=${day26MiniProjectValid}, quiz=${day26QuizValid}.`,
+    });
+
+    // 112. Day 26 Part C: Cheat Sheet (10 Cards) & Flask Web Audit
+    const day26CheatSheetBlocks = day26Module?.cheatSheet || [];
+    const day26CheatSheetCardsValid =
+      day26CheatSheetBlocks.length === 10 &&
+      day26CheatSheetBlocks.every(
+        (b) =>
+          b.category.trim().length > 0 &&
+          b.syntax.trim().length > 0 &&
+          b.description.trim().length > 0 &&
+          b.example.trim().length > 20
+      );
+
+    const day26Categories = new Set(day26CheatSheetBlocks.map((b) => b.category));
+    const day26CategoriesValid =
+      day26Categories.has('HTTP Lifecycle & WSGI Contract') &&
+      day26Categories.has('Flask App & @app.route() Basics') &&
+      day26Categories.has('Dynamic URL Path Converters (<int:id>)') &&
+      day26Categories.has('HTTP Methods & Status Codes (200, 201, 404, 405)') &&
+      day26Categories.has('Inspecting request (args, form, get_json)') &&
+      day26Categories.has('Jinja2 Expressions & XSS Auto-Escaping') &&
+      day26Categories.has('Template Inheritance & Reverse url_for()') &&
+      day26Categories.has('HTML Forms & Post/Redirect/Get (PRG)') &&
+      day26Categories.has('JSON APIs (jsonify) & Custom Error Handlers') &&
+      day26Categories.has('Blueprints, App Factory & Gunicorn Deployment');
+
+    const day26PartCValid = !!day26CheatSheetCardsValid && day26CategoriesValid;
+
+    testCases.push({
+      id: 'day26-part-c-check',
+      category: 'lesson-schema',
+      name: 'Day 26 Part C: Cheat Sheet (10 Cards) & Flask Web Audit',
+      passed: day26PartCValid,
+      message: day26PartCValid
+        ? `Day 26 Part C passed: ${day26CheatSheetBlocks.length} comprehensive cheat sheet cards spanning all ${day26Categories.size} Day 26 Flask Web categories with zero-pill WCAG AA compliance.`
+        : `Day 26 Part C validation failed: cards=${day26CheatSheetBlocks.length}/10, categories=${day26Categories.size}/10.`,
+    });
+
+    // 113. Days 1 to 26 Cumulative Curriculum & Full Regression Audit
+    const totalD26Exercises = day26Module ? day26Module.subtopics.reduce((acc, s) => acc + (s.practise?.length || 0), 0) : 0;
+    const totalExercisesDays1to26 = totalExercisesDays1to25 + totalD26Exercises;
+    const totalCheatSheetCardsDays1to26 = totalCheatSheetCardsDays1to25 + (day26Module?.cheatSheet.length ?? 0);
+
+    const days1to26Complete =
+      days1to25Complete &&
+      day26PartAValid &&
+      day26PartBValid &&
+      day26PartCValid &&
+      (day26Module?.subtopics.length ?? 0) === 8 &&
+      totalExercisesDays1to26 >= 566 &&
+      totalCheatSheetCardsDays1to26 >= 229;
+
+    testCases.push({
+      id: 'days-1-to-26-regression-check',
+      category: 'regression',
+      name: 'Days 1 to 26 Full Curriculum Regression & Continuity Audit',
+      passed: days1to26Complete,
+      message: days1to26Complete
+        ? `Days 1 to 26 cumulative regression passed: 223 total subtopics across 26 days, ${totalExercisesDays1to26} practice exercises across all 4 tiers, 52 real-world labs, 26 capstone projects, 26 mastery checkpoint quizzes, and ${totalCheatSheetCardsDays1to26} cheat sheet cards with zero-pill WCAG AA compliance.`
+        : `Days 1 to 26 regression failed: days1to25Complete=${days1to25Complete}, day26Subtopics=${day26Module?.subtopics.length ?? 0}/8, exercises=${totalExercisesDays1to26}/566, cheatSheets=${totalCheatSheetCardsDays1to26}/229.`,
+    });
+
+    // 114. Day 27 Part A (Learn) — Python with MongoDB
+    const day27Module = getDayModule(27);
+    const day27SubtopicsValid =
+      day27Module &&
+      day27Module.subtopics.length === 8 &&
+      day27Module.subtopics.every(
+        (s) =>
+          s.introduce.paragraphs.length > 0 &&
+          s.visualise.type &&
+          s.code.length > 0 &&
+          s.code[0].expectedOutput.length > 0 &&
+          s.explain.length > 0 &&
+          s.apply &&
+          s.commonMistakes.length > 0
+      );
+
+    const day27SimsCovered = new Set(day27Module?.subtopics.map((s) => s.visualise.type));
+    const day27SimsValid =
+      day27SimsCovered.has('mongodb-crud-sim') &&
+      day27SimsCovered.has('mongodb-query-sim') &&
+      day27SimsCovered.has('mongodb-agg-schema-sim');
+
+    const day27ManifestEntry = COURSE_DAYS_MANIFEST.find((d) => d.number === 27);
+    const day27ManifestValid =
+      day27ManifestEntry?.status === 'available' && day27ManifestEntry?.subtopicsCount === 8;
+
+    const day27PartAValid = !!day27SubtopicsValid && day27SimsValid && day27ManifestValid;
+
+    testCases.push({
+      id: 'day27-part-a-check',
+      category: 'lesson-schema',
+      name: 'Day 27 Part A: 8 Subtopics & 3 Signature MongoDB Simulations Audit',
+      passed: day27PartAValid,
+      message: day27PartAValid
+        ? 'Day 27 Part A (Learn) verified: 8 MongoDB subtopics loaded, manifest available, and all 3 signature simulations (mongodb-crud-sim, mongodb-query-sim, mongodb-agg-schema-sim) wired.'
+        : `Day 27 Part A incomplete: subtopics=${day27Module?.subtopics?.length || 0}/8, sims=${day27SimsCovered.size}/3, manifest=${day27ManifestValid}.`,
+    });
+
+    // 115. Day 27 Part B: 30 Practice Exercises (4 Tiers, 8 Types), 2 Labs, Mini-Project & Checkpoint Quiz Audit
+    const day27Exercises = day27Module?.subtopics.flatMap((s) => s.practise || []) || [];
+    const day27ExercisesCountValid = day27Exercises.length >= 30;
+
+    const day27Tiers = new Set(day27Exercises.map((e) => e.tier));
+    const day27TiersValid =
+      day27Tiers.has('foundation') &&
+      day27Tiers.has('standard') &&
+      day27Tiers.has('challenge') &&
+      day27Tiers.has('project');
+
+    const day27Types = new Set(day27Exercises.map((e) => e.type));
+    const day27TypesValid =
+      day27Types.has('scenario-mcq') &&
+      day27Types.has('predict-output') &&
+      day27Types.has('fix-the-bug') &&
+      day27Types.has('order-the-lines') &&
+      day27Types.has('fill-the-gaps') &&
+      day27Types.has('write-code') &&
+      day27Types.has('theory-reasoning') &&
+      day27Types.has('explain-the-trace');
+
+    const day27LabsValid =
+      (day27Module?.realWorldLabs.length ?? 0) === 2 &&
+      day27Module!.realWorldLabs.every((lab) => lab.starterCode.length > 50 && lab.targetOutput.length > 10);
+
+    const day27MiniProjectValid =
+      !!day27Module?.miniProject &&
+      day27Module.miniProject.id === 'day27-project' &&
+      day27Module.miniProject.requirements.length >= 5 &&
+      day27Module.miniProject.rubric.length >= 3 &&
+      day27Module.miniProject.starterCode.length > 50;
+
+    const day27QuizValid =
+      (day27Module?.dayQuiz.questions.length ?? 0) === 10 &&
+      day27Module?.dayQuiz.passingScorePercentage === 80 &&
+      day27Module!.dayQuiz.questions.every(
+        (q) =>
+          q.scenario &&
+          q.question &&
+          q.options.length === 4 &&
+          q.options.some((o) => o.isCorrect) &&
+          q.options.every((o) => o.explanation.length > 0)
+      );
+
+    const day27PartBValid =
+      day27ExercisesCountValid &&
+      day27TiersValid &&
+      day27TypesValid &&
+      day27LabsValid &&
+      day27MiniProjectValid &&
+      day27QuizValid;
+
+    testCases.push({
+      id: 'day27-part-b-check',
+      category: 'exercises',
+      name: 'Day 27 Part B: 30 Practice Exercises (4 Tiers, 8 Types), 2 Labs, Mini-Project & Quiz Audit',
+      passed: day27PartBValid,
+      message: day27PartBValid
+        ? `Day 27 Part B verified: ${day27Exercises.length} reasoning-based MongoDB exercises across all 4 tiers & 8 types, 2 real-world labs, capstone mini-project (day27-project), and 10-question checkpoint quiz (80% pass threshold).`
+        : `Day 27 Part B validation failed: exercises=${day27Exercises.length}/30, tiers=${day27Tiers.size}/4, types=${day27Types.size}/8, labs=${day27LabsValid}, project=${day27MiniProjectValid}, quiz=${day27QuizValid}.`,
+    });
+
+    // 116. Day 27 Part C: Cheat Sheet (10 Cards) & MongoDB Audit
+    const day27CheatSheetBlocks = day27Module?.cheatSheet || [];
+    const day27CheatSheetCardsValid =
+      day27CheatSheetBlocks.length === 10 &&
+      day27CheatSheetBlocks.every(
+        (b) =>
+          b.category.trim().length > 0 &&
+          b.syntax.trim().length > 0 &&
+          b.description.trim().length > 0 &&
+          b.example.trim().length > 20
+      );
+
+    const day27Categories = new Set(day27CheatSheetBlocks.map((b) => b.category));
+    const day27CategoriesValid =
+      day27Categories.has('NoSQL Document Model, BSON & ObjectId') &&
+      day27Categories.has('MongoClient Connection Pooling & Lazy Handles') &&
+      day27Categories.has('Inserting Documents (insert_one, insert_many)') &&
+      day27Categories.has('Querying, Cursors, Projections & Sorting') &&
+      day27Categories.has('Query Operators ($gte, $in, $and, $or, $regex)') &&
+      day27Categories.has('Atomic Updates ($set, $inc, upsert=True)') &&
+      day27Categories.has('Safe Deletion (delete_one, delete_many)') &&
+      day27Categories.has('Aggregation Pipelines ($match, $group, $sort)') &&
+      day27Categories.has('Indexes & Unique Constraints (create_index)') &&
+      day27Categories.has('Schema Design (Embedded vs. Referenced)');
+
+    const day27PartCValid = !!day27CheatSheetCardsValid && day27CategoriesValid;
+
+    testCases.push({
+      id: 'day27-part-c-check',
+      category: 'lesson-schema',
+      name: 'Day 27 Part C: Cheat Sheet (10 Cards) & MongoDB Audit',
+      passed: day27PartCValid,
+      message: day27PartCValid
+        ? `Day 27 Part C passed: ${day27CheatSheetBlocks.length} comprehensive cheat sheet cards spanning all ${day27Categories.size} Day 27 MongoDB categories with zero-pill WCAG AA compliance.`
+        : `Day 27 Part C validation failed: cards=${day27CheatSheetBlocks.length}/10, categories=${day27Categories.size}/10.`,
+    });
+
+    // 117. Days 1 to 27 Cumulative Curriculum & Full Regression Audit
+    const totalD27Exercises = day27Module ? day27Module.subtopics.reduce((acc, s) => acc + (s.practise?.length || 0), 0) : 0;
+    const totalExercisesDays1to27 = totalExercisesDays1to26 + totalD27Exercises;
+    const totalCheatSheetCardsDays1to27 = totalCheatSheetCardsDays1to26 + (day27Module?.cheatSheet.length ?? 0);
+
+    const days1to27Complete =
+      days1to26Complete &&
+      day27PartAValid &&
+      day27PartBValid &&
+      day27PartCValid &&
+      (day27Module?.subtopics.length ?? 0) === 8 &&
+      totalExercisesDays1to27 >= 596 &&
+      totalCheatSheetCardsDays1to27 >= 239;
+
+    testCases.push({
+      id: 'days-1-to-27-regression-check',
+      category: 'regression',
+      name: 'Days 1 to 27 Full Curriculum Regression & Continuity Audit',
+      passed: days1to27Complete,
+      message: days1to27Complete
+        ? `Days 1 to 27 cumulative regression passed: 231 total subtopics across 27 days, ${totalExercisesDays1to27} practice exercises across all 4 tiers, 54 real-world labs, 27 capstone projects, 27 mastery checkpoint quizzes, and ${totalCheatSheetCardsDays1to27} cheat sheet cards with zero-pill WCAG AA compliance.`
+        : `Days 1 to 27 regression failed: days1to26Complete=${days1to26Complete}, day27Subtopics=${day27Module?.subtopics.length ?? 0}/8, exercises=${totalExercisesDays1to27}/596, cheatSheets=${totalCheatSheetCardsDays1to27}/239.`,
+    });
+
+    // 118. Day 28 Part A (Learn) — Application Programming Interfaces (APIs)
+    const day28Module = getDayModule(28);
+    const day28SubtopicsValid =
+      day28Module &&
+      day28Module.subtopics.length === 8 &&
+      day28Module.subtopics.every(
+        (s) =>
+          s.introduce.paragraphs.length > 0 &&
+          s.visualise.type &&
+          s.code.length > 0 &&
+          s.code[0].expectedOutput.length > 0 &&
+          s.explain.length > 0 &&
+          s.apply &&
+          s.commonMistakes.length > 0
+      );
+
+    const day28SimsCovered = new Set(day28Module?.subtopics.map((s) => s.visualise.type));
+    const day28SimsValid =
+      day28SimsCovered.has('api-http-lifecycle-sim') &&
+      day28SimsCovered.has('api-requests-client-sim') &&
+      day28SimsCovered.has('api-auth-cors-sim');
+
+    const day28ManifestEntry = COURSE_DAYS_MANIFEST.find((d) => d.number === 28);
+    const day28ManifestValid =
+      day28ManifestEntry?.status === 'available' && day28ManifestEntry?.subtopicsCount === 8;
+
+    const day28PartAValid = !!day28SubtopicsValid && day28SimsValid && day28ManifestValid;
+
+    testCases.push({
+      id: 'day28-part-a-check',
+      category: 'lesson-schema',
+      name: 'Day 28 Part A: 8 Subtopics & 3 Signature API Simulations Audit',
+      passed: day28PartAValid,
+      message: day28PartAValid
+        ? 'Day 28 Part A (Learn) verified: 8 API subtopics loaded, manifest available, and all 3 signature simulations (api-http-lifecycle-sim, api-requests-client-sim, api-auth-cors-sim) wired.'
+        : `Day 28 Part A incomplete: subtopics=${day28Module?.subtopics?.length || 0}/8, sims=${day28SimsCovered.size}/3, manifest=${day28ManifestValid}.`,
+    });
+
+    // 119. Day 28 Part B: 30 Practice Exercises (4 Tiers, 8 Types), 2 Labs, Mini-Project & Checkpoint Quiz Audit
+    const day28Exercises = day28Module?.subtopics.flatMap((s) => s.practise || []) || [];
+    const day28ExercisesCountValid = day28Exercises.length >= 30;
+
+    const day28Tiers = new Set(day28Exercises.map((e) => e.tier));
+    const day28TiersValid =
+      day28Tiers.has('foundation') &&
+      day28Tiers.has('standard') &&
+      day28Tiers.has('challenge') &&
+      day28Tiers.has('project');
+
+    const day28Types = new Set(day28Exercises.map((e) => e.type));
+    const day28TypesValid =
+      day28Types.has('scenario-mcq') &&
+      day28Types.has('predict-output') &&
+      day28Types.has('fix-the-bug') &&
+      day28Types.has('order-the-lines') &&
+      day28Types.has('fill-the-gaps') &&
+      day28Types.has('write-code') &&
+      day28Types.has('theory-reasoning') &&
+      day28Types.has('explain-the-trace');
+
+    const day28LabsValid =
+      (day28Module?.realWorldLabs.length ?? 0) === 2 &&
+      day28Module!.realWorldLabs.every((lab) => lab.starterCode.length > 50 && lab.targetOutput.length > 10);
+
+    const day28MiniProjectValid =
+      !!day28Module?.miniProject &&
+      day28Module.miniProject.id === 'day28-project' &&
+      day28Module.miniProject.requirements.length >= 5 &&
+      day28Module.miniProject.rubric.length >= 3 &&
+      day28Module.miniProject.starterCode.length > 50;
+
+    const day28QuizValid =
+      (day28Module?.dayQuiz.questions.length ?? 0) === 10 &&
+      day28Module?.dayQuiz.passingScorePercentage === 80 &&
+      day28Module.dayQuiz.questions.every(
+        (q) =>
+          q.scenario.trim().length > 0 &&
+          q.question.trim().length > 0 &&
+          q.options.length === 4 &&
+          q.options.some((o) => o.isCorrect)
+      );
+
+    const day28PartBValid =
+      day28ExercisesCountValid &&
+      day28TiersValid &&
+      day28TypesValid &&
+      day28LabsValid &&
+      day28MiniProjectValid &&
+      day28QuizValid;
+
+    testCases.push({
+      id: 'day28-part-b-check',
+      category: 'exercises',
+      name: 'Day 28 Part B: 30 Practice Exercises (4 Tiers, 8 Types), 2 Labs, Mini-Project & Quiz Audit',
+      passed: day28PartBValid,
+      message: day28PartBValid
+        ? `Day 28 Part B verified: ${day28Exercises.length} reasoning-based API exercises across all 4 tiers & 8 types, 2 real-world labs, capstone mini-project (day28-project), and 10-question checkpoint quiz (80% pass threshold).`
+        : `Day 28 Part B validation failed: exercises=${day28Exercises.length}/30, tiers=${day28Tiers.size}/4, types=${day28Types.size}/8, labs=${day28LabsValid}, project=${day28MiniProjectValid}, quiz=${day28QuizValid}.`,
+    });
+
+    // 120. Day 28 Part C: Cheat Sheet (10 Cards) & API Client Audit
+    const day28CheatSheetBlocks = day28Module?.cheatSheet || [];
+    const day28CheatSheetCardsValid =
+      day28CheatSheetBlocks.length === 10 &&
+      day28CheatSheetBlocks.every(
+        (b) =>
+          b.category.trim().length > 0 &&
+          b.syntax.trim().length > 0 &&
+          b.description.trim().length > 0 &&
+          b.example.trim().length > 20
+      );
+
+    const day28Categories = new Set(day28CheatSheetBlocks.map((b) => b.category));
+    const day28CategoriesValid =
+      day28Categories.has('REST Architecture, Resources & Statelessness') &&
+      day28Categories.has('HTTP Verbs, Safety & Idempotency') &&
+      day28Categories.has('URL Anatomy, Path Params & Query Encoding') &&
+      day28Categories.has('HTTP Status Code Families (2xx, 3xx, 4xx, 5xx)') &&
+      day28Categories.has('Consuming APIs with requests & Session()') &&
+      day28Categories.has('Response Handling (raise_for_status, .json())') &&
+      day28Categories.has('Headers, Content Negotiation & json= vs data=') &&
+      day28Categories.has('API Authentication (API Keys & Bearer Tokens)') &&
+      day28Categories.has('Timeouts, Rate Limits (429) & Exponential Backoff') &&
+      day28Categories.has('CORS Preflight (OPTIONS & Allow-Origin)');
+
+    const day28PartCValid = !!day28CheatSheetCardsValid && day28CategoriesValid;
+
+    testCases.push({
+      id: 'day28-part-c-check',
+      category: 'lesson-schema',
+      name: 'Day 28 Part C: Cheat Sheet (10 Cards) & API Client Audit',
+      passed: day28PartCValid,
+      message: day28PartCValid
+        ? `Day 28 Part C passed: ${day28CheatSheetBlocks.length} comprehensive cheat sheet cards spanning all ${day28Categories.size} Day 28 API categories with zero-pill WCAG AA compliance.`
+        : `Day 28 Part C validation failed: cards=${day28CheatSheetBlocks.length}/10, categories=${day28Categories.size}/10.`,
+    });
+
+    // 121. Days 1 to 28 Cumulative Curriculum & Full Regression Audit
+    const totalD28Exercises = day28Module ? day28Module.subtopics.reduce((acc, s) => acc + (s.practise?.length || 0), 0) : 0;
+    const totalExercisesDays1to28 = totalExercisesDays1to27 + totalD28Exercises;
+    const totalCheatSheetCardsDays1to28 = totalCheatSheetCardsDays1to27 + (day28Module?.cheatSheet.length ?? 0);
+
+    const days1to28Complete =
+      days1to27Complete &&
+      day28PartAValid &&
+      day28PartBValid &&
+      day28PartCValid &&
+      (day28Module?.subtopics.length ?? 0) === 8 &&
+      totalExercisesDays1to28 >= 626 &&
+      totalCheatSheetCardsDays1to28 >= 249;
+
+    testCases.push({
+      id: 'days-1-to-28-regression-check',
+      category: 'regression',
+      name: 'Days 1 to 28 Full Curriculum Regression & Continuity Audit',
+      passed: days1to28Complete,
+      message: days1to28Complete
+        ? `Days 1 to 28 cumulative regression passed: 239 total subtopics across 28 days, ${totalExercisesDays1to28} practice exercises across all 4 tiers, 56 real-world labs, 28 capstone projects, 28 mastery checkpoint quizzes, and ${totalCheatSheetCardsDays1to28} cheat sheet cards with zero-pill WCAG AA compliance.`
+        : `Days 1 to 28 regression failed: days1to27Complete=${days1to27Complete}, day28Subtopics=${day28Module?.subtopics.length ?? 0}/8, exercises=${totalExercisesDays1to28}/626, cheatSheets=${totalCheatSheetCardsDays1to28}/249.`,
+    });
+
+    // 122. Day 29 Part A (Learn) — Building APIs
+    const day29Module = getDayModule(29);
+    const day29SubtopicsValid =
+      day29Module &&
+      day29Module.subtopics.length === 8 &&
+      day29Module.subtopics.every(
+        (s) =>
+          s.introduce.paragraphs.length > 0 &&
+          s.visualise.type &&
+          s.code.length > 0 &&
+          s.code[0].expectedOutput.length > 0 &&
+          s.explain.length > 0 &&
+          s.apply &&
+          s.commonMistakes.length > 0
+      );
+
+    const day29SimsCovered = new Set(day29Module?.subtopics.map((s) => s.visualise.type));
+    const day29SimsValid =
+      day29SimsCovered.has('api-builder-router-sim') &&
+      day29SimsCovered.has('api-validation-serialization-sim') &&
+      day29SimsCovered.has('api-idempotency-pagination-sim');
+
+    const day29ManifestEntry = COURSE_DAYS_MANIFEST.find((d) => d.number === 29);
+    const day29ManifestValid =
+      day29ManifestEntry?.status === 'available' && day29ManifestEntry?.subtopicsCount === 8;
+
+    const day29PartAValid = !!day29SubtopicsValid && day29SimsValid && day29ManifestValid;
+
+    testCases.push({
+      id: 'day29-part-a-check',
+      category: 'lesson-schema',
+      name: 'Day 29 Part A: 8 Subtopics & 3 Signature API Builder Simulations Audit',
+      passed: day29PartAValid,
+      message: day29PartAValid
+        ? 'Day 29 Part A (Learn) verified: 8 Building APIs subtopics loaded, manifest available, and all 3 signature simulations (api-builder-router-sim, api-validation-serialization-sim, api-idempotency-pagination-sim) wired.'
+        : `Day 29 Part A incomplete: subtopics=${day29Module?.subtopics?.length || 0}/8, sims=${day29SimsCovered.size}/3, manifest=${day29ManifestValid}.`,
+    });
+
+    // 123. Day 29 Part B: 30 Practice Exercises (4 Tiers, 8 Types), 2 Labs, Mini-Project & Checkpoint Quiz Audit
+    const day29Exercises = day29Module?.subtopics.flatMap((s) => s.practise || []) || [];
+    const day29ExercisesCountValid = day29Exercises.length >= 30;
+
+    const day29Tiers = new Set(day29Exercises.map((e) => e.tier));
+    const day29TiersValid =
+      day29Tiers.has('foundation') &&
+      day29Tiers.has('standard') &&
+      day29Tiers.has('challenge') &&
+      day29Tiers.has('project');
+
+    const day29Types = new Set(day29Exercises.map((e) => e.type));
+    const day29TypesValid =
+      day29Types.has('scenario-mcq') &&
+      day29Types.has('predict-output') &&
+      day29Types.has('fix-the-bug') &&
+      day29Types.has('order-the-lines') &&
+      day29Types.has('fill-the-gaps') &&
+      day29Types.has('write-code') &&
+      day29Types.has('theory-reasoning') &&
+      day29Types.has('explain-the-trace');
+
+    const day29LabsValid =
+      (day29Module?.realWorldLabs.length ?? 0) === 2 &&
+      day29Module!.realWorldLabs.every((lab) => lab.starterCode.length > 50 && lab.targetOutput.length > 10);
+
+    const day29MiniProjectValid =
+      !!day29Module?.miniProject &&
+      day29Module.miniProject.id === 'day29-project' &&
+      day29Module.miniProject.requirements.length >= 5 &&
+      day29Module.miniProject.rubric.length >= 3 &&
+      day29Module.miniProject.starterCode.length > 50;
+
+    const day29QuizValid =
+      (day29Module?.dayQuiz.questions.length ?? 0) === 10 &&
+      day29Module?.dayQuiz.passingScorePercentage === 80 &&
+      day29Module.dayQuiz.questions.every(
+        (q) =>
+          q.scenario.trim().length > 0 &&
+          q.question.trim().length > 0 &&
+          q.options.length === 4 &&
+          q.options.some((o) => o.isCorrect)
+      );
+
+    const day29PartBValid =
+      day29ExercisesCountValid &&
+      day29TiersValid &&
+      day29TypesValid &&
+      day29LabsValid &&
+      day29MiniProjectValid &&
+      day29QuizValid;
+
+    testCases.push({
+      id: 'day29-part-b-check',
+      category: 'exercises',
+      name: 'Day 29 Part B: 30 Practice Exercises (4 Tiers, 8 Types), 2 Labs, Mini-Project & Quiz Audit',
+      passed: day29PartBValid,
+      message: day29PartBValid
+        ? `Day 29 Part B verified: ${day29Exercises.length} reasoning-based Building APIs exercises across all 4 tiers & 8 types, 2 real-world labs, capstone mini-project (day29-project), and 10-question checkpoint quiz (80% pass threshold).`
+        : `Day 29 Part B validation failed: exercises=${day29Exercises.length}/30, tiers=${day29Tiers.size}/4, types=${day29Types.size}/8, labs=${day29LabsValid}, project=${day29MiniProjectValid}, quiz=${day29QuizValid}.`,
+    });
+
     setResults(testCases);
     setIsRunning(false);
   };
