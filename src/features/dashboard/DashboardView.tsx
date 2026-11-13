@@ -15,13 +15,14 @@ import {
   ChevronRight,
   CheckCircle2,
   Lock,
+  Download,
 } from 'lucide-react';
 import { useProgress } from '../../store/progressContext';
 import { useNavigation } from '../../store/navigationContext';
 import { COURSE_DAYS_MANIFEST } from '../../data/manifest';
 
 export const DashboardView: React.FC = () => {
-  const { progress, completionPercentage, totalSubtopicsCompleted } = useProgress();
+  const { progress, completionPercentage, totalSubtopicsCompleted, totalCourseSubtopics } = useProgress();
   const { navigateTo, selectDay } = useNavigation();
 
   const beginnerDays = COURSE_DAYS_MANIFEST.filter((d) => d.level === 'beginner');
@@ -72,6 +73,13 @@ export const DashboardView: React.FC = () => {
               <BookOpen className="w-4 h-4 text-[var(--text-dim)]" />
               <span>Explore 30-Day Roadmap</span>
             </button>
+            <button
+              onClick={() => navigateTo('certificate')}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-elevated)] text-[var(--text-main)] text-sm font-semibold transition-colors"
+            >
+              <Award className="w-4 h-4 text-[var(--accent-primary)]" />
+              <span>PDF Certificate</span>
+            </button>
           </div>
         </div>
       </div>
@@ -79,23 +87,33 @@ export const DashboardView: React.FC = () => {
       {/* Metric Cards Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         {/* Metric 1: Completion */}
-        <div className="p-4 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] space-y-2">
-          <div className="flex items-center justify-between text-xs text-[var(--text-dim)]">
-            <span className="eyebrow-label text-[10px]">COURSE PROGRESS</span>
-            <Award className="w-4 h-4 text-[var(--accent-primary)]" />
+        <div className="p-4 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] space-y-2 flex flex-col justify-between">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs text-[var(--text-dim)]">
+              <span className="eyebrow-label text-[10px]">COURSE PROGRESS</span>
+              <Award className="w-4 h-4 text-[var(--accent-primary)]" />
+            </div>
+            <div className="text-2xl sm:text-3xl font-extrabold text-[var(--text-main)] tabular-nums">
+              {completionPercentage}%
+            </div>
+            <div className="w-full bg-[var(--bg-app)] rounded-full h-1.5 overflow-hidden">
+              <div
+                className="bg-[var(--accent-primary)] h-full transition-all duration-500"
+                style={{ width: `${completionPercentage}%` }}
+              />
+            </div>
+            <div className="text-[11px] text-[var(--text-dim)] tabular-nums">
+              {totalSubtopicsCompleted} of {totalCourseSubtopics} subtopics completed
+            </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-[var(--text-main)]">
-            {completionPercentage}%
-          </div>
-          <div className="w-full bg-[var(--bg-app)] rounded-full h-1.5 overflow-hidden">
-            <div
-              className="bg-[var(--accent-primary)] h-full transition-all duration-500"
-              style={{ width: `${completionPercentage}%` }}
-            />
-          </div>
-          <div className="text-[11px] text-[var(--text-dim)]">
-            {totalSubtopicsCompleted} of 240 subtopics completed
-          </div>
+          <button
+            type="button"
+            onClick={() => navigateTo('certificate')}
+            className="mt-1 inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--accent-primary)] hover:underline text-left"
+          >
+            <Download className="w-3.5 h-3.5 shrink-0" />
+            <span>Export PDF Certificate</span>
+          </button>
         </div>
 
         {/* Metric 2: Streak */}

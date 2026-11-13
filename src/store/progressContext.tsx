@@ -5,6 +5,13 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { storage } from './storageAdapter';
+import { COURSE_DAYS_MANIFEST } from '../data/manifest';
+
+const TOTAL_COURSE_SUBTOPICS = COURSE_DAYS_MANIFEST.reduce((acc, day) => acc + day.subtopicsCount, 0);
+
+function getDaySubtopicCount(dayNumber: number): number {
+  return COURSE_DAYS_MANIFEST.find((d) => d.number === dayNumber)?.subtopicsCount ?? 8;
+}
 
 export interface UserProgress {
   schemaVersion: 1;
@@ -47,6 +54,7 @@ interface ProgressContextValue {
   exportProgressJson: () => string;
   importProgressJson: (json: string) => boolean;
   totalSubtopicsCompleted: number;
+  totalCourseSubtopics: number;
   completionPercentage: number;
 }
 
@@ -88,8 +96,9 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const isDayCompleted = useCallback(
     (day: number) => {
       if (progress.completedDays.includes(day)) return true;
-      let allCompleted = true;
-      for (let s = 0; s < 10; s++) {
+      const count = getDaySubtopicCount(day);
+      let allCompleted = count > 0;
+      for (let s = 0; s < count; s++) {
         if (!progress.completedSubtopics.includes(`${day}_${s}`)) {
           allCompleted = false;
           break;
@@ -125,20 +134,21 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         ? prev.completedSubtopics.filter((k) => k !== key)
         : [...prev.completedSubtopics, key];
 
-      // Auto-sync completedDays
-      let allTenDone = true;
-      for (let s = 0; s < 10; s++) {
+      // Auto-sync completedDays using the actual day's subtopic count
+      const daySubtopicsCount = getDaySubtopicCount(day);
+      let allDone = daySubtopicsCount > 0;
+      for (let s = 0; s < daySubtopicsCount; s++) {
         const subKey = `${day}_${s}`;
         if (!updatedSubtopics.includes(subKey)) {
-          allTenDone = false;
+          allDone = false;
           break;
         }
       }
 
       let updatedDays = [...prev.completedDays];
-      if (allTenDone && !updatedDays.includes(day)) {
+      if (allDone && !updatedDays.includes(day)) {
         updatedDays.push(day);
-      } else if (!allTenDone && updatedDays.includes(day)) {
+      } else if (!allDone && updatedDays.includes(day)) {
         updatedDays = updatedDays.filter((d) => d !== day);
       }
 
@@ -232,8 +242,10 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, []);
 
   const totalSubtopicsCompleted = progress.completedSubtopics.length;
-  // Estimate total course subtopics ~ 240
-  const completionPercentage = Math.min(100, Math.round((totalSubtopicsCompleted / 240) * 100));
+  const completionPercentage =
+    TOTAL_COURSE_SUBTOPICS > 0
+      ? Math.min(100, Math.round((totalSubtopicsCompleted / TOTAL_COURSE_SUBTOPICS) * 100))
+      : 0;
 
   const value = useMemo(
     () => ({
@@ -253,6 +265,7 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       exportProgressJson,
       importProgressJson,
       totalSubtopicsCompleted,
+      totalCourseSubtopics: TOTAL_COURSE_SUBTOPICS,
       completionPercentage,
     }),
     [

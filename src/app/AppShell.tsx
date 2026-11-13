@@ -23,6 +23,7 @@ import { NotesView } from '../features/notes/NotesView';
 import { TeachingMode } from '../features/teaching/TeachingMode';
 import { CreditsView } from '../features/credits/CreditsView';
 import { GlossaryView } from '../features/glossary/GlossaryView';
+import { CertificateView } from '../features/certificate/CertificateView';
 import { SelfTestView } from '../dev/SelfTestView';
 
 export const AppShell: React.FC = () => {
@@ -67,6 +68,7 @@ export const AppShell: React.FC = () => {
           {route === 'glossary' && <GlossaryView />}
           {route === 'teaching' && <TeachingMode />}
           {route === 'credits' && <CreditsView />}
+          {route === 'certificate' && <CertificateView />}
           {route === 'selftest' && <SelfTestView />}
         </ErrorBoundary>
       </main>

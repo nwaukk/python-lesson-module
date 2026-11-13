@@ -13,14 +13,15 @@ import {
   Filter,
   ArrowRight,
   ExternalLink,
+  Award,
 } from 'lucide-react';
 import { COURSE_DAYS_MANIFEST } from '../../data/manifest';
 import { useNavigation } from '../../store/navigationContext';
 import { useProgress } from '../../store/progressContext';
 
 export const RoadmapView: React.FC = () => {
-  const { selectDay } = useNavigation();
-  const { isSubtopicCompleted } = useProgress();
+  const { selectDay, navigateTo } = useNavigation();
+  const { isSubtopicCompleted, isDayCompleted } = useProgress();
   const [filterLevel, setFilterLevel] = useState<'all' | 'beginner' | 'intermediate' | 'advanced'>('all');
 
   const filteredDays = COURSE_DAYS_MANIFEST.filter((day) => {
@@ -44,32 +45,47 @@ export const RoadmapView: React.FC = () => {
           </p>
         </div>
 
-        {/* Level Filters */}
-        <div className="flex items-center gap-1.5 p-1 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-xs font-semibold self-start sm:self-auto">
-          {[
-            { id: 'all', label: 'All 30 Days' },
-            { id: 'beginner', label: 'Beginner (1-8)' },
-            { id: 'intermediate', label: 'Intermediate (9-20)' },
-            { id: 'advanced', label: 'Advanced (21-30)' },
-          ].map((f) => (
-            <button
-              key={f.id}
-              onClick={() => setFilterLevel(f.id as typeof filterLevel)}
-              className={`px-3 py-1.5 rounded-lg transition-colors ${
-                filterLevel === f.id
-                  ? 'bg-[var(--accent-primary)] text-[var(--accent-on)]'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
+        {/* Level Filters & Certificate Export */}
+        <div className="flex flex-wrap items-center gap-2.5 self-start sm:self-auto">
+          <div className="flex items-center gap-1.5 p-1 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-xs font-semibold">
+            {[
+              { id: 'all', label: 'All 30 Days' },
+              { id: 'beginner', label: 'Beginner (1-8)' },
+              { id: 'intermediate', label: 'Intermediate (9-20)' },
+              { id: 'advanced', label: 'Advanced (21-30)' },
+            ].map((f) => (
+              <button
+                key={f.id}
+                onClick={() => setFilterLevel(f.id as typeof filterLevel)}
+                className={`px-3 py-1.5 rounded-lg transition-colors ${
+                  filterLevel === f.id
+                    ? 'bg-[var(--accent-primary)] text-[var(--accent-on)]'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => navigateTo('certificate')}
+            className="min-h-[38px] flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[var(--accent-primary)] hover:bg-[var(--accent-hover)] text-[var(--accent-on)] text-xs font-bold transition-colors whitespace-nowrap"
+          >
+            <Award className="w-3.5 h-3.5 shrink-0" />
+            <span>Export PDF Certificate</span>
+          </button>
         </div>
       </div>
 
       {/* Grid of 30 Days */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredDays.map((day) => {
+          let completedSubs = 0;
+          for (let i = 0; i < day.subtopicsCount; i++) {
+            if (isSubtopicCompleted(day.number, i)) completedSubs++;
+          }
+          const completed = isDayCompleted(day.number);
           return (
             <div
               key={day.number}
@@ -113,7 +129,10 @@ export const RoadmapView: React.FC = () => {
               </div>
 
               <div className="mt-4 pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs text-[var(--text-dim)]">
-                <span>{day.subtopicsCount} topics</span>
+                <span className="flex items-center gap-1.5 tabular-nums">
+                  {completed && <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-success)]" />}
+                  {completedSubs}/{day.subtopicsCount} topics
+                </span>
                 <span className="flex items-center gap-1 text-[var(--accent-primary)] font-semibold group-hover:translate-x-1 transition-transform">
                   Open Lesson <ArrowRight className="w-3.5 h-3.5" />
                 </span>

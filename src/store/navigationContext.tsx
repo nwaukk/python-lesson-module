@@ -17,6 +17,7 @@ export type AppRoute =
   | 'glossary'
   | 'teaching'
   | 'credits'
+  | 'certificate'
   | 'selftest';
 
 interface NavigationContextValue {
@@ -47,6 +48,7 @@ function parseHash(hash: string): { route: AppRoute; day: number; subtopic: numb
   if (clean === 'glossary') return { route: 'glossary', day: 1, subtopic: 0 };
   if (clean === 'teaching') return { route: 'teaching', day: 1, subtopic: 0 };
   if (clean === 'credits') return { route: 'credits', day: 1, subtopic: 0 };
+  if (clean === 'certificate') return { route: 'certificate', day: 1, subtopic: 0 };
   if (clean.startsWith('dev/selftest')) return { route: 'selftest', day: 1, subtopic: 0 };
 
   const dayMatch = clean.match(/^day\/(\d+)(?:\/subtopic\/(\d+))?/);

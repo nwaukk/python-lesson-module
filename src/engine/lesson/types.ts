@@ -110,7 +110,10 @@ export type SimulationPrimitiveType =
   | 'api-auth-cors-sim'
   | 'api-builder-router-sim'
   | 'api-validation-serialization-sim'
-  | 'api-idempotency-pagination-sim';
+  | 'api-idempotency-pagination-sim'
+  | 'curriculum-revision-radar-sim'
+  | 'capstone-architecture-sim'
+  | 'future-horizons-roadmap-sim';
 
 export interface SimulationRef {
   type: SimulationPrimitiveType;

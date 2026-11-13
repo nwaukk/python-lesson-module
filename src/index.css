@@ -6,6 +6,8 @@
   --bg-surface: #1e293b;
   --bg-surface-elevated: #334155;
   --bg-surface-subtle: #1e293b80;
+  --bg-panel: var(--bg-surface);
+  --bg-card: var(--bg-app);
   
   --text-main: #f8fafc;
   --text-muted: #94a3b8;

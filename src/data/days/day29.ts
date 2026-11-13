@@ -1470,7 +1470,126 @@ print(paginate(["a", "b", "c"], page=1, limit=2))
     ],
     passingScorePercentage: 80,
   },
-  cheatSheet: [],
+  cheatSheet: [
+    {
+      category: 'Versioned REST URIs & Response Envelopes',
+      syntax: '/api/v1/resources          # {"count": N, "items": [...]}\n/api/v1/resources/<id>',
+      description:
+        'Prefix API routes with a major version (/api/v1/) and wrap collections in a top-level JSON object envelope (e.g., {"count": N, "items": [...]}) so pagination or cursor metadata can be added later without breaking existing clients.',
+      example: `API_PREFIX = "/api/v1"
+
+def collection_envelope(items):
+    return {"count": len(items), "items": items}
+
+print(f"{API_PREFIX}/students ->", collection_envelope([{"id": "s1", "name": "Ada"}]))`,
+    },
+    {
+      category: 'GET Collection (200 OK) vs Single Resource (404)',
+      syntax: '@app.get("/api/v1/students/<id>")\nif not doc: return jsonify({"error": "Not found"}), 404',
+      description:
+        'A collection GET always returns 200 OK with items: [] when filters match zero rows. A single-resource GET validates the incoming ID format (e.g., 24-hex ObjectId.is_valid) and returns JSON 404 Not Found when absent.',
+      example: `def get_student(db, student_id):
+    doc = db.get(student_id)
+    if not doc:
+        return {"error": "Student not found"}, 404
+    return doc, 200`,
+    },
+    {
+      category: 'BSON ObjectId & ISO 8601 Serialization',
+      syntax: 'def serialize(doc): return {"id": str(doc["_id"]), "created_at": doc["created_at"].isoformat()}',
+      description:
+        'Standard json.dumps() raises TypeError on BSON ObjectId and Python datetime objects. Write an explicit allowlist serializer converting _id to string "id" and UTC datetimes via .isoformat(), while stripping sensitive internal fields.',
+      example: `import json
+from datetime import datetime, timezone
+
+def serialize_student(doc):
+    return {
+        "id": str(doc["_id"]),
+        "name": doc["name"],
+        "created_at": doc["created_at"].isoformat(),
+    }
+
+raw = {"_id": 101, "name": "Nadia", "password_hash": "hidden", "created_at": datetime(2026, 11, 12, tzinfo=timezone.utc)}
+print(json.dumps(serialize_student(raw)))`,
+    },
+    {
+      category: 'Defensive Payload Validation (400 vs 422)',
+      syntax: 'payload = request.get_json(silent=True)  # None if malformed JSON -> 400\n# Field/type errors -> 422',
+      description:
+        'Return 400 Bad Request for syntactically malformed JSON bodies and 422 Unprocessable Entity for valid JSON failing schema rules. Guard integer checks with `not isinstance(val, bool) and isinstance(val, int)` because bool subclasses int in Python.',
+      example: `def validate_age(val):
+    return not isinstance(val, bool) and isinstance(val, int) and val >= 0
+
+print("bool True valid?", validate_age(True), "| 24 valid?", validate_age(24))`,
+    },
+    {
+      category: 'POST Creation, 201 Created & Location Header',
+      syntax: 'return jsonify(created), 201, {"Location": f"/api/v1/students/{created[\'id\']}"}',
+      description:
+        'Successful resource creation returns 201 Created with the newly serialized record (including server-assigned id) and a Location header pointing to its canonical URI. Return 409 Conflict when violating unique constraints.',
+      example: `def create_student(store, name):
+    new_id = f"stu_{len(store) + 1}"
+    record = {"id": new_id, "name": name}
+    store.append(record)
+    return record, 201, {"Location": f"/api/v1/students/{new_id}"}`,
+    },
+    {
+      category: 'Full PUT Replacement vs Partial PATCH Updates',
+      syntax: 'PUT /students/<id>   # Full representation required\nPATCH /students/<id> # Partial delta fields',
+      description:
+        'Use PUT when replacing an entire resource (all required fields must be sent), and PATCH for partial field updates while rejecting empty or invalid fields.',
+      example: `def apply_patch(record, updates):
+    for key, val in updates.items():
+        record[key] = val
+    return record, 200`,
+    },
+    {
+      category: 'Allowlist PATCH Security (Anti-Mass Assignment)',
+      syntax: 'ALLOWED = {"name", "track"}\nclean = {k: v for k, v in updates.items() if k in ALLOWED}',
+      description:
+        'Never pass raw request.get_json() directly into database $set updates. Filter incoming keys against an explicit allowlist of mutable fields so attackers cannot overwrite role, is_admin, or id.',
+      example: `ALLOWED_FIELDS = {"name", "track"}
+incoming = {"track": "Systems", "role": "admin"}
+safe_updates = {k: v for k, v in incoming.items() if k in ALLOWED_FIELDS}
+print("Filtered PATCH:", safe_updates)`,
+    },
+    {
+      category: 'Safe DELETE Routes & 204 No Content',
+      syntax: '@app.delete("/api/v1/students/<id>")\nreturn "", 204',
+      description:
+        'Deleting an existing resource returns 204 No Content with an empty body "". If the target ID does not exist, return JSON 404 Not Found rather than failing with 500.',
+      example: `def delete_student(db, student_id):
+    if student_id not in db:
+        return {"error": "Student not found"}, 404
+    del db[student_id]
+    return "", 204`,
+    },
+    {
+      category: 'Idempotency-Key Mutation Deduplication',
+      syntax: 'if idem_key in cache:\n    return cache[idem_key]  # Replay stored (body, status)',
+      description:
+        'Protect non-idempotent POST endpoints (such as payments or order creation) by requiring an Idempotency-Key header. Cache the initial response keyed by user + key, replay it on retries, and return 422/409 if the same key is reused with a different payload.',
+      example: `cache = {}
+
+def create_order(idem_key, sku):
+    if idem_key in cache:
+        return cache[idem_key]
+    res = ({"id": "ord_1", "sku": sku}, 201)
+    cache[idem_key] = res
+    return res`,
+    },
+    {
+      category: 'Clamped Pagination, Sort Allowlists & Global Errors',
+      syntax: 'page = max(1, page)\nlimit = max(1, min(limit, 100))\nskip = (page - 1) * limit',
+      description:
+        'Bound page >= 1 and 1 <= limit <= 100 on the server to prevent OOM/DoS queries. Validate sort parameters against an allowlist and register @app.errorhandler(404)/(500) so every failure returns structured JSON.',
+      example: `def paginate(items, page=1, limit=20):
+    page = max(1, page)
+    limit = max(1, min(limit, 100))
+    start = (page - 1) * limit
+    return {"page": page, "limit": limit, "total": len(items), "has_next": start + limit < len(items), "items": items[start:start + limit]}`,
+    },
+  ],
   sourceNotes: [
     'Curriculum reference: https://github.com/Asabeneh/30-Days-Of-Python/tree/master/29_Day_Building_API',
   ],

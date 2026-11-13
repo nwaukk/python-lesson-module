@@ -20,6 +20,7 @@ import {
   AlertCircle,
   HelpCircle,
   FolderGit2,
+  Award,
 } from 'lucide-react';
 import { useNavigation, AppRoute } from '../store/navigationContext';
 import { useSettings } from '../store/settingsContext';
@@ -32,7 +33,7 @@ interface Props {
 export const TopBar: React.FC<Props> = ({ onOpenSearch }) => {
   const { route, navigateTo, activeDay } = useNavigation();
   const { setIsAppearanceStudioOpen, stepTextSize, settings } = useSettings();
-  const { progress, isFallbackStorage, totalSubtopicsCompleted, completionPercentage } = useProgress();
+  const { progress, isFallbackStorage, totalSubtopicsCompleted, totalCourseSubtopics, completionPercentage } = useProgress();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks: { id: AppRoute; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
@@ -170,7 +171,7 @@ export const TopBar: React.FC<Props> = ({ onOpenSearch }) => {
           >
             <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span className="font-semibold text-[var(--text-main)]">{completionPercentage}%</span>
-            <span className="text-[10px] text-[var(--text-dim)]">({totalSubtopicsCompleted}/240)</span>
+            <span className="text-[10px] text-[var(--text-dim)]">({totalSubtopicsCompleted}/{totalCourseSubtopics})</span>
           </button>
 
           {/* Streak Badge */}
@@ -243,12 +244,21 @@ export const TopBar: React.FC<Props> = ({ onOpenSearch }) => {
             </button>
             <button
               onClick={() => {
+                handleNavClick('certificate');
+              }}
+              className="flex items-center gap-1.5 text-[var(--accent-primary)] font-semibold hover:underline"
+            >
+              <Award className="w-4 h-4" />
+              <span>Certificate</span>
+            </button>
+            <button
+              onClick={() => {
                 handleNavClick('credits');
               }}
               className="flex items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text-main)]"
             >
               <FolderGit2 className="w-4 h-4" />
-              <span>Curriculum Credits</span>
+              <span>Credits</span>
             </button>
           </div>
         </div>

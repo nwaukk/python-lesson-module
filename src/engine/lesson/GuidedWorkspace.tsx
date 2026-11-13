@@ -137,6 +137,9 @@ import { ApiAuthCorsSim } from '../simulation/ApiAuthCorsSim';
 import { ApiBuilderRouterSim } from '../simulation/ApiBuilderRouterSim';
 import { ApiValidationSerializationSim } from '../simulation/ApiValidationSerializationSim';
 import { ApiIdempotencyPaginationSim } from '../simulation/ApiIdempotencyPaginationSim';
+import { CurriculumRevisionRadarSim } from '../simulation/CurriculumRevisionRadarSim';
+import { CapstoneArchitectureSim } from '../simulation/CapstoneArchitectureSim';
+import { FutureHorizonsRoadmapSim } from '../simulation/FutureHorizonsRoadmapSim';
 import { SimulationController } from '../simulation/SimulationController';
 import { defaultTutor, TutorResponse } from '../coach/tutorProvider';
 
@@ -411,6 +414,12 @@ export const GuidedWorkspace: React.FC = () => {
         return <ApiValidationSerializationSim />;
       case 'api-idempotency-pagination-sim':
         return <ApiIdempotencyPaginationSim />;
+      case 'curriculum-revision-radar-sim':
+        return <CurriculumRevisionRadarSim />;
+      case 'capstone-architecture-sim':
+        return <CapstoneArchitectureSim />;
+      case 'future-horizons-roadmap-sim':
+        return <FutureHorizonsRoadmapSim />;
       default:
         return (
           <div className="flex-1 flex flex-col min-h-0 bg-[var(--bg-app)]">

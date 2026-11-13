@@ -91,6 +91,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     root.style.setProperty('--bg-surface', surface);
     root.style.setProperty('--bg-surface-elevated', isDark ? '#1f2937' : '#e2e8f0');
     root.style.setProperty('--bg-surface-subtle', isDark ? 'rgba(17, 24, 39, 0.75)' : 'rgba(255, 255, 255, 0.85)');
+    root.style.setProperty('--bg-panel', surface);
+    root.style.setProperty('--bg-card', bg);
     
     root.style.setProperty('--text-main', textMain);
     root.style.setProperty('--text-muted', isDark ? '#9ca3af' : '#475569');

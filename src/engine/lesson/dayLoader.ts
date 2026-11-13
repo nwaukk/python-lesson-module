@@ -36,6 +36,7 @@ import { DAY_26_MODULE } from '../../data/days/day26';
 import { DAY_27_MODULE } from '../../data/days/day27';
 import { DAY_28_MODULE } from '../../data/days/day28';
 import { DAY_29_MODULE } from '../../data/days/day29';
+import { DAY_30_MODULE } from '../../data/days/day30';
 
 export function getDayModule(dayNumber: number): DayModule {
   if (dayNumber === 0) {
@@ -189,7 +190,12 @@ export function getDayModule(dayNumber: number): DayModule {
     return DAY_29_MODULE;
   }
 
-  // Placeholder module for Day 30
+  // If Day 30, return the fully authored DAY_30_MODULE
+  if (dayNumber === 30) {
+    return DAY_30_MODULE;
+  }
+
+  // Fallback module
   return {
     schemaVersion: 1,
     number: dayNumber,

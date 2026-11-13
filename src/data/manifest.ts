@@ -379,7 +379,7 @@ export const COURSE_DAYS_MANIFEST: DayManifestItem[] = [
     summary: 'Comprehensive revision, targeted weak-spot review, capstone project choices, certificate generation, and future horizons.',
     sourceUrl: 'https://github.com/Asabeneh/30-Days-Of-Python/tree/master/30_Day_Conclusions',
     prerequisites: [1, 5, 8, 11, 21, 25, 29],
-    status: 'coming-soon',
+    status: 'available',
     tags: ['Revision', 'Capstone', 'Assessment', 'Certificate'],
   },
 ];
