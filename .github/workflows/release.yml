@@ -49,8 +49,8 @@ jobs:
           node-version: 'lts/*'
           cache: 'npm'
 
-      - name: Install dependencies (npm ci)
-        run: npm ci
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
 
       - name: Sync version into package.json and prepare repository metadata
         shell: pwsh
@@ -68,10 +68,11 @@ jobs:
           REL_VERSION: ${{ steps.meta.outputs.version }}
           GH_REPO: ${{ github.repository }}
 
-      - name: Verify TypeScript & bundle Vite web app
-        run: |
-          npm run lint
-          npm run build
+      - name: Verify TypeScript
+        run: npm run lint
+
+      - name: Bundle Vite web app
+        run: npm run build
 
       - name: Ensure desktop icon asset exists
         shell: pwsh
