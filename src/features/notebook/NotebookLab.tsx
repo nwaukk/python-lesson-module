@@ -4,25 +4,20 @@
  * Multi-column cell layout, left icon rail, interactive controls, and bottom status bar.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Play,
   RotateCcw,
   Plus,
   Trash2,
-  Columns,
   ListTree,
   Database,
   Layers,
   FileText,
-  Settings,
-  HelpCircle,
-  Sliders,
-  CheckCircle2,
-  Sparkles,
   Table as TableIcon,
 } from 'lucide-react';
 import { DataTable } from './DataTable';
+import { storage } from '../../store/storageAdapter';
 
 interface CellData {
   id: string;
@@ -35,38 +30,93 @@ interface CellData {
   isDataTable?: boolean;
 }
 
+interface PersistedNotebookState {
+  schemaVersion: 1;
+  columns: 1 | 2 | 3;
+  autoRun: boolean;
+  cells: CellData[];
+}
+
+const DEFAULT_NOTEBOOK_CELLS: CellData[] = [
+  {
+    id: 'cell-1',
+    code: `# Parameter Slider: Step Count\nsteps = 15\nprint(f"Configured step count: {steps}")`,
+    output: 'Configured step count: 15',
+    isStale: false,
+    status: 'success',
+    controlType: 'slider',
+    controlValue: 15,
+  },
+  {
+    id: 'cell-2',
+    code: `# Derived computation\nfactorial_estimate = 1\nfor i in range(1, steps + 1):\n    factorial_estimate *= i\nprint(f"Product pipeline result: {factorial_estimate:,}")`,
+    output: 'Product pipeline result: 1,307,674,368,000',
+    isStale: false,
+    status: 'success',
+  },
+  {
+    id: 'cell-3',
+    code: `# Sequence transformation\nwords = ["python", "visual", "laboratory", "reactive", "notebook"]\ncapitalised = [w.capitalize() for w in words]\nprint(capitalised)`,
+    output: "['Python', 'Visual', 'Laboratory', 'Reactive', 'Notebook']",
+    isStale: false,
+    status: 'success',
+  },
+];
+
+const DEFAULT_NOTEBOOK_STATE: PersistedNotebookState = {
+  schemaVersion: 1,
+  columns: 2,
+  autoRun: true,
+  cells: DEFAULT_NOTEBOOK_CELLS,
+};
+
 export const NotebookLab: React.FC = () => {
-  const [columns, setColumns] = useState<1 | 2 | 3>(2);
+  const [notebookState, setNotebookState] = useState<PersistedNotebookState>(() => {
+    const saved = storage.getItem<PersistedNotebookState>('notebook_state', DEFAULT_NOTEBOOK_STATE);
+    return {
+      schemaVersion: 1,
+      columns: saved.columns === 1 || saved.columns === 2 || saved.columns === 3 ? saved.columns : 2,
+      autoRun: typeof saved.autoRun === 'boolean' ? saved.autoRun : true,
+      cells: Array.isArray(saved.cells) && saved.cells.length > 0 ? saved.cells : DEFAULT_NOTEBOOK_CELLS,
+    };
+  });
   const [activeRail, setActiveRail] = useState<'outline' | 'variables' | 'datasets' | 'notes'>('outline');
   const [isRailExpanded, setIsRailExpanded] = useState(false);
-  const [autoRun, setAutoRun] = useState(true);
 
-  // Initial sample reactive cells
-  const [cells, setCells] = useState<CellData[]>([
-    {
-      id: 'cell-1',
-      code: `# Parameter Slider: Step Count\nsteps = 15\nprint(f"Configured step count: {steps}")`,
-      output: 'Configured step count: 15',
-      isStale: false,
-      status: 'success',
-      controlType: 'slider',
-      controlValue: 15,
-    },
-    {
-      id: 'cell-2',
-      code: `# Derived computation\nfactorial_estimate = 1\nfor i in range(1, steps + 1):\n    factorial_estimate *= i\nprint(f"Product pipeline result: {factorial_estimate:,}")`,
-      output: 'Product pipeline result: 1,307,674,368,000',
-      isStale: false,
-      status: 'success',
-    },
-    {
-      id: 'cell-3',
-      code: `# Sequence transformation\nwords = ["python", "visual", "laboratory", "reactive", "notebook"]\ncapitalised = [w.capitalize() for w in words]\nprint(capitalised)`,
-      output: "['Python', 'Visual', 'Laboratory', 'Reactive', 'Notebook']",
-      isStale: false,
-      status: 'success',
-    },
-  ]);
+  const columns = notebookState.columns;
+  const autoRun = notebookState.autoRun;
+  const cells = notebookState.cells;
+
+  const setColumns = (col: 1 | 2 | 3) => {
+    setNotebookState((prev) => ({ ...prev, columns: col }));
+  };
+
+  const setAutoRun = (next: boolean) => {
+    setNotebookState((prev) => ({ ...prev, autoRun: next }));
+  };
+
+  const setCells = (updater: CellData[] | ((prev: CellData[]) => CellData[])) => {
+    setNotebookState((prev) => ({
+      ...prev,
+      cells: typeof updater === 'function' ? updater(prev.cells) : updater,
+    }));
+  };
+
+  useEffect(() => {
+    return storage.subscribeHydration(() => {
+      const hydrated = storage.getItem<PersistedNotebookState>('notebook_state', DEFAULT_NOTEBOOK_STATE);
+      setNotebookState({
+        schemaVersion: 1,
+        columns: hydrated.columns === 1 || hydrated.columns === 2 || hydrated.columns === 3 ? hydrated.columns : 2,
+        autoRun: typeof hydrated.autoRun === 'boolean' ? hydrated.autoRun : true,
+        cells: Array.isArray(hydrated.cells) && hydrated.cells.length > 0 ? hydrated.cells : DEFAULT_NOTEBOOK_CELLS,
+      });
+    });
+  }, []);
+
+  useEffect(() => {
+    storage.setItem('notebook_state', notebookState);
+  }, [notebookState]);
 
   const handleRunCell = (id: string) => {
     setCells((prev) =>
@@ -135,10 +185,14 @@ export const NotebookLab: React.FC = () => {
     setCells((prev) => prev.filter((c) => c.id !== id));
   };
 
+  const handleResetCells = () => {
+    setNotebookState(DEFAULT_NOTEBOOK_STATE);
+  };
+
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-[var(--bg-app)]">
       {/* Notebook Toolbar */}
-      <div className="px-4 py-2 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)] flex items-center justify-between gap-3 shrink-0">
+      <div className="px-4 py-2 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)] flex flex-wrap items-center justify-between gap-3 shrink-0">
         <div className="flex items-center gap-2">
           <span className="badge-real-python px-2 py-0.5 rounded text-[10px] font-bold">
             NOTEBOOK LAB
@@ -148,7 +202,7 @@ export const NotebookLab: React.FC = () => {
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {/* Column selector */}
           <div className="flex items-center rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-app)] p-0.5 text-xs">
             <span className="text-[10px] text-[var(--text-dim)] px-2 font-medium">Columns:</span>
@@ -177,6 +231,16 @@ export const NotebookLab: React.FC = () => {
             }`}
           >
             {autoRun ? '⚡ Auto-Run (Reactive)' : 'Manual Run'}
+          </button>
+
+          {/* Reset Cells */}
+          <button
+            onClick={handleResetCells}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-app)] hover:border-[var(--border-strong)] text-[var(--text-muted)] hover:text-[var(--text-main)] text-xs font-medium transition-colors"
+            title="Restore default reactive notebook cells"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Reset</span>
           </button>
 
           {/* Add Data Table */}

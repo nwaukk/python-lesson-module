@@ -42,7 +42,7 @@ export const InputQueuePanel: React.FC = () => {
       </div>
 
       <p className="text-[11px] text-[var(--text-muted)] font-sans leading-relaxed">
-        Because browser workers cannot pause execution waiting for keyboard prompts, stage the responses your Python <code className="px-1 rounded bg-[var(--bg-app)] text-[var(--syntax-builtin)]">input()</code> statements will read:
+        Stage automatic responses below for unattended runs, or run directly and answer interactive <code className="px-1 rounded bg-[var(--bg-app)] text-[var(--syntax-builtin)]">input()</code> prompts right inside the Console tab:
       </p>
 
       {/* Input Entry Box */}

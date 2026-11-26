@@ -67,6 +67,28 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const [isAppearanceStudioOpen, setIsAppearanceStudioOpen] = useState(false);
 
+  // Sync with IndexedDB hydration or backup import
+  useEffect(() => {
+    return storage.subscribeHydration(() => {
+      const nextSettings = storage.getItem<AppearanceSettings>(
+        'appearance_settings',
+        DEFAULT_APPEARANCE_SETTINGS
+      );
+      setSettings({
+        ...DEFAULT_APPEARANCE_SETTINGS,
+        ...nextSettings,
+        customColors: {
+          ...DEFAULT_APPEARANCE_SETTINGS.customColors,
+          ...(nextSettings.customColors || {}),
+        },
+      });
+      const nextProfiles = storage.getItem<AppearanceProfile[]>('appearance_profiles', [
+        { name: 'Default Dark', savedAt: new Date().toISOString(), settings: DEFAULT_APPEARANCE_SETTINGS },
+      ]);
+      setProfiles(nextProfiles);
+    });
+  }, []);
+
   // Sync settings with DOM and storage
   useEffect(() => {
     storage.setItem('appearance_settings', settings);

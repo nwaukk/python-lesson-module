@@ -53,8 +53,8 @@ export const CodeRunnerExercise: React.FC<Props> = ({
     setTestResults(null);
 
     try {
-      // 1. Run main user code to get stdout & syntax validity
-      const mainRun = await runCode(code);
+      // 1. Run main user code in isolated test namespace to check stdout & syntax validity
+      const mainRun = await runCode(code, { isolated: true });
       const mainOutput = mainRun.stdout.trim();
 
       if (mainRun.error) {
@@ -98,9 +98,9 @@ export const CodeRunnerExercise: React.FC<Props> = ({
       let passedCount = 0;
 
       for (const tc of testCases) {
-        // Run code with test case setup/call
+        // Run code with test case setup/call in isolated namespace
         const testScript = `${code}\n\n# Test Case: ${tc.label}\n${tc.setup || ''}`;
-        const runRes = await runCode(testScript);
+        const runRes = await runCode(testScript, { isolated: true });
         const actual = runRes.stdout.trim();
         const expected = tc.expected.trim();
 

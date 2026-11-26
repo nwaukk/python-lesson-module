@@ -1,63 +1,317 @@
 /**
- * Safe Storage Adapter with Automatic In-Memory Fallback
- * Complies with Section 7.4 of the Python Visual Lab Specification.
- * Handles sandboxed iframes where localStorage access is prohibited or throws a SecurityError.
+ * Safe Versioned IndexedDB + LocalStorage + In-Memory Storage Adapter
+ * Primary durable storage: IndexedDB ('python_visual_lab_db' -> 'kv_store').
+ * Synchronous mirror & fallback: localStorage -> in-memory Map.
+ * Preserves synchronous initial reads while hydrating/persisting asynchronously in IndexedDB
+ * so desktop launches and web sessions never lose user progress, notes, snippets, settings, or position.
  */
 
-const STORAGE_VERSION = 1;
-const STORAGE_PREFIX = 'pvl_v' + STORAGE_VERSION + '_';
+export const STORAGE_VERSION = 1;
+const STORAGE_PREFIX = `pvl_v${STORAGE_VERSION}_`;
+const IDB_NAME = 'python_visual_lab_db';
+const IDB_VERSION = 1;
+const IDB_STORE = 'kv_store';
+
+export type StorageBackendType = 'indexeddb' | 'localstorage' | 'memory';
+
+interface StoredEnvelope<T = unknown> {
+  key: string;
+  version: number;
+  value: T;
+  updatedAt: string;
+}
 
 class StorageAdapter {
   private inMemoryStore: Map<string, string> = new Map();
-  private isStorageAvailable: boolean = true;
-  private listeners: Set<(isFallback: boolean) => void> = new Set();
+  private isLocalStorageAvailable: boolean = true;
+  private isIndexedDbAvailable: boolean = false;
+  private statusListeners: Set<(isFallback: boolean) => void> = new Set();
+  private hydrationListeners: Set<() => void> = new Set();
+  private hydrationPromise: Promise<void>;
 
   constructor() {
-    this.checkAvailability();
+    this.checkLocalStorageAvailability();
+    this.seedMemoryFromLocalStorage();
+    this.hydrationPromise = this.hydrateFromIndexedDB();
   }
 
-  private checkAvailability(): void {
+  private checkLocalStorageAvailability(): void {
     try {
       if (typeof window === 'undefined' || !window.localStorage) {
-        this.isStorageAvailable = false;
+        this.isLocalStorageAvailable = false;
         return;
       }
       const testKey = '__pvl_storage_test__';
       window.localStorage.setItem(testKey, '1');
       window.localStorage.removeItem(testKey);
-      this.isStorageAvailable = true;
+      this.isLocalStorageAvailable = true;
     } catch {
-      this.isStorageAvailable = false;
-      this.notifyListeners();
+      this.isLocalStorageAvailable = false;
     }
   }
 
+  private seedMemoryFromLocalStorage(): void {
+    if (!this.isLocalStorageAvailable) return;
+    try {
+      for (let i = 0; i < window.localStorage.length; i++) {
+        const key = window.localStorage.key(i);
+        if (key && key.startsWith(STORAGE_PREFIX)) {
+          const val = window.localStorage.getItem(key);
+          if (val !== null) {
+            this.inMemoryStore.set(key, val);
+          }
+        }
+      }
+    } catch {
+      // Ignore partial read failures
+    }
+  }
+
+  private openDatabase(): Promise<IDBDatabase | null> {
+    return new Promise((resolve) => {
+      try {
+        if (typeof window === 'undefined' || !window.indexedDB) {
+          resolve(null);
+          return;
+        }
+        const request = window.indexedDB.open(IDB_NAME, IDB_VERSION);
+        request.onupgradeneeded = () => {
+          const db = request.result;
+          if (!db.objectStoreNames.contains(IDB_STORE)) {
+            db.createObjectStore(IDB_STORE, { keyPath: 'key' });
+          }
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => resolve(null);
+        request.onblocked = () => resolve(null);
+      } catch {
+        resolve(null);
+      }
+    });
+  }
+
+  private async hydrateFromIndexedDB(): Promise<void> {
+    const db = await this.openDatabase();
+    if (!db) {
+      this.isIndexedDbAvailable = false;
+      this.notifyStatusListeners();
+      return;
+    }
+
+    try {
+      const records = await new Promise<StoredEnvelope[]>((resolve) => {
+        try {
+          const tx = db.transaction(IDB_STORE, 'readonly');
+          const store = tx.objectStore(IDB_STORE);
+          const req = store.getAll();
+          req.onsuccess = () => resolve((req.result as StoredEnvelope[]) || []);
+          req.onerror = () => resolve([]);
+        } catch {
+          resolve([]);
+        }
+      });
+
+      this.isIndexedDbAvailable = true;
+      this.notifyStatusListeners();
+
+      if (records.length > 0) {
+        let updatedAny = false;
+        records.forEach((record) => {
+          if (!record || !record.key || !record.key.startsWith(STORAGE_PREFIX)) return;
+          const serialised = JSON.stringify(record.value);
+          const currentMem = this.inMemoryStore.get(record.key);
+          if (currentMem !== serialised) {
+            this.inMemoryStore.set(record.key, serialised);
+            updatedAny = true;
+          }
+          if (this.isLocalStorageAvailable) {
+            try {
+              window.localStorage.setItem(record.key, serialised);
+            } catch {
+              // Ignore quota errors on localStorage mirror
+            }
+          }
+        });
+        if (updatedAny) {
+          this.triggerHydration();
+        }
+      } else if (this.inMemoryStore.size > 0) {
+        // Migrate existing localStorage entries into IndexedDB seamlessly
+        const entries = Array.from(this.inMemoryStore.entries());
+        await this.writeBatchToIdb(db, entries);
+      }
+    } catch {
+      this.isIndexedDbAvailable = false;
+      this.notifyStatusListeners();
+    } finally {
+      try {
+        db.close();
+      } catch {
+        // Ignore close error
+      }
+    }
+  }
+
+  private async writeBatchToIdb(
+    existingDb: IDBDatabase | null,
+    entries: [string, string][]
+  ): Promise<void> {
+    const db = existingDb || (await this.openDatabase());
+    if (!db) return;
+    try {
+      await new Promise<void>((resolve) => {
+        const tx = db.transaction(IDB_STORE, 'readwrite');
+        const store = tx.objectStore(IDB_STORE);
+        const now = new Date().toISOString();
+        entries.forEach(([fullKey, raw]) => {
+          try {
+            store.put({
+              key: fullKey,
+              version: STORAGE_VERSION,
+              value: JSON.parse(raw),
+              updatedAt: now,
+            } satisfies StoredEnvelope);
+          } catch {
+            // Skip malformed JSON
+          }
+        });
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => resolve();
+      });
+    } catch {
+      // Ignore write error
+    } finally {
+      if (!existingDb) {
+        try {
+          db.close();
+        } catch {
+          // Ignore close error
+        }
+      }
+    }
+  }
+
+  private async idbPut(fullKey: string, value: unknown): Promise<void> {
+    const db = await this.openDatabase();
+    if (!db) return;
+    try {
+      await new Promise<void>((resolve) => {
+        const tx = db.transaction(IDB_STORE, 'readwrite');
+        const store = tx.objectStore(IDB_STORE);
+        store.put({
+          key: fullKey,
+          version: STORAGE_VERSION,
+          value,
+          updatedAt: new Date().toISOString(),
+        } satisfies StoredEnvelope);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => resolve();
+      });
+      if (!this.isIndexedDbAvailable) {
+        this.isIndexedDbAvailable = true;
+        this.notifyStatusListeners();
+      }
+    } catch {
+      // Fall back silently to synchronous mirror
+    } finally {
+      try {
+        db.close();
+      } catch {
+        // Ignore
+      }
+    }
+  }
+
+  private async idbDelete(fullKey: string): Promise<void> {
+    const db = await this.openDatabase();
+    if (!db) return;
+    try {
+      await new Promise<void>((resolve) => {
+        const tx = db.transaction(IDB_STORE, 'readwrite');
+        tx.objectStore(IDB_STORE).delete(fullKey);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => resolve();
+      });
+    } catch {
+      // Ignore
+    } finally {
+      try {
+        db.close();
+      } catch {
+        // Ignore
+      }
+    }
+  }
+
+  private async idbClear(): Promise<void> {
+    const db = await this.openDatabase();
+    if (!db) return;
+    try {
+      await new Promise<void>((resolve) => {
+        const tx = db.transaction(IDB_STORE, 'readwrite');
+        tx.objectStore(IDB_STORE).clear();
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => resolve();
+      });
+    } catch {
+      // Ignore
+    } finally {
+      try {
+        db.close();
+      } catch {
+        // Ignore
+      }
+    }
+  }
+
+  public ready(): Promise<void> {
+    return this.hydrationPromise;
+  }
+
+  public getStorageBackend(): StorageBackendType {
+    if (this.isIndexedDbAvailable) return 'indexeddb';
+    if (this.isLocalStorageAvailable) return 'localstorage';
+    return 'memory';
+  }
+
   public isUsingFallback(): boolean {
-    return !this.isStorageAvailable;
+    return !this.isIndexedDbAvailable && !this.isLocalStorageAvailable;
   }
 
   public subscribeStatus(listener: (isFallback: boolean) => void): () => void {
-    this.listeners.add(listener);
-    listener(!this.isStorageAvailable);
-    return () => this.listeners.delete(listener);
+    this.statusListeners.add(listener);
+    listener(this.isUsingFallback());
+    return () => this.statusListeners.delete(listener);
   }
 
-  private notifyListeners(): void {
-    this.listeners.forEach((listener) => listener(!this.isStorageAvailable));
+  private notifyStatusListeners(): void {
+    const fallback = this.isUsingFallback();
+    this.statusListeners.forEach((listener) => listener(fallback));
+  }
+
+  public subscribeHydration(listener: () => void): () => void {
+    this.hydrationListeners.add(listener);
+    return () => this.hydrationListeners.delete(listener);
+  }
+
+  public triggerHydration(): void {
+    this.hydrationListeners.forEach((listener) => listener());
   }
 
   public getItem<T>(key: string, defaultValue: T): T {
     const fullKey = STORAGE_PREFIX + key;
     try {
-      if (this.isStorageAvailable) {
+      const cached = this.inMemoryStore.get(fullKey);
+      if (cached !== undefined) {
+        return JSON.parse(cached) as T;
+      }
+      if (this.isLocalStorageAvailable) {
         const raw = window.localStorage.getItem(fullKey);
         if (raw === null) return defaultValue;
-        return JSON.parse(raw) as T;
-      } else {
-        const raw = this.inMemoryStore.get(fullKey);
-        if (!raw) return defaultValue;
+        this.inMemoryStore.set(fullKey, raw);
         return JSON.parse(raw) as T;
       }
+      return defaultValue;
     } catch {
       return defaultValue;
     }
@@ -67,40 +321,39 @@ class StorageAdapter {
     const fullKey = STORAGE_PREFIX + key;
     try {
       const serialised = JSON.stringify(value);
-      if (this.isStorageAvailable) {
-        window.localStorage.setItem(fullKey, serialised);
-      } else {
-        this.inMemoryStore.set(fullKey, serialised);
+      this.inMemoryStore.set(fullKey, serialised);
+      if (this.isLocalStorageAvailable) {
+        try {
+          window.localStorage.setItem(fullKey, serialised);
+        } catch {
+          this.isLocalStorageAvailable = false;
+          this.notifyStatusListeners();
+        }
       }
+      void this.idbPut(fullKey, value);
       return true;
-    } catch (e) {
-      // In case quota exceeded or sudden block, fall back to in-memory
-      this.isStorageAvailable = false;
-      this.notifyListeners();
-      try {
-        this.inMemoryStore.set(fullKey, JSON.stringify(value));
-        return true;
-      } catch {
-        return false;
-      }
+    } catch {
+      return false;
     }
   }
 
   public removeItem(key: string): void {
     const fullKey = STORAGE_PREFIX + key;
-    try {
-      if (this.isStorageAvailable) {
+    this.inMemoryStore.delete(fullKey);
+    if (this.isLocalStorageAvailable) {
+      try {
         window.localStorage.removeItem(fullKey);
+      } catch {
+        // Ignore
       }
-      this.inMemoryStore.delete(fullKey);
-    } catch {
-      this.inMemoryStore.delete(fullKey);
     }
+    void this.idbDelete(fullKey);
   }
 
   public clear(): void {
-    try {
-      if (this.isStorageAvailable) {
+    this.inMemoryStore.clear();
+    if (this.isLocalStorageAvailable) {
+      try {
         const keysToRemove: string[] = [];
         for (let i = 0; i < window.localStorage.length; i++) {
           const key = window.localStorage.key(i);
@@ -109,45 +362,53 @@ class StorageAdapter {
           }
         }
         keysToRemove.forEach((k) => window.localStorage.removeItem(k));
+      } catch {
+        // Ignore
       }
-      this.inMemoryStore.clear();
-    } catch {
-      this.inMemoryStore.clear();
     }
+    void this.idbClear();
+  }
+
+  public getAllEntries(): Record<string, unknown> {
+    const dump: Record<string, unknown> = {};
+    if (this.isLocalStorageAvailable) {
+      try {
+        for (let i = 0; i < window.localStorage.length; i++) {
+          const key = window.localStorage.key(i);
+          if (key && key.startsWith(STORAGE_PREFIX) && !this.inMemoryStore.has(key)) {
+            const val = window.localStorage.getItem(key);
+            if (val !== null) this.inMemoryStore.set(key, val);
+          }
+        }
+      } catch {
+        // Ignore
+      }
+    }
+    this.inMemoryStore.forEach((val, key) => {
+      if (!key.startsWith(STORAGE_PREFIX)) return;
+      const shortKey = key.slice(STORAGE_PREFIX.length);
+      try {
+        dump[shortKey] = JSON.parse(val);
+      } catch {
+        dump[shortKey] = val;
+      }
+    });
+    return dump;
   }
 
   public exportAll(): string {
-    const dump: Record<string, unknown> = {};
     try {
-      if (this.isStorageAvailable) {
-        for (let i = 0; i < window.localStorage.length; i++) {
-          const key = window.localStorage.key(i);
-          if (key && key.startsWith(STORAGE_PREFIX)) {
-            const shortKey = key.slice(STORAGE_PREFIX.length);
-            const val = window.localStorage.getItem(key);
-            try {
-              dump[shortKey] = val ? JSON.parse(val) : null;
-            } catch {
-              dump[shortKey] = val;
-            }
-          }
-        }
-      } else {
-        this.inMemoryStore.forEach((val, key) => {
-          const shortKey = key.slice(STORAGE_PREFIX.length);
-          try {
-            dump[shortKey] = JSON.parse(val);
-          } catch {
-            dump[shortKey] = val;
-          }
-        });
-      }
-      return JSON.stringify({
-        app: 'Python Visual Lab',
-        version: STORAGE_VERSION,
-        exportedAt: new Date().toISOString(),
-        data: dump,
-      }, null, 2);
+      const dump = this.getAllEntries();
+      return JSON.stringify(
+        {
+          app: 'Python Visual Lab',
+          version: STORAGE_VERSION,
+          exportedAt: new Date().toISOString(),
+          data: dump,
+        },
+        null,
+        2
+      );
     } catch {
       return '{}';
     }
@@ -156,11 +417,14 @@ class StorageAdapter {
   public importAll(jsonStr: string): boolean {
     try {
       const parsed = JSON.parse(jsonStr);
-      if (!parsed || typeof parsed !== 'object' || !parsed.data) return false;
+      if (!parsed || typeof parsed !== 'object' || !parsed.data || typeof parsed.data !== 'object') {
+        return false;
+      }
       const data = parsed.data as Record<string, unknown>;
       Object.entries(data).forEach(([shortKey, val]) => {
         this.setItem(shortKey, val);
       });
+      this.triggerHydration();
       return true;
     } catch {
       return false;

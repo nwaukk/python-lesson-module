@@ -3,8 +3,10 @@
  * Supports deep linking, responsive tab tracking, Day 0 (Welcome Tour), and subtopic navigation.
  */
 
-import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { getDayModule } from '../engine/lesson/dayLoader';
+import { storage } from './storageAdapter';
+import { PersistedLastPosition } from './backupManager';
 
 export type AppRoute =
   | 'dashboard'
@@ -63,16 +65,37 @@ function parseHash(hash: string): { route: AppRoute; day: number; subtopic: numb
 }
 
 export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const hasExplicitHash =
+    typeof window !== 'undefined' &&
+    window.location.hash !== '' &&
+    window.location.hash !== '#' &&
+    window.location.hash !== '#/';
+
   const initial = useMemo(() => {
+    if (hasExplicitHash) {
+      return parseHash(window.location.hash);
+    }
+    const saved = storage.getItem<PersistedLastPosition | null>('last_position', null);
+    if (saved && saved.route) {
+      return {
+        route: saved.route as AppRoute,
+        day: Math.max(0, Math.min(30, saved.day ?? 1)),
+        subtopic: Math.max(0, saved.subtopic ?? 0),
+        mobileTab: saved.mobileTab || 'concept',
+      };
+    }
     return typeof window !== 'undefined'
-      ? parseHash(window.location.hash)
-      : { route: 'dashboard' as AppRoute, day: 1, subtopic: 0 };
-  }, []);
+      ? { ...parseHash(window.location.hash), mobileTab: 'concept' as const }
+      : { route: 'dashboard' as AppRoute, day: 1, subtopic: 0, mobileTab: 'concept' as const };
+  }, [hasExplicitHash]);
 
   const [route, setRoute] = useState<AppRoute>(initial.route);
   const [activeDay, setActiveDay] = useState<number>(initial.day);
   const [activeSubtopicIndex, setActiveSubtopicIndex] = useState<number>(initial.subtopic);
-  const [mobileTab, setMobileTab] = useState<'concept' | 'visualise' | 'code' | 'output' | 'practise'>('concept');
+  const [mobileTab, setMobileTab] = useState<'concept' | 'visualise' | 'code' | 'output' | 'practise'>(
+    'mobileTab' in initial ? initial.mobileTab : 'concept'
+  );
+  const skipInitialPersistRef = useRef(true);
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -85,6 +108,36 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
+
+  // Persist last_position whenever location updates
+  useEffect(() => {
+    if (skipInitialPersistRef.current) {
+      skipInitialPersistRef.current = false;
+      return;
+    }
+    const pos: PersistedLastPosition = {
+      schemaVersion: 1,
+      route,
+      day: activeDay,
+      subtopic: activeSubtopicIndex,
+      mobileTab,
+      updatedAt: new Date().toISOString(),
+    };
+    storage.setItem('last_position', pos);
+  }, [route, activeDay, activeSubtopicIndex, mobileTab]);
+
+  // Restore position on IndexedDB hydration or backup import when no explicit hash overrides it
+  useEffect(() => {
+    return storage.subscribeHydration(() => {
+      const saved = storage.getItem<PersistedLastPosition | null>('last_position', null);
+      if (saved && saved.route && !hasExplicitHash) {
+        setRoute(saved.route as AppRoute);
+        setActiveDay(Math.max(0, Math.min(30, saved.day ?? 1)));
+        setActiveSubtopicIndex(Math.max(0, saved.subtopic ?? 0));
+        if (saved.mobileTab) setMobileTab(saved.mobileTab);
+      }
+    });
+  }, [hasExplicitHash]);
 
   const navigateTo = useCallback((newRoute: AppRoute, params?: { day?: number; subtopic?: number }) => {
     const targetDay = params?.day ?? activeDay;

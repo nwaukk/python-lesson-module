@@ -1,8 +1,21 @@
+# Dependencies
 node_modules/
-build/
+
+# Build & Installer Outputs (never commit build output)
 dist/
+release/
 coverage/
+
+# Keep desktop icon assets in build/, ignore any other temporary build artifacts
+build/*
+!build/icon.ico
+!build/icon.png
+
+# OS & Logs
 .DS_Store
+Thumbs.db
 *.log
+
+# Environment secrets
 .env*
 !.env.example

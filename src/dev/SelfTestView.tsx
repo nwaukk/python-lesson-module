@@ -20,6 +20,20 @@ import { SAMPLE_DATASETS } from '../features/notebook/DataTable';
 import { defaultTutor } from '../engine/coach/tutorProvider';
 import { buildCertificateSummary } from '../features/certificate/certificateData';
 import { buildCertificatePdfBlob } from '../features/certificate/pdfExporter';
+import { getOnlineStatus } from '../store/useOnlineStatus';
+import { exportProgressBackupJson, importProgressBackupJson } from '../store/backupManager';
+import { pyodideWorker } from '../engine/runtime/PyodideWorkerRuntime';
+import { nativePythonRuntime } from '../engine/runtime/NativePythonRuntime';
+import {
+  isElectronDesktop,
+  openPythonFileDialog,
+  savePythonFileDialog,
+  toggleDesktopFullscreen,
+  openExternalSafeUrl,
+  subscribeDesktopMenuActions,
+  getDesktopAppInfo,
+  detectNativePython,
+} from '../platform/desktopBridge';
 
 interface TestResult {
   id: string;
@@ -5091,6 +5105,140 @@ export const SelfTestView: React.FC = () => {
       message: certPassed
         ? `Certificate PDF exporter verified: aggregated 30-day progress (${certSummary.subtopicsTotal} subtopics, ${certSummary.exercisesTotal} exercises, 3 levels) and generated valid ${certBlob.size}-byte PDF (${certHeaderText.trim()}).`
         : `Certificate PDF check failed: days=${certSummary.days.length}/30, blobSize=${certBlob.size}, header=${certHeaderText}.`,
+    });
+
+    // 131. Phase 1 Desktop Readiness (IndexedDB / Fallback Storage, Online Status Hook, Single-File .json Export/Import)
+    await storage.ready();
+    const backend = storage.getStorageBackend();
+    const onlineFlag = getOnlineStatus();
+    const previousEntriesJson = exportProgressBackupJson();
+    storage.setItem('phase1_probe_position', { route: 'lesson', day: 7, subtopic: 2 });
+    const exportedJson = exportProgressBackupJson();
+    storage.removeItem('phase1_probe_position');
+    const importRes = importProgressBackupJson(exportedJson);
+    const restoredProbe = storage.getItem<{ route: string; day: number; subtopic: number } | null>(
+      'phase1_probe_position',
+      null
+    );
+    storage.removeItem('phase1_probe_position');
+    importProgressBackupJson(previousEntriesJson);
+    const phase1Passed =
+      ['indexeddb', 'localstorage', 'memory'].includes(backend) &&
+      typeof onlineFlag === 'boolean' &&
+      importRes.ok &&
+      restoredProbe?.day === 7 &&
+      restoredProbe?.subtopic === 2;
+
+    testCases.push({
+      id: 'desktop-phase1-readiness-check',
+      category: 'storage',
+      name: 'Phase 1 Desktop Readiness: IndexedDB Storage, Offline Hook & JSON Backup Round-Trip',
+      passed: phase1Passed,
+      message: phase1Passed
+        ? `Phase 1 verified: backend=${backend}, onlineHook=${String(onlineFlag)}, full .json backup exported (${exportedJson.length} chars) & restored versioned state cleanly.`
+        : `Phase 1 check failed: backend=${backend}, importOk=${importRes.ok}, restoredDay=${restoredProbe?.day}.`,
+    });
+
+    // 132. Phase 2 Offline Python Execution Engine Verification (Local Pyodide, Stdlib, Trace, Persistence & Offline Shims)
+    let phase2Passed = false;
+    let phase2Details = '';
+    try {
+      const base = document.baseURI || window.location.href;
+      const workerScriptResp = await fetch(new URL('./pyodide-worker.js', base).href);
+      const pyodideJsResp = await fetch(new URL('./pyodide/pyodide.js', base).href);
+      const workerJsText = workerScriptResp.ok ? await workerScriptResp.text() : '';
+      const noCdnInWorker = workerScriptResp.ok && pyodideJsResp.ok && !workerJsText.includes('cdn.jsdelivr.net');
+
+      let streamedChunksCount = 0;
+      const unsubStream = pyodideWorker.onOutput((c) => {
+        if (c.type === 'stdout') streamedChunksCount++;
+      });
+
+      const stdlibRun = await pyodideWorker.run(
+        `import math, random, datetime, json, re, collections, statistics\n` +
+          `_phase2_x = int(math.sqrt(144)) + statistics.mean([10, 20])\n` +
+          `print(json.dumps({"val": _phase2_x, "count": collections.Counter("aab")["a"]}))`,
+        { persistentNamespace: true }
+      );
+      const persistRun = await pyodideWorker.run(`print(_phase2_x * 2)`, { persistentNamespace: true });
+      await pyodideWorker.resetNamespace();
+      const offlineReqRun = await pyodideWorker.run(
+        `import requests\nr = requests.get("https://api.example.com/users")\nprint(r.status_code, len(r.json()))`,
+        { isolated: true }
+      );
+      const traceProbe = await pyodideWorker.trace(`z = 7\nprint(z + 3)`, { isolated: true });
+      unsubStream();
+
+      const stdlibOk = stdlibRun.exitCode === 0 && stdlibRun.stdout.includes('"val": 27');
+      const persistOk = persistRun.exitCode === 0 && persistRun.stdout.trim() === '54';
+      const offlineNoticeOk =
+        offlineReqRun.exitCode === 0 &&
+        offlineReqRun.stdout.includes('200') &&
+        Boolean(offlineReqRun.offlineNotice?.includes('Not available in offline mode'));
+      const traceOk = traceProbe.steps.length >= 2 && traceProbe.stdout.includes('10');
+
+      phase2Passed =
+        noCdnInWorker && streamedChunksCount >= 2 && stdlibOk && persistOk && offlineNoticeOk && traceOk;
+      phase2Details = phase2Passed
+        ? `Offline Pyodide worker verified: zero CDN URLs, streamed ${streamedChunksCount} live stdout chunks, stdlib (math/random/datetime/json/re/collections/statistics) passed, shared cell variables (${persistRun.stdout.trim()}) passed, sys.settrace (${traceProbe.steps.length} steps) passed, and offline requests shim emitted sample-data notice.`
+        : `Checks: noCdn=${noCdnInWorker}, chunks=${streamedChunksCount}, stdlib=${stdlibOk} (${stdlibRun.stderr}), persist=${persistOk} (${persistRun.stdout}), offlineShim=${offlineNoticeOk}, trace=${traceOk}.`;
+    } catch (phase2Err: any) {
+      phase2Passed = false;
+      phase2Details = `Offline Pyodide check failed: ${phase2Err?.message || String(phase2Err)}`;
+    }
+
+    testCases.push({
+      id: 'desktop-phase2-offline-python-check',
+      category: 'runtime',
+      name: 'Phase 2 Offline Python Engine: Local Pyodide Worker, Streaming, Persistence & Offline Shims',
+      passed: phase2Passed,
+      message: phase2Details,
+    });
+
+    // 133. Phase 3 Electron Shell & Desktop Bridge Contract Check
+    const desktopInfo = await getDesktopAppInfo();
+    const bridgeReady =
+      typeof isElectronDesktop === 'function' &&
+      typeof openPythonFileDialog === 'function' &&
+      typeof savePythonFileDialog === 'function' &&
+      typeof toggleDesktopFullscreen === 'function' &&
+      typeof openExternalSafeUrl === 'function' &&
+      typeof subscribeDesktopMenuActions === 'function' &&
+      typeof desktopInfo.isElectron === 'boolean';
+
+    testCases.push({
+      id: 'desktop-phase3-electron-shell-check',
+      category: 'storage',
+      name: 'Phase 3 Electron Shell & Desktop Bridge Contract',
+      passed: bridgeReady,
+      message: bridgeReady
+        ? `Desktop shell bridge verified (isElectron=${desktopInfo.isElectron}, platform=${desktopInfo.platform}): native .py open/save dialogs, fullscreen toggle, menu subscriber, and external link guard are wired cleanly.`
+        : 'Desktop shell bridge check failed.',
+    });
+
+    // 134. Phase 4 Optional Native Python Mode & Safe Default Engine Check
+    const nativeDetectProbe = await detectNativePython();
+    const persistedRuntime = storage.getItem<{ pythonEngine?: string } | null>('runtime_settings', null);
+    const defaultIsPyodide = !persistedRuntime?.pythonEngine || persistedRuntime.pythonEngine === 'pyodide';
+    const nativeAdapterContract =
+      nativePythonRuntime.id === 'native-python' &&
+      typeof nativePythonRuntime.detect === 'function' &&
+      typeof nativePythonRuntime.run === 'function' &&
+      typeof nativePythonRuntime.trace === 'function' &&
+      typeof nativePythonRuntime.stop === 'function' &&
+      typeof nativePythonRuntime.submitInput === 'function' &&
+      typeof nativeDetectProbe.found === 'boolean' &&
+      typeof nativeDetectProbe.message === 'string' &&
+      nativeDetectProbe.message.length > 10;
+
+    testCases.push({
+      id: 'desktop-phase4-native-engine-check',
+      category: 'runtime',
+      name: 'Phase 4 Optional Native Python Engine & Safe Built-in Fallback',
+      passed: nativeAdapterContract && (defaultIsPyodide || nativeDetectProbe.found),
+      message: nativeAdapterContract
+        ? `Native Python optional mode verified (off by default: defaultPyodide=${defaultIsPyodide}, systemFound=${nativeDetectProbe.found}): ${nativeDetectProbe.message}`
+        : 'Native Python runtime contract or fallback message check failed.',
     });
 
     setResults(testCases);

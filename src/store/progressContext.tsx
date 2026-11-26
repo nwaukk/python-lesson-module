@@ -68,10 +68,21 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [isFallbackStorage, setIsFallbackStorage] = useState<boolean>(() => storage.isUsingFallback());
 
   useEffect(() => {
-    const unsub = storage.subscribeStatus((isFallback) => {
+    const unsubStatus = storage.subscribeStatus((isFallback) => {
       setIsFallbackStorage(isFallback);
     });
-    return unsub;
+    const unsubHydration = storage.subscribeHydration(() => {
+      const hydrated = storage.getItem<UserProgress>('user_progress', DEFAULT_PROGRESS);
+      setProgress({
+        ...DEFAULT_PROGRESS,
+        ...hydrated,
+        schemaVersion: 1,
+      });
+    });
+    return () => {
+      unsubStatus();
+      unsubHydration();
+    };
   }, []);
 
   // Save progress changes

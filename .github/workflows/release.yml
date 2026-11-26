@@ -1,0 +1,141 @@
+name: Build & Release Windows Desktop App
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'App release version (e.g. 2.0.0 or v2.0.0)'
+        required: true
+        default: '2.0.0'
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    name: Build Windows x64 (.exe Installer & Portable)
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Resolve release version and tag
+        id: meta
+        shell: pwsh
+        run: |
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            $raw = "${{ github.event.inputs.version }}".Trim()
+          } else {
+            $raw = "${{ github.ref_name }}".Trim()
+          }
+          $cleanVersion = $raw -replace '^[vV]', ''
+          if ($cleanVersion -notmatch '^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$') {
+            Write-Error "Invalid version '$raw'. Use semantic versioning such as 2.0.0 or v2.0.0."
+            exit 1
+          }
+          $tag = "v$cleanVersion"
+          "version=$cleanVersion" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "tag=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          Write-Host "Resolved release tag: $tag (package version: $cleanVersion)"
+
+      - name: Set up Node.js LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+
+      - name: Install dependencies (npm ci)
+        run: npm ci
+
+      - name: Sync version into package.json and prepare repository metadata
+        shell: pwsh
+        run: |
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            pkg.version = process.env.REL_VERSION;
+            if (!pkg.repository || !pkg.repository.url) {
+              pkg.repository = { type: 'git', url: 'https://github.com/' + process.env.GH_REPO };
+            }
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n', 'utf8');
+          "
+        env:
+          REL_VERSION: ${{ steps.meta.outputs.version }}
+          GH_REPO: ${{ github.repository }}
+
+      - name: Verify TypeScript & bundle Vite web app
+        run: |
+          npm run lint
+          npm run build
+
+      - name: Ensure desktop icon asset exists
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "build/icon.ico")) {
+            Write-Host "build/icon.ico not found; generating default icon..."
+            node scripts/generate-icon.mjs
+          }
+
+      - name: Configure code signing (unsigned fallback until certificates are added)
+        shell: pwsh
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:CSC_LINK)) {
+            Write-Host "No code-signing certificate secret configured. Building unsigned Windows executables."
+            "CSC_IDENTITY_AUTO_DISCOVERY=false" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          } else {
+            Write-Host "Code-signing certificate detected. Signing Windows executables."
+          }
+        env:
+          # Optional future code signing: add CSC_LINK and CSC_KEY_PASSWORD in GitHub Secrets
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+
+      - name: Package Windows NSIS Installer and Portable .exe
+        run: npx electron-builder --win --x64 --publish never
+
+      - name: Verify expected Windows .exe outputs
+        shell: pwsh
+        run: |
+          $setup = "release/PythonVisualLab-Setup-${{ steps.meta.outputs.version }}.exe"
+          $portable = "release/PythonVisualLab-Portable-${{ steps.meta.outputs.version }}.exe"
+          if (-not (Test-Path $setup)) {
+            Write-Error "Missing expected installer: $setup"
+            Get-ChildItem release
+            exit 1
+          }
+          if (-not (Test-Path $portable)) {
+            Write-Error "Missing expected portable executable: $portable"
+            Get-ChildItem release
+            exit 1
+          }
+          Get-ChildItem release | Format-Table Name, Length
+
+      - name: Upload Windows build artefacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: PythonVisualLab-Windows-${{ steps.meta.outputs.version }}
+          path: |
+            release/PythonVisualLab-Setup-*.exe
+            release/PythonVisualLab-Portable-*.exe
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Create or update GitHub Release and attach .exe files
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.meta.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: Python Visual Lab ${{ steps.meta.outputs.tag }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+          files: |
+            release/PythonVisualLab-Setup-*.exe
+            release/PythonVisualLab-Portable-*.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

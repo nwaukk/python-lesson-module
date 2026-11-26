@@ -152,13 +152,20 @@ export const GuidedWorkspace: React.FC = () => {
     runCode,
     traceCode,
     stopExecution,
+    resetRuntime,
+    ensureEngineReady,
     isExecuting,
     runtimeMode,
     status,
     loadProgress,
+    statusMessage,
+    isEngineCached,
     activeTraceStep,
     lastError,
     inputQueue,
+    pendingInputPrompt,
+    pythonEngine,
+    nativePythonInfo,
   } = usePythonRuntime();
 
   // Load day module & subtopic
@@ -173,6 +180,16 @@ export const GuidedWorkspace: React.FC = () => {
   const [editorCode, setEditorCode] = useState<string>('');
   const [activeHintLevel, setActiveHintLevel] = useState<number>(0);
   const [tutorGuidance, setTutorGuidance] = useState<TutorResponse | null>(null);
+
+  useEffect(() => {
+    void ensureEngineReady();
+  }, [ensureEngineReady]);
+
+  useEffect(() => {
+    if (pendingInputPrompt !== null) {
+      setActiveResultTab('console');
+    }
+  }, [pendingInputPrompt]);
 
   // Synchronise tutor guidance dynamically
   useEffect(() => {
@@ -598,14 +615,18 @@ export const GuidedWorkspace: React.FC = () => {
                   {runtimeMode === 'real' ? 'REAL PYTHON' : runtimeMode === 'trace' ? 'TRACE' : 'SIMULATION'}
                 </span>
 
-                <span className="text-[11px] font-mono text-[var(--text-dim)] hidden sm:inline">
+                <span className="text-[11px] font-mono text-[var(--text-dim)] hidden sm:inline tabular-nums">
                   {status === 'loading'
-                    ? `Loading Pyodide (${loadProgress}%)...`
+                    ? `${statusMessage || 'Preparing Python engine...'} (${loadProgress}%)`
                     : status === 'ready'
-                    ? 'Pyodide 3.12 Ready'
+                    ? pythonEngine === 'native'
+                      ? `Native Python ${nativePythonInfo?.version || '3'} Ready`
+                      : isEngineCached
+                      ? 'Pyodide 3.12 Offline (Cached)'
+                      : 'Pyodide 3.12 Offline Ready'
                     : status === 'running'
                     ? 'Running...'
-                    : 'Ready'}
+                    : 'Offline Engine Standby'}
                 </span>
 
                 {inputQueue.length > 0 && (
@@ -617,6 +638,14 @@ export const GuidedWorkspace: React.FC = () => {
 
               {/* Execution Actions */}
               <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => void resetRuntime()}
+                  disabled={isExecuting}
+                  className="px-2 py-1 rounded-lg border border-[var(--border-subtle)] hover:bg-[var(--border-subtle)] text-xs text-[var(--text-muted)] transition-colors disabled:opacity-40"
+                  title="Reset Python interpreter & clear variables"
+                >
+                  Reset Engine
+                </button>
                 <button
                   onClick={() => {
                     if (currentSubtopic.code && currentSubtopic.code[0]) {

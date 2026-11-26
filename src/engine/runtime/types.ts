@@ -44,6 +44,8 @@ export interface RunOptions {
   timeLimitMs?: number;
   inputQueue?: string[];
   maxOutputChars?: number;
+  isolated?: boolean;
+  persistentNamespace?: boolean;
 }
 
 export interface TraceOptions extends RunOptions {
@@ -58,6 +60,8 @@ export interface RunResult {
   memoryObjectsCreated: number;
   bytecodeSteps: number;
   error?: ParsedPythonError | null;
+  needsInputPrompt?: string | null;
+  offlineNotice?: string | null;
 }
 
 export interface TraceResult {
@@ -68,6 +72,8 @@ export interface TraceResult {
   stderr: string;
   durationMs: number;
   error?: ParsedPythonError | null;
+  needsInputPrompt?: string | null;
+  offlineNotice?: string | null;
 }
 
 export interface OutputChunk {
@@ -82,12 +88,17 @@ export interface PythonRuntime {
   mode: ExecutionMode;
   status: RuntimeStatus;
   loadProgress: number; // 0 to 100
+  statusMessage?: string;
+  isCached?: boolean;
   init(): Promise<void>;
   run(code: string, options?: RunOptions): Promise<RunResult>;
   trace(code: string, options?: TraceOptions): Promise<TraceResult>;
   stop(): void;
   reset(): Promise<void>;
+  resetNamespace?(): Promise<void>;
+  submitInput?(value: string): void;
   installPackage?(packageName: string): Promise<boolean>;
-  onStatusChange(listener: (status: RuntimeStatus, progress: number) => void): () => void;
+  onStatusChange(listener: (status: RuntimeStatus, progress: number, message?: string, cached?: boolean) => void): () => void;
   onOutput(listener: (chunk: OutputChunk) => void): () => void;
+  onInputRequest?(listener: (prompt: string) => void): () => void;
 }

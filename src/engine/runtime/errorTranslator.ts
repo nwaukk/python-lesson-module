@@ -159,10 +159,11 @@ function generatePlainLanguageExplanation(
     case 'ImportError':
       return {
         friendlyExplanation:
-          'Python could not find or import the specified module name.',
+          `Python could not find or import the requested module (${message}). In offline WebAssembly mode, the core Python standard library (math, random, datetime, json, re, collections, statistics) and educational shims (requests, flask, pymongo, sqlite3) are bundled locally, while unbundled external third-party packages are unavailable offline.`,
         fixSuggestions: [
           'Check the spelling of the module in your import statement.',
-          'Verify whether the module is part of the standard library or needs to be installed.',
+          'Use bundled standard library modules (math, random, datetime, json, re, collections, statistics, csv, pathlib, urllib.parse).',
+          'For external PyPI packages or OS tools, switch to Desktop Native Python mode in Phase 4 when available.',
         ],
       };
 
@@ -179,21 +180,31 @@ function generatePlainLanguageExplanation(
     case 'EOFError':
       return {
         friendlyExplanation:
-          'The `input()` function asked for user input, but the Input Queue has run out of items.',
+          'The `input()` function asked for user input, but no input was provided yet.',
         fixSuggestions: [
-          'Open the Input Queue panel and add lines of input before running.',
-          'Provide enough input lines to satisfy every `input()` call in your program.',
+          'Type a response into the interactive console prompt or stage lines in the Input Queue panel.',
+          'Provide one response per `input()` call in your program.',
+        ],
+      };
+
+    case 'KeyboardInterrupt':
+      return {
+        friendlyExplanation:
+          'Execution was stopped before completion via the Stop / Interrupt button.',
+        fixSuggestions: [
+          'If you were testing an infinite `while` loop, verify the loop exit condition updates on every iteration.',
+          'Click Run Code whenever you are ready to run the script again.',
         ],
       };
 
     case 'TimeoutError':
       return {
         friendlyExplanation:
-          'Execution timed out after exceeding the safety limit (5 seconds). This usually happens when a `while` loop condition never becomes False.',
+          'Execution timed out after exceeding the configured safety limit. This usually happens when a `while` loop condition never becomes False.',
         fixSuggestions: [
           'Check your while loops to confirm that the loop variable is updated on every pass (e.g. `count += 1`).',
           'Make sure the loop has an achievable termination condition or a `break` statement.',
-          'If your calculation is intentionally heavy, adjust the time limit in settings.',
+          'If your calculation is intentionally heavy, increase the Run Timeout setting in the console bar.',
         ],
       };
 

@@ -1,7 +1,9 @@
 /**
- * Pyodide Web Worker Runtime
- * Section 8.1, 8.2 & 8.3: Dedicated Web Worker, stdout/stderr capture, timeout termination,
- * input queue redirection, and sys.settrace execution tracing.
+ * Offline Pyodide Web Worker Runtime
+ * Serves 100% locally bundled Pyodide assets (./pyodide/ via ./pyodide-worker.js, zero CDN requests).
+ * Supports lazy initialization, single-instance lock, live stdout/stderr streaming,
+ * interactive console input() (SharedArrayBuffer + non-isolated prompt resumption),
+ * interrupt / timeout recovery, persistent cell namespaces, and sys.settrace stepping.
  */
 
 import {
@@ -13,285 +15,56 @@ import {
   RunResult,
   TraceResult,
   OutputChunk,
-  TraceStep,
 } from './types';
 import { parsePythonError } from './errorTranslator';
 
-// Worker inline source script that runs Pyodide in background
-const WORKER_SCRIPT = `
-importScripts("https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js");
-
-let pyodide = null;
-let isReady = false;
-
-async function initPyodideWorker() {
-  try {
-    postMessage({ type: 'STATUS', status: 'loading', progress: 20 });
-    pyodide = await loadPyodide({
-      indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.4/full/"
-    });
-    postMessage({ type: 'STATUS', status: 'loading', progress: 80 });
-
-    // Set up standard python harness for stdout, stderr, input queue and tracing
-    await pyodide.runPythonAsync(\`
-import sys
-import io
-import json
-
-class InputQueue:
-    def __init__(self):
-        self.queue = []
-    
-    def set_inputs(self, items):
-        self.queue = list(items)
-        
-    def readline(self, prompt=""):
-        if prompt:
-            sys.stdout.write(prompt)
-            sys.stdout.flush()
-        if not self.queue:
-            raise EOFError("Ran out of input from Input Queue. Please provide input before running.")
-        return self.queue.pop(0)
-
-_pvl_input_queue = InputQueue()
-__builtins__.input = _pvl_input_queue.readline
-\`);
-
-    isReady = true;
-    postMessage({ type: 'STATUS', status: 'ready', progress: 100 });
-  } catch (err) {
-    postMessage({ type: 'STATUS', status: 'failed', error: String(err) });
-  }
+interface PendingWorkerRequest {
+  kind: 'RUN' | 'TRACE';
+  resolve: (val: any) => void;
+  reject: (err: any) => void;
+  timer?: ReturnType<typeof setTimeout>;
+  streamedStdout: string;
+  streamedStderr: string;
+  offlineNotices: string[];
+  startedAt: number;
 }
 
-initPyodideWorker();
-
-onmessage = async function(e) {
-  const { id, type, code, inputQueue, maxSteps } = e.data;
-
-  if (type === 'RUN') {
-    if (!isReady || !pyodide) {
-      postMessage({ id, type: 'ERROR', error: 'Python runtime is not ready.' });
-      return;
-    }
-
-    try {
-      // Pass inputs to Python input queue
-      pyodide.globals.get('_pvl_input_queue').set_inputs(inputQueue || []);
-
-      // Execute with separate stdout and stderr capture
-      const pyScript = \`
-import sys, io, time
-
-_pvl_stdout = io.StringIO()
-_pvl_stderr = io.StringIO()
-_pvl_old_stdout = sys.stdout
-_pvl_old_stderr = sys.stderr
-
-sys.stdout = _pvl_stdout
-sys.stderr = _pvl_stderr
-
-_pvl_start_time = time.perf_counter()
-_pvl_error = None
-
-try:
-    _pvl_compiled = compile(\` + JSON.stringify(code) + \`, '<stdin>', 'exec')
-    exec(_pvl_compiled, globals())
-except Exception as e:
-    import traceback
-    _pvl_error = traceback.format_exc()
-finally:
-    _pvl_duration_ms = (time.perf_counter() - _pvl_start_time) * 1000
-    sys.stdout = _pvl_old_stdout
-    sys.stderr = _pvl_old_stderr
-
-{
-    "stdout": _pvl_stdout.getvalue(),
-    "stderr": _pvl_stderr.getvalue(),
-    "error": _pvl_error,
-    "durationMs": _pvl_duration_ms
-}
-\`;
-
-      const resultProxy = await pyodide.runPythonAsync(pyScript);
-      const res = resultProxy.toJs({ dict_converter: Object.fromEntries });
-      resultProxy.destroy();
-
-      postMessage({
-        id,
-        type: 'RUN_SUCCESS',
-        result: {
-          stdout: res.stdout || '',
-          stderr: res.stderr || '',
-          error: res.error || null,
-          durationMs: Math.round(res.durationMs || 0),
-          exitCode: res.error ? 1 : 0
-        }
-      });
-    } catch (err) {
-      postMessage({
-        id,
-        type: 'RUN_SUCCESS',
-        result: {
-          stdout: '',
-          stderr: '',
-          error: String(err),
-          durationMs: 0,
-          exitCode: 1
-        }
-      });
-    }
+function resolveWorkerUrls(): { workerUrl: string; indexURL: string } {
+  if (typeof window === 'undefined') {
+    return { workerUrl: './pyodide-worker.js', indexURL: './pyodide/' };
   }
-
-  if (type === 'TRACE') {
-    if (!isReady || !pyodide) {
-      postMessage({ id, type: 'ERROR', error: 'Python runtime is not ready.' });
-      return;
-    }
-
-    try {
-      pyodide.globals.get('_pvl_input_queue').set_inputs(inputQueue || []);
-
-      const traceHarness = \`
-import sys, io, time, inspect
-
-_trace_steps = []
-_max_steps = \` + (maxSteps || 300) + \`
-_step_count = 0
-_truncated = False
-
-_pvl_stdout = io.StringIO()
-_pvl_stderr = io.StringIO()
-_pvl_old_stdout = sys.stdout
-_pvl_old_stderr = sys.stderr
-sys.stdout = _pvl_stdout
-sys.stderr = _pvl_stderr
-
-_prev_stdout_len = 0
-
-def _tracer(frame, event, arg):
-    global _step_count, _truncated, _prev_stdout_len
-    if frame.f_code.co_filename != '<stdin>':
-        return _tracer
-    
-    _step_count += 1
-    if _step_count > _max_steps:
-        _truncated = True
-        return None
-    
-    # Capture variables
-    local_vars = {}
-    for k, v in frame.f_locals.items():
-        if k.startswith('_pvl_') or k.startswith('_trace_') or k.startswith('__'):
-            continue
-        try:
-            r = repr(v)
-            if len(r) > 100:
-                r = r[:97] + '...'
-            local_vars[k] = {
-                "name": k,
-                "type": type(v).__name__,
-                "repr": r,
-                "objectId": id(v) % 10000,
-                "isMutable": type(v) in (list, dict, set, bytearray)
-            }
-        except:
-            pass
-
-    current_stdout = _pvl_stdout.getvalue()
-    stdout_delta = current_stdout[_prev_stdout_len:]
-    _prev_stdout_len = len(current_stdout)
-
-    _trace_steps.append({
-        "stepNumber": _step_count,
-        "line": frame.f_lineno,
-        "event": event,
-        "functionName": frame.f_code.co_name,
-        "scope": "local" if frame.f_code.co_name != '<module>' else "global",
-        "variables": local_vars,
-        "stdoutDelta": stdout_delta
-    })
-    return _tracer
-
-_start = time.perf_counter()
-_err = None
-
-try:
-    code_obj = compile(\` + JSON.stringify(code) + \`, '<stdin>', 'exec')
-    sys.settrace(_tracer)
-    exec(code_obj, globals())
-except Exception as e:
-    import traceback
-    _err = traceback.format_exc()
-finally:
-    sys.settrace(None)
-    _dur = (time.perf_counter() - _start) * 1000
-    sys.stdout = _pvl_old_stdout
-    sys.stderr = _pvl_old_stderr
-
-{
-    "steps": _trace_steps,
-    "totalSteps": _step_count,
-    "truncated": _truncated,
-    "stdout": _pvl_stdout.getvalue(),
-    "stderr": _pvl_stderr.getvalue(),
-    "durationMs": _dur,
-    "error": _err
+  const base = document.baseURI || window.location.href;
+  return {
+    workerUrl: new URL('./pyodide-worker.js', base).href,
+    indexURL: new URL('./pyodide/', base).href,
+  };
 }
-\`;
-
-      const resultProxy = await pyodide.runPythonAsync(traceHarness);
-      const res = resultProxy.toJs({ dict_converter: Object.fromEntries });
-      resultProxy.destroy();
-
-      postMessage({
-        id,
-        type: 'TRACE_SUCCESS',
-        result: {
-          steps: res.steps || [],
-          totalSteps: res.totalSteps || 0,
-          truncated: Boolean(res.truncated),
-          stdout: res.stdout || '',
-          stderr: res.stderr || '',
-          durationMs: Math.round(res.durationMs || 0),
-          error: res.error || null
-        }
-      });
-    } catch (err) {
-      postMessage({
-        id,
-        type: 'TRACE_SUCCESS',
-        result: {
-          steps: [],
-          totalSteps: 0,
-          truncated: false,
-          stdout: '',
-          stderr: '',
-          durationMs: 0,
-          error: String(err)
-        }
-      });
-    }
-  }
-};
-`;
 
 export class PyodideWorkerRuntime implements PythonRuntime {
   public id = 'pyodide-worker';
-  public name = 'Pyodide Web Worker (Python 3.12)';
+  public name = 'Pyodide Web Worker (Offline Python 3.12)';
   public mode: ExecutionMode = 'real';
   public status: RuntimeStatus = 'not-loaded';
   public loadProgress = 0;
+  public statusMessage = 'Preparing Python engine...';
+  public isCached = false;
 
   private worker: Worker | null = null;
-  private workerBlobUrl: string | null = null;
-  private statusListeners: Set<(status: RuntimeStatus, progress: number) => void> = new Set();
+  private initPromise: Promise<void> | null = null;
+  private statusListeners: Set<(status: RuntimeStatus, progress: number, message?: string, cached?: boolean) => void> = new Set();
   private outputListeners: Set<(chunk: OutputChunk) => void> = new Set();
-  private pendingRequests: Map<string, { resolve: (val: any) => void; reject: (err: any) => void; timer?: any }> = new Map();
+  private inputRequestListeners: Set<(prompt: string) => void> = new Set();
+  private pendingRequests: Map<string, PendingWorkerRequest> = new Map();
 
-  public onStatusChange(listener: (status: RuntimeStatus, progress: number) => void): () => void {
+  private activeInputSab: SharedArrayBuffer | null = null;
+  private activeInterruptSab: SharedArrayBuffer | null = null;
+  private stopGraceTimer: ReturnType<typeof setTimeout> | null = null;
+
+  public onStatusChange(
+    listener: (status: RuntimeStatus, progress: number, message?: string, cached?: boolean) => void
+  ): () => void {
     this.statusListeners.add(listener);
-    listener(this.status, this.loadProgress);
+    listener(this.status, this.loadProgress, this.statusMessage, this.isCached);
     return () => this.statusListeners.delete(listener);
   }
 
@@ -300,177 +73,406 @@ export class PyodideWorkerRuntime implements PythonRuntime {
     return () => this.outputListeners.delete(listener);
   }
 
-  private setStatus(status: RuntimeStatus, progress = this.loadProgress) {
+  public onInputRequest(listener: (prompt: string) => void): () => void {
+    this.inputRequestListeners.add(listener);
+    return () => this.inputRequestListeners.delete(listener);
+  }
+
+  private emitOutputChunk(type: OutputChunk['type'], text: string): void {
+    const chunk: OutputChunk = { type, text, timestamp: Date.now() };
+    this.outputListeners.forEach((l) => l(chunk));
+  }
+
+  private setStatus(
+    status: RuntimeStatus,
+    progress = this.loadProgress,
+    message = this.statusMessage,
+    cached = this.isCached
+  ): void {
     this.status = status;
     this.loadProgress = progress;
-    this.statusListeners.forEach((l) => l(status, progress));
+    this.statusMessage = message;
+    this.isCached = cached;
+    this.statusListeners.forEach((l) => l(status, progress, message, cached));
   }
 
   public async init(): Promise<void> {
-    if (this.status === 'ready' || this.status === 'loading') return;
-    this.setStatus('loading', 10);
+    if (this.status === 'ready' && this.worker) return;
+    if (this.initPromise) return this.initPromise;
 
-    try {
-      const blob = new Blob([WORKER_SCRIPT], { type: 'application/javascript' });
-      this.workerBlobUrl = URL.createObjectURL(blob);
-      this.worker = new Worker(this.workerBlobUrl);
-
-      this.worker.onmessage = (e) => {
-        const msg = e.data;
-        if (msg.type === 'STATUS') {
-          if (msg.status === 'ready') {
-            this.setStatus('ready', 100);
-          } else if (msg.status === 'loading') {
-            this.setStatus('loading', msg.progress || 50);
-          } else if (msg.status === 'failed') {
-            this.setStatus('failed', 0);
-          }
-        } else if (msg.id && this.pendingRequests.has(msg.id)) {
-          const req = this.pendingRequests.get(msg.id)!;
-          if (req.timer) clearTimeout(req.timer);
-          this.pendingRequests.delete(msg.id);
-          this.setStatus('ready');
-
-          if (msg.type === 'RUN_SUCCESS' || msg.type === 'TRACE_SUCCESS') {
-            req.resolve(msg.result);
-          } else {
-            req.reject(new Error(msg.error || 'Execution failed'));
-          }
+    this.initPromise = new Promise<void>((resolve, reject) => {
+      try {
+        if (typeof Worker === 'undefined') {
+          this.setStatus('failed', 0, 'Web Workers are unavailable in this environment.', false);
+          reject(new Error('Web Workers unavailable'));
+          return;
         }
-      };
 
-      this.worker.onerror = (err) => {
-        console.error('Pyodide Worker Error:', err);
-        this.setStatus('failed');
-      };
-    } catch (e) {
-      console.warn('Could not launch Pyodide worker, marking failed:', e);
-      this.setStatus('failed');
+        const { workerUrl, indexURL } = resolveWorkerUrls();
+        this.setStatus('loading', 10, 'Preparing Python engine...', false);
+
+        const worker = new Worker(workerUrl);
+        this.worker = worker;
+
+        let settledInit = false;
+
+        worker.onmessage = (e) => {
+          const msg = e.data || {};
+
+          if (msg.type === 'STATUS') {
+            const nextStatus = msg.status as RuntimeStatus;
+            const nextProg = typeof msg.progress === 'number' ? msg.progress : this.loadProgress;
+            const nextMsg = msg.message || this.statusMessage;
+            const nextCached = Boolean(msg.cached);
+            this.setStatus(nextStatus, nextProg, nextMsg, nextCached);
+
+            if (nextStatus === 'ready' && !settledInit) {
+              settledInit = true;
+              resolve();
+            } else if (nextStatus === 'failed' && !settledInit) {
+              settledInit = true;
+              this.initPromise = null;
+              reject(new Error(msg.error || 'Failed to prepare Python engine.'));
+            }
+            return;
+          }
+
+          if (msg.type === 'OUTPUT_CHUNK' && msg.id && this.pendingRequests.has(msg.id)) {
+            const req = this.pendingRequests.get(msg.id)!;
+            const chunkType = (msg.chunkType as OutputChunk['type']) || 'stdout';
+            const text = String(msg.text || '');
+            if (chunkType === 'stdout') req.streamedStdout += text;
+            else if (chunkType === 'stderr') req.streamedStderr += text;
+            else if (chunkType === 'system' && text) req.offlineNotices.push(text);
+            this.emitOutputChunk(chunkType, text);
+            return;
+          }
+
+          if (msg.type === 'INPUT_REQUEST') {
+            const prompt = String(msg.prompt || '');
+            this.inputRequestListeners.forEach((l) => l(prompt));
+            return;
+          }
+
+          if (msg.id && this.pendingRequests.has(msg.id)) {
+            const req = this.pendingRequests.get(msg.id)!;
+            if (req.timer) clearTimeout(req.timer);
+            this.pendingRequests.delete(msg.id);
+            if (this.stopGraceTimer) {
+              clearTimeout(this.stopGraceTimer);
+              this.stopGraceTimer = null;
+            }
+            this.setStatus('ready', 100, this.isCached ? 'Python 3.12 Ready (Cached)' : 'Python 3.12 Ready (Offline)', this.isCached);
+
+            if (msg.type === 'RUN_SUCCESS' || msg.type === 'TRACE_SUCCESS') {
+              req.resolve(msg.result);
+            } else {
+              req.reject(new Error(msg.error || 'Python execution failed'));
+            }
+          }
+        };
+
+        worker.onerror = (err) => {
+          console.error('Pyodide Worker crashed:', err);
+          if (!settledInit) {
+            settledInit = true;
+            this.initPromise = null;
+            this.setStatus('failed', 0, 'Python worker crashed during initialization.', false);
+            reject(new Error(err?.message || 'Worker error'));
+          } else {
+            this.recoverFromCrash('Python worker encountered a memory/runtime fault and was safely recovered.');
+          }
+        };
+
+        worker.postMessage({ type: 'INIT', indexURL });
+      } catch (e: any) {
+        this.initPromise = null;
+        this.setStatus('failed', 0, 'Could not start offline Python worker.', false);
+        reject(e);
+      }
+    });
+
+    return this.initPromise;
+  }
+
+  private recoverFromCrash(reason: string): void {
+    const crashErr = parsePythonError(`RuntimeError: ${reason}`);
+    this.pendingRequests.forEach((req) => {
+      if (req.timer) clearTimeout(req.timer);
+      if (req.kind === 'TRACE') {
+        req.resolve({
+          steps: [],
+          totalSteps: 0,
+          truncated: true,
+          stdout: req.streamedStdout,
+          stderr: req.streamedStderr ? `${req.streamedStderr}\n${reason}` : reason,
+          durationMs: Date.now() - req.startedAt,
+          error: crashErr,
+        });
+      } else {
+        req.resolve({
+          stdout: req.streamedStdout,
+          stderr: req.streamedStderr ? `${req.streamedStderr}\n${reason}` : reason,
+          exitCode: 1,
+          durationMs: Date.now() - req.startedAt,
+          memoryObjectsCreated: 0,
+          bytecodeSteps: 0,
+          error: crashErr,
+        });
+      }
+    });
+    this.pendingRequests.clear();
+    this.terminateWorkerOnly();
+    this.emitOutputChunk('system', reason);
+  }
+
+  public submitInput(value: string): void {
+    if (!this.activeInputSab || typeof Atomics === 'undefined') return;
+    const ctrl = new Int32Array(this.activeInputSab, 0, 2);
+    const dataView = new Uint8Array(this.activeInputSab, 8);
+    const encoded = new TextEncoder().encode(String(value));
+    const clampedLen = Math.min(encoded.length, dataView.byteLength);
+    dataView.set(encoded.subarray(0, clampedLen), 0);
+    Atomics.store(ctrl, 1, clampedLen);
+    Atomics.store(ctrl, 0, 1);
+    Atomics.notify(ctrl, 0, 1);
+  }
+
+  private createSharedBuffers(): { inputSab: SharedArrayBuffer | null; interruptSab: SharedArrayBuffer | null } {
+    if (
+      typeof SharedArrayBuffer !== 'undefined' &&
+      typeof window !== 'undefined' &&
+      Boolean(window.crossOriginIsolated)
+    ) {
+      try {
+        this.activeInputSab = new SharedArrayBuffer(65536);
+        this.activeInterruptSab = new SharedArrayBuffer(4);
+        return { inputSab: this.activeInputSab, interruptSab: this.activeInterruptSab };
+      } catch {
+        this.activeInputSab = null;
+        this.activeInterruptSab = null;
+      }
     }
+    this.activeInputSab = null;
+    this.activeInterruptSab = null;
+    return { inputSab: null, interruptSab: null };
   }
 
   public async run(code: string, options?: RunOptions): Promise<RunResult> {
-    if (this.status !== 'ready') {
+    if (this.status === 'failed' || !this.worker) {
+      this.initPromise = null;
       await this.init();
-      // If still not ready after init, throw friendly error
-      if (this.status === 'failed') {
-        throw new Error('Pyodide is unavailable (offline or worker blocked). Switched to Trace Fallback.');
-      }
+    } else if (this.status !== 'ready') {
+      await this.init();
     }
 
     const id = `run_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-    const timeLimitMs = options?.timeLimitMs || 5000;
-    this.setStatus('running');
+    const timeLimitMs = options?.timeLimitMs ?? 5000;
+    const { indexURL } = resolveWorkerUrls();
+    const { inputSab, interruptSab } = this.createSharedBuffers();
+
+    this.setStatus('running', 100, 'Executing Python script...', this.isCached);
 
     return new Promise<RunResult>((resolve, reject) => {
-      // Set timeout safety mechanism (Section 8.2: Terminate and recreate on timeout)
-      const timeoutTimer = setTimeout(() => {
-        if (this.pendingRequests.has(id)) {
-          this.pendingRequests.delete(id);
-          this.terminateAndRespawn();
-
-          const timeoutError = parsePythonError(
-            `TimeoutError: Execution exceeded time limit of ${timeLimitMs / 1000} seconds.`
-          );
-          resolve({
-            stdout: '',
-            stderr: `TimeoutError: Execution exceeded time limit of ${timeLimitMs / 1000}s. Worker was safely reset.`,
-            exitCode: 124,
-            durationMs: timeLimitMs,
-            memoryObjectsCreated: 0,
-            bytecodeSteps: 0,
-            error: timeoutError,
-          });
-        }
-      }, timeLimitMs + 500);
-
-      this.pendingRequests.set(id, {
+      const pending: PendingWorkerRequest = {
+        kind: 'RUN',
+        streamedStdout: '',
+        streamedStderr: '',
+        offlineNotices: [],
+        startedAt: Date.now(),
         resolve: (raw: any) => {
-          const error = raw.error ? parsePythonError(raw.error) : null;
+          const rawErrorText = raw.error ? String(raw.error) : null;
+          const error = rawErrorText ? parsePythonError(rawErrorText) : null;
+          const combinedStderr = [raw.stderr, rawErrorText].filter(Boolean).join('\n').trim();
           resolve({
-            stdout: raw.stdout || '',
-            stderr: raw.stderr || '',
-            exitCode: raw.exitCode || 0,
-            durationMs: raw.durationMs || 0,
-            memoryObjectsCreated: 4,
+            stdout: raw.stdout ?? pending.streamedStdout,
+            stderr: combinedStderr,
+            exitCode: raw.exitCode ?? (error ? 1 : 0),
+            durationMs: raw.durationMs ?? 0,
+            memoryObjectsCreated: raw.memoryObjectsCreated ?? 0,
             bytecodeSteps: 12,
             error,
+            needsInputPrompt: raw.needsInputPrompt ?? null,
+            offlineNotice:
+              raw.offlineNotice ||
+              (pending.offlineNotices.length > 0 ? pending.offlineNotices.join('\n') : null),
           });
         },
         reject,
-        timer: timeoutTimer,
-      });
+      };
+
+      pending.timer = setTimeout(() => {
+        if (!this.pendingRequests.has(id)) return;
+        this.pendingRequests.delete(id);
+        const partialStdout = pending.streamedStdout;
+        this.terminateAndRespawn();
+
+        const msg = `TimeoutError: Execution exceeded time limit of ${(timeLimitMs / 1000).toFixed(1).replace(/\.0$/, '')}s.`;
+        const timeoutError = parsePythonError(msg);
+        resolve({
+          stdout: partialStdout,
+          stderr: `${msg} Worker was safely terminated and reset.`,
+          exitCode: 124,
+          durationMs: timeLimitMs,
+          memoryObjectsCreated: 0,
+          bytecodeSteps: 0,
+          error: timeoutError,
+        });
+      }, timeLimitMs + 400);
+
+      this.pendingRequests.set(id, pending);
 
       this.worker?.postMessage({
         id,
         type: 'RUN',
         code,
+        indexURL,
         inputQueue: options?.inputQueue || [],
+        maxOutputChars: options?.maxOutputChars || 65000,
+        isolated: options?.isolated ?? false,
+        persistentNamespace: options?.persistentNamespace ?? true,
+        inputSab,
+        interruptSab,
       });
     });
   }
 
   public async trace(code: string, options?: TraceOptions): Promise<TraceResult> {
-    if (this.status !== 'ready') {
+    if (this.status === 'failed' || !this.worker) {
+      this.initPromise = null;
       await this.init();
-      if (this.status === 'failed') {
-        throw new Error('Pyodide is unavailable. Trace Fallback ready.');
-      }
+    } else if (this.status !== 'ready') {
+      await this.init();
     }
 
     const id = `trace_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-    const timeLimitMs = options?.timeLimitMs || 7000;
-    this.setStatus('running');
+    const timeLimitMs = options?.timeLimitMs ?? 7000;
+    const { indexURL } = resolveWorkerUrls();
+    const { inputSab, interruptSab } = this.createSharedBuffers();
+
+    this.setStatus('running', 100, 'Tracing execution steps...', this.isCached);
 
     return new Promise<TraceResult>((resolve, reject) => {
-      const timeoutTimer = setTimeout(() => {
-        if (this.pendingRequests.has(id)) {
-          this.pendingRequests.delete(id);
-          this.terminateAndRespawn();
-
-          const timeoutError = parsePythonError(`TimeoutError: Tracing exceeded ${timeLimitMs / 1000}s safety limit.`);
-          resolve({
-            steps: [],
-            totalSteps: 0,
-            truncated: true,
-            stdout: '',
-            stderr: 'Execution timed out during tracing.',
-            durationMs: timeLimitMs,
-            error: timeoutError,
-          });
-        }
-      }, timeLimitMs + 500);
-
-      this.pendingRequests.set(id, {
+      const pending: PendingWorkerRequest = {
+        kind: 'TRACE',
+        streamedStdout: '',
+        streamedStderr: '',
+        offlineNotices: [],
+        startedAt: Date.now(),
         resolve: (raw: any) => {
-          const error = raw.error ? parsePythonError(raw.error) : null;
+          const rawErrorText = raw.error ? String(raw.error) : null;
+          const error = rawErrorText ? parsePythonError(rawErrorText) : null;
+          const combinedStderr = [raw.stderr, rawErrorText].filter(Boolean).join('\n').trim();
           resolve({
             steps: raw.steps || [],
             totalSteps: raw.totalSteps || 0,
             truncated: Boolean(raw.truncated),
-            stdout: raw.stdout || '',
-            stderr: raw.stderr || '',
+            stdout: raw.stdout ?? pending.streamedStdout,
+            stderr: combinedStderr,
             durationMs: raw.durationMs || 0,
             error,
+            needsInputPrompt: raw.needsInputPrompt ?? null,
+            offlineNotice:
+              raw.offlineNotice ||
+              (pending.offlineNotices.length > 0 ? pending.offlineNotices.join('\n') : null),
           });
         },
         reject,
-        timer: timeoutTimer,
-      });
+      };
+
+      pending.timer = setTimeout(() => {
+        if (!this.pendingRequests.has(id)) return;
+        this.pendingRequests.delete(id);
+        const partialStdout = pending.streamedStdout;
+        this.terminateAndRespawn();
+
+        const msg = `TimeoutError: Tracing exceeded ${(timeLimitMs / 1000).toFixed(1).replace(/\.0$/, '')}s safety limit.`;
+        const timeoutError = parsePythonError(msg);
+        resolve({
+          steps: [],
+          totalSteps: 0,
+          truncated: true,
+          stdout: partialStdout,
+          stderr: msg,
+          durationMs: timeLimitMs,
+          error: timeoutError,
+        });
+      }, timeLimitMs + 400);
+
+      this.pendingRequests.set(id, pending);
 
       this.worker?.postMessage({
         id,
         type: 'TRACE',
         code,
+        indexURL,
         inputQueue: options?.inputQueue || [],
         maxSteps: options?.maxSteps || 300,
+        isolated: options?.isolated ?? false,
+        persistentNamespace: options?.persistentNamespace ?? true,
+        inputSab,
+        interruptSab,
       });
     });
   }
 
   public stop(): void {
-    if (this.status === 'running') {
-      this.terminateAndRespawn();
+    if (this.status !== 'running' && this.pendingRequests.size === 0) return;
+
+    // 1. Attempt gentle KeyboardInterrupt via SharedArrayBuffer first (keeps worker warm if responsive)
+    if (this.activeInterruptSab) {
+      try {
+        const iv = new Uint8Array(this.activeInterruptSab);
+        iv[0] = 2; // SIGINT -> KeyboardInterrupt
+        if (this.stopGraceTimer) clearTimeout(this.stopGraceTimer);
+        this.stopGraceTimer = setTimeout(() => {
+          if (this.pendingRequests.size > 0) {
+            this.forceStopPendingRequests();
+          }
+        }, 300);
+        return;
+      } catch {
+        // Fall through to hard worker termination
+      }
+    }
+
+    // 2. Immediately terminate worker if SharedArrayBuffer isn't active
+    this.forceStopPendingRequests();
+  }
+
+  private forceStopPendingRequests(): void {
+    const interruptErr = parsePythonError('KeyboardInterrupt: Execution stopped by user.');
+    this.pendingRequests.forEach((req) => {
+      if (req.timer) clearTimeout(req.timer);
+      if (req.kind === 'TRACE') {
+        req.resolve({
+          steps: [],
+          totalSteps: 0,
+          truncated: true,
+          stdout: req.streamedStdout,
+          stderr: 'KeyboardInterrupt: Execution stopped by user.',
+          durationMs: Date.now() - req.startedAt,
+          error: interruptErr,
+        });
+      } else {
+        req.resolve({
+          stdout: req.streamedStdout,
+          stderr: 'KeyboardInterrupt: Execution stopped by user.',
+          exitCode: 130,
+          durationMs: Date.now() - req.startedAt,
+          memoryObjectsCreated: 0,
+          bytecodeSteps: 0,
+          error: interruptErr,
+        });
+      }
+    });
+    this.pendingRequests.clear();
+    this.terminateAndRespawn();
+  }
+
+  public async resetNamespace(): Promise<void> {
+    if (this.worker && this.status === 'ready') {
+      this.worker.postMessage({ id: `reset_${Date.now()}`, type: 'RESET_NAMESPACE' });
     }
   }
 
@@ -479,24 +481,29 @@ export class PyodideWorkerRuntime implements PythonRuntime {
     await this.init();
   }
 
-  private terminateAndRespawn(): void {
+  private terminateWorkerOnly(): void {
+    if (this.stopGraceTimer) {
+      clearTimeout(this.stopGraceTimer);
+      this.stopGraceTimer = null;
+    }
     if (this.worker) {
       try {
         this.worker.terminate();
       } catch {}
       this.worker = null;
     }
-    if (this.workerBlobUrl) {
-      try {
-        URL.revokeObjectURL(this.workerBlobUrl);
-      } catch {}
-      this.workerBlobUrl = null;
-    }
+    this.initPromise = null;
+    this.activeInputSab = null;
+    this.activeInterruptSab = null;
+    this.setStatus('not-loaded', 0, 'Preparing Python engine...', this.isCached);
+  }
+
+  private terminateAndRespawn(): void {
     this.pendingRequests.forEach((req) => {
       if (req.timer) clearTimeout(req.timer);
     });
     this.pendingRequests.clear();
-    this.setStatus('not-loaded', 0);
+    this.terminateWorkerOnly();
   }
 }
 

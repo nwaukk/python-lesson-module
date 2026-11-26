@@ -3,27 +3,75 @@
  * Section 11: Progress metrics, level overviews, continue learning action, and manifest cards.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Flame,
   Award,
   BookOpen,
   ArrowRight,
-  Clock,
   Sparkles,
   Layers,
   ChevronRight,
-  CheckCircle2,
-  Lock,
   Download,
+  Upload,
+  HardDrive,
+  Wifi,
+  WifiOff,
 } from 'lucide-react';
 import { useProgress } from '../../store/progressContext';
 import { useNavigation } from '../../store/navigationContext';
 import { COURSE_DAYS_MANIFEST } from '../../data/manifest';
+import { storage, StorageBackendType } from '../../store/storageAdapter';
+import { useOnlineStatus } from '../../store/useOnlineStatus';
+import { downloadProgressBackupFile, importProgressBackupJson } from '../../store/backupManager';
 
 export const DashboardView: React.FC = () => {
   const { progress, completionPercentage, totalSubtopicsCompleted, totalCourseSubtopics } = useProgress();
   const { navigateTo, selectDay } = useNavigation();
+  const { isOnline } = useOnlineStatus();
+  const [storageBackend, setStorageBackend] = useState<StorageBackendType>(() => storage.getStorageBackend());
+  const [backupFeedback, setBackupFeedback] = useState<{ ok: boolean; text: string } | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    void storage.ready().then(() => {
+      if (active) setStorageBackend(storage.getStorageBackend());
+    });
+    const unsub = storage.subscribeStatus(() => {
+      setStorageBackend(storage.getStorageBackend());
+    });
+    return () => {
+      active = false;
+      unsub();
+    };
+  }, []);
+
+  const handleExportFullProgress = () => {
+    const { filename } = downloadProgressBackupFile();
+    setBackupFeedback({ ok: true, text: `Exported complete workspace backup to ${filename}.` });
+  };
+
+  const handleImportFullProgress = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = String(event.target?.result ?? '');
+      const result = importProgressBackupJson(content);
+      setBackupFeedback({ ok: result.ok, text: result.message });
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
+  const backendLabel =
+    storageBackend === 'indexeddb'
+      ? 'IndexedDB (Persistent Local Database)'
+      : storageBackend === 'localstorage'
+      ? 'Local Storage Mirror'
+      : 'In-Memory Session Fallback';
+
+  const notesCount = Object.keys(progress.notes || {}).filter((k) => Boolean(progress.notes[k]?.trim())).length;
 
   const beginnerDays = COURSE_DAYS_MANIFEST.filter((d) => d.level === 'beginner');
   const intermediateDays = COURSE_DAYS_MANIFEST.filter((d) => d.level === 'intermediate');
@@ -156,6 +204,50 @@ export const DashboardView: React.FC = () => {
           <div className="text-[11px] text-emerald-400 font-medium">
             Pyodide Worker • 100% Private & Free
           </div>
+        </div>
+      </div>
+
+      {/* Offline Storage & Single-File Progress Backup */}
+      <div className="p-5 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2 text-xs text-[var(--text-dim)]">
+            <HardDrive className="w-4 h-4 text-[var(--accent-primary)] shrink-0" />
+            <span className="font-semibold text-[var(--text-main)]">Local Progress &amp; Offline Backup</span>
+            <span aria-hidden="true">·</span>
+            <span>{backendLabel}</span>
+            <span aria-hidden="true">·</span>
+            <span className="inline-flex items-center gap-1 text-[var(--text-muted)]">
+              {isOnline ? <Wifi className="w-3.5 h-3.5 text-emerald-400" /> : <WifiOff className="w-3.5 h-3.5 text-amber-400" />}
+              {isOnline ? 'Online' : 'Offline Ready'}
+            </span>
+          </div>
+          <p className="text-xs text-[var(--text-muted)] tabular-nums">
+            Automatically saves completed days ({progress.completedDays.length}), subtopics ({totalSubtopicsCompleted}), saved notes ({notesCount}), code snippets, appearance preferences, and your last position.
+          </p>
+          {backupFeedback && (
+            <p
+              role="status"
+              className={`text-xs font-medium ${backupFeedback.ok ? 'text-emerald-400' : 'text-red-400'}`}
+            >
+              {backupFeedback.text}
+            </p>
+          )}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={handleExportFullProgress}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[var(--accent-primary)] hover:bg-[var(--accent-hover)] text-[var(--accent-on)] text-xs font-semibold transition-colors whitespace-nowrap"
+          >
+            <Download className="w-4 h-4" />
+            <span>Export Progress (.json)</span>
+          </button>
+          <label className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-app)] hover:bg-[var(--bg-surface-elevated)] text-xs font-semibold text-[var(--text-main)] cursor-pointer transition-colors whitespace-nowrap">
+            <Upload className="w-4 h-4" />
+            <span>Import Progress (.json)</span>
+            <input type="file" accept=".json" onChange={handleImportFullProgress} className="hidden" />
+          </label>
         </div>
       </div>
 

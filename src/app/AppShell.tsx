@@ -3,14 +3,27 @@
  * Glues together TopBar, DaySubtopicStrip, Views, ErrorBoundaries, and Appearance Drawer.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { TopBar } from './TopBar';
 import { DaySubtopicStrip } from './DaySubtopicStrip';
 import { AppearanceStudio } from '../design/AppearanceStudio';
 import { GlobalSearch } from '../features/search/GlobalSearch';
-import { useNavigation } from '../store/navigationContext';
+import { useNavigation, AppRoute } from '../store/navigationContext';
 import { useSettings } from '../store/settingsContext';
 import { ErrorBoundary } from './ErrorBoundary';
+import {
+  downloadProgressBackupFile,
+  importProgressBackupJson,
+  PersistedPlaygroundState,
+} from '../store/backupManager';
+import { storage } from '../store/storageAdapter';
+import {
+  DesktopUpdateStatus,
+  openExternalSafeUrl,
+  savePythonFileDialog,
+  subscribeDesktopMenuActions,
+  subscribeDesktopUpdateStatus,
+} from '../platform/desktopBridge';
 
 // Lazy/direct views
 import { DashboardView } from '../features/dashboard/DashboardView';
@@ -27,9 +40,79 @@ import { CertificateView } from '../features/certificate/CertificateView';
 import { SelfTestView } from '../dev/SelfTestView';
 
 export const AppShell: React.FC = () => {
-  const { route } = useNavigation();
-  const { settings } = useSettings();
+  const { route, navigateTo } = useNavigation();
+  const { settings, setIsAppearanceStudioOpen } = useSettings();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [availableUpdate, setAvailableUpdate] = useState<DesktopUpdateStatus | null>(null);
+
+  useEffect(() => {
+    return subscribeDesktopUpdateStatus((info) => {
+      if (info.status === 'update-available' && info.latestVersion && info.releaseUrl) {
+        setAvailableUpdate(info);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    return subscribeDesktopMenuActions((event) => {
+      if (event.action === 'navigate' && event.payload?.route) {
+        navigateTo(event.payload.route as AppRoute);
+      } else if (event.action === 'open-search') {
+        setIsSearchOpen(true);
+      } else if (event.action === 'open-appearance') {
+        setIsAppearanceStudioOpen(true);
+      } else if (event.action === 'export-backup') {
+        downloadProgressBackupFile();
+      } else if (event.action === 'import-backup') {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json,application/json';
+        input.onchange = async () => {
+          const file = input.files?.[0];
+          if (!file) return;
+          const text = await file.text();
+          importProgressBackupJson(text);
+        };
+        input.click();
+      } else if (event.action === 'open-py' && event.payload && !event.payload.canceled) {
+        const current = storage.getItem<PersistedPlaygroundState>('code_snippets', {
+          schemaVersion: 1,
+          activeCode: '',
+          savedSnippets: [],
+        });
+        storage.setItem('code_snippets', {
+          ...current,
+          schemaVersion: 1,
+          activeCode: typeof event.payload.content === 'string' ? event.payload.content : '',
+          activeFilePath: event.payload.filePath,
+          activeFileName: event.payload.fileName,
+        });
+        storage.triggerHydration();
+        navigateTo('playground');
+      } else if (event.action === 'save-py' && route !== 'playground') {
+        const current = storage.getItem<PersistedPlaygroundState>('code_snippets', {
+          schemaVersion: 1,
+          activeCode: '# Python Visual Lab Script\nprint("Hello, Python!")\n',
+          savedSnippets: [],
+        });
+        void savePythonFileDialog({
+          content: current.activeCode || '',
+          filePath: current.activeFilePath,
+          defaultName: current.activeFileName || 'playground_script.py',
+          saveAs: Boolean(event.payload?.saveAs),
+        }).then((res) => {
+          if (!res.canceled && res.filePath) {
+            storage.setItem('code_snippets', {
+              ...current,
+              activeFilePath: res.filePath,
+              activeFileName: res.fileName,
+            });
+            storage.triggerHydration();
+          }
+        });
+      }
+    });
+  }, [navigateTo, route, setIsAppearanceStudioOpen]);
 
   // In teaching layout preset, render full TeachingMode directly
   if (settings.layoutPreset === 'teaching') {
@@ -47,6 +130,32 @@ export const AppShell: React.FC = () => {
     <div className="w-full h-screen flex flex-col bg-[var(--bg-app)] overflow-hidden select-text">
       {/* Top Bar (Section 3.3) */}
       <TopBar onOpenSearch={() => setIsSearchOpen(true)} />
+
+      {/* Optional Online-Only GitHub Release Notification */}
+      {availableUpdate && availableUpdate.releaseUrl && (
+        <div
+          role="status"
+          className="px-4 py-1.5 border-b border-emerald-500/30 bg-emerald-500/10 text-emerald-200 text-xs flex items-center justify-center gap-3 shrink-0"
+        >
+          <span>
+            A new desktop release (<strong>v{availableUpdate.latestVersion}</strong>) is available on GitHub Releases.
+          </span>
+          <button
+            type="button"
+            onClick={() => void openExternalSafeUrl(availableUpdate.releaseUrl!)}
+            className="px-2.5 py-0.5 rounded bg-emerald-500 text-slate-950 font-bold hover:bg-emerald-400 transition-colors"
+          >
+            Download Update
+          </button>
+          <button
+            type="button"
+            onClick={() => setAvailableUpdate(null)}
+            className="text-emerald-300/80 hover:text-emerald-100 underline"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
 
       {/* Day and Subtopic Strip (shown for Lessons, Notebook, and Playground) */}
       {(route === 'lesson' || route === 'notebook' || route === 'playground') && (

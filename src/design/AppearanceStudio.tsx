@@ -22,9 +22,15 @@ import {
   Eye,
   AlertCircle,
   Wand2,
+  Cpu,
+  RefreshCw,
+  CheckCircle2,
+  Terminal,
 } from 'lucide-react';
 import { useSettings } from '../store/settingsContext';
 import { THEME_PRESETS, getContrastRatio, getWcagRating, suggestContrastFix } from './themes';
+import { downloadProgressBackupFile, importProgressBackupJson } from '../store/backupManager';
+import { usePythonRuntime } from '../engine/runtime/runtimeContext';
 import {
   ACCENT_SWATCHES,
   DATA_TYPES,
@@ -63,9 +69,19 @@ export const AppearanceStudio: React.FC = () => {
     importSettingsJson,
   } = useSettings();
 
-  const [activeTab, setActiveTab] = useState<'themes' | 'custom-colors' | 'typography' | 'layout' | 'motion' | 'profiles'>('themes');
+  const {
+    pythonEngine,
+    setPythonEngine,
+    nativePythonInfo,
+    isCheckingNativePython,
+    engineFallbackNotice,
+    refreshNativePythonDetection,
+  } = usePythonRuntime();
+
+  const [activeTab, setActiveTab] = useState<'themes' | 'custom-colors' | 'typography' | 'layout' | 'motion' | 'profiles' | 'engine'>('themes');
   const [newProfileName, setNewProfileName] = useState('');
   const [importFeedback, setImportFeedback] = useState<string | null>(null);
+  const [engineFeedback, setEngineFeedback] = useState<string | null>(null);
 
   if (!isAppearanceStudioOpen) return null;
 
@@ -123,6 +139,26 @@ export const AppearanceStudio: React.FC = () => {
     reader.readAsText(file);
   };
 
+  const handleExportAllProgress = () => {
+    const { filename } = downloadProgressBackupFile();
+    setImportFeedback(`Exported complete workspace & settings to ${filename}`);
+    setTimeout(() => setImportFeedback(null), 4000);
+  };
+
+  const handleImportAllProgress = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = String(event.target?.result ?? '');
+      const result = importProgressBackupJson(content);
+      setImportFeedback(result.message);
+      setTimeout(() => setImportFeedback(null), 4000);
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
   return (
     <div
       role="dialog"
@@ -172,6 +208,7 @@ export const AppearanceStudio: React.FC = () => {
             { id: 'layout', label: 'Layout & Editor', icon: Layout },
             { id: 'motion', label: 'Motion', icon: Sparkles },
             { id: 'profiles', label: 'Profiles', icon: Bookmark },
+            { id: 'engine', label: 'Engine', icon: Cpu },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -884,16 +921,172 @@ export const AppearanceStudio: React.FC = () => {
                     onClick={handleExport}
                     className="flex-1 py-2 px-3 rounded-lg border border-[var(--border-subtle)] hover:bg-[var(--bg-surface-elevated)] text-xs font-semibold text-[var(--text-main)] flex items-center justify-center gap-1.5"
                   >
-                    <Download className="w-4 h-4" /> Export JSON
+                    <Download className="w-4 h-4" /> Export Appearance
                   </button>
                   <label className="flex-1 py-2 px-3 rounded-lg border border-[var(--border-subtle)] hover:bg-[var(--bg-surface-elevated)] text-xs font-semibold text-[var(--text-main)] flex items-center justify-center gap-1.5 cursor-pointer">
-                    <Upload className="w-4 h-4" /> Import JSON
+                    <Upload className="w-4 h-4" /> Import Appearance
                     <input type="file" accept=".json" onChange={handleImport} className="hidden" />
                   </label>
+                </div>
+                <div className="pt-2 border-t border-[var(--border-subtle)] space-y-2">
+                  <div className="text-[11px] text-[var(--text-dim)]">
+                    Complete workspace backup (completed days, notes, code snippets, settings, last position):
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleExportAllProgress}
+                      className="flex-1 py-2 px-3 rounded-lg bg-[var(--accent-primary)] hover:bg-[var(--accent-hover)] text-[var(--accent-on)] text-xs font-semibold flex items-center justify-center gap-1.5"
+                    >
+                      <Download className="w-4 h-4" /> Export Progress
+                    </button>
+                    <label className="flex-1 py-2 px-3 rounded-lg border border-[var(--border-subtle)] hover:bg-[var(--bg-surface-elevated)] text-xs font-semibold text-[var(--text-main)] flex items-center justify-center gap-1.5 cursor-pointer">
+                      <Upload className="w-4 h-4" /> Import Progress
+                      <input type="file" accept=".json" onChange={handleImportAllProgress} className="hidden" />
+                    </label>
+                  </div>
                 </div>
                 {importFeedback && (
                   <div className="p-2 rounded bg-[var(--accent-subtle)] text-[var(--accent-primary)] text-xs text-center font-medium">
                     {importFeedback}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 7: PYTHON EXECUTION ENGINE (OPTIONAL NATIVE PYTHON, OFF BY DEFAULT) */}
+          {activeTab === 'engine' && (
+            <div className="space-y-6">
+              <div>
+                <span className="eyebrow-label block mb-2">Python Execution Engine</span>
+                <p className="text-xs text-[var(--text-muted)] mb-3 leading-relaxed">
+                  Choose how scripts run across lessons and the Playground. Built-in (Pyodide) works 100% offline with zero setup. Native Python (advanced) uses a local Python 3 installation if available on this computer.
+                </p>
+
+                <div className="space-y-2.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void setPythonEngine('pyodide').then((res) => {
+                        setEngineFeedback(res.message || 'Built-in Pyodide engine selected.');
+                      });
+                    }}
+                    className={`w-full p-3.5 rounded-xl border text-left transition-all flex items-start justify-between gap-3 ${
+                      pythonEngine === 'pyodide'
+                        ? 'border-[var(--accent-primary)] bg-[var(--accent-subtle)] ring-1 ring-[var(--accent-primary)]'
+                        : 'border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-[var(--border-strong)]'
+                    }`}
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <Cpu className="w-4 h-4 text-[var(--accent-primary)]" />
+                        <span className="text-xs font-bold text-[var(--text-main)]">
+                          Built-in (Pyodide)
+                        </span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 font-bold border border-emerald-500/25">
+                          Default
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
+                        Bundled Python 3.12 WebAssembly engine in an isolated worker. Includes offline standard library modules, interactive input(), step-through tracing, and safe simulated data modules.
+                      </p>
+                    </div>
+                    {pythonEngine === 'pyodide' && (
+                      <CheckCircle2 className="w-4 h-4 text-[var(--accent-primary)] shrink-0 mt-0.5" />
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void setPythonEngine('native').then((res) => {
+                        setEngineFeedback(res.message || null);
+                      });
+                    }}
+                    disabled={isCheckingNativePython}
+                    className={`w-full p-3.5 rounded-xl border text-left transition-all flex items-start justify-between gap-3 ${
+                      pythonEngine === 'native'
+                        ? 'border-[var(--accent-primary)] bg-[var(--accent-subtle)] ring-1 ring-[var(--accent-primary)]'
+                        : 'border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-[var(--border-strong)]'
+                    }`}
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <Terminal className="w-4 h-4 text-amber-400" />
+                        <span className="text-xs font-bold text-[var(--text-main)]">
+                          Native Python
+                        </span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 font-bold border border-amber-500/25">
+                          Advanced • Off by Default
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
+                        Runs your script through the computer&apos;s own Python 3 child process in Desktop mode. Enables real disk file handling, installed pip packages, sockets, and full OS access.
+                      </p>
+                    </div>
+                    {pythonEngine === 'native' && (
+                      <CheckCircle2 className="w-4 h-4 text-[var(--accent-primary)] shrink-0 mt-0.5" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* System Python Detection Card */}
+              <div className="p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="eyebrow-label">Computer Python Check</span>
+                  <button
+                    type="button"
+                    onClick={() => void refreshNativePythonDetection()}
+                    disabled={isCheckingNativePython}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-app)] hover:bg-[var(--bg-surface-elevated)] text-[11px] font-semibold text-[var(--text-main)] disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-3 h-3 ${isCheckingNativePython ? 'animate-spin' : ''}`} />
+                    <span>{isCheckingNativePython ? 'Checking...' : 'Check Again'}</span>
+                  </button>
+                </div>
+
+                {nativePythonInfo ? (
+                  nativePythonInfo.found ? (
+                    <div className="space-y-1.5 text-xs">
+                      <div className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+                        <CheckCircle2 className="w-4 h-4 shrink-0" />
+                        <span>Python {nativePythonInfo.version} Detected</span>
+                      </div>
+                      <div className="text-[11px] font-mono text-[var(--text-muted)] break-all bg-[var(--bg-app)] p-2 rounded border border-[var(--border-subtle)]">
+                        {nativePythonInfo.executable}
+                      </div>
+                      <div className="text-[11px] text-[var(--text-dim)]">
+                        {nativePythonInfo.pipAvailable
+                          ? 'pip package manager is available for external libraries.'
+                          : 'Standard library ready (pip module was not found in this Python environment).'}
+                      </div>
+                      {nativePythonInfo.workspaceDir && (
+                        <div className="text-[11px] text-[var(--text-dim)] break-all">
+                          Script working folder: <span className="font-mono">{nativePythonInfo.workspaceDir}</span>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="p-3 rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-200 text-xs flex items-start gap-2">
+                      <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                      <div className="space-y-1 leading-relaxed">
+                        <div className="font-semibold text-amber-300">
+                          Staying on Built-in Engine
+                        </div>
+                        <div>{nativePythonInfo.message}</div>
+                      </div>
+                    </div>
+                  )
+                ) : (
+                  <p className="text-[11px] text-[var(--text-dim)] leading-relaxed">
+                    Click <strong className="text-[var(--text-main)]">Check Again</strong> or select <strong className="text-[var(--text-main)]">Native Python</strong> above to scan this computer for an installed Python 3 interpreter. If none is found, the Built-in Pyodide engine stays active automatically.
+                  </p>
+                )}
+
+                {(engineFallbackNotice || engineFeedback) && (
+                  <div className="p-2.5 rounded-lg bg-[var(--bg-app)] border border-[var(--border-subtle)] text-[11px] text-[var(--text-main)] leading-relaxed">
+                    {engineFallbackNotice || engineFeedback}
                   </div>
                 )}
               </div>

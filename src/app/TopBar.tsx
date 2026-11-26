@@ -21,10 +21,15 @@ import {
   HelpCircle,
   FolderGit2,
   Award,
+  WifiOff,
+  Maximize2,
+  Minimize2,
 } from 'lucide-react';
 import { useNavigation, AppRoute } from '../store/navigationContext';
 import { useSettings } from '../store/settingsContext';
 import { useProgress } from '../store/progressContext';
+import { useOnlineStatus } from '../store/useOnlineStatus';
+import { toggleDesktopFullscreen } from '../platform/desktopBridge';
 
 interface Props {
   onOpenSearch: () => void;
@@ -34,7 +39,9 @@ export const TopBar: React.FC<Props> = ({ onOpenSearch }) => {
   const { route, navigateTo, activeDay } = useNavigation();
   const { setIsAppearanceStudioOpen, stepTextSize, settings } = useSettings();
   const { progress, isFallbackStorage, totalSubtopicsCompleted, totalCourseSubtopics, completionPercentage } = useProgress();
+  const { isOffline } = useOnlineStatus();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const navLinks: { id: AppRoute; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { id: 'lesson', label: 'Lessons', icon: BookOpen },
@@ -52,7 +59,7 @@ export const TopBar: React.FC<Props> = ({ onOpenSearch }) => {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-[var(--border-subtle)] bg-[var(--bg-surface)] backdrop-blur-md">
-      {/* Storage fallback notice banner if localStorage blocked */}
+      {/* Storage fallback notice banner if IndexedDB and localStorage are blocked */}
       {isFallbackStorage && (
         <div className="bg-amber-500/15 border-b border-amber-500/30 px-4 py-1 text-xs text-amber-300 flex items-center justify-center gap-2">
           <AlertCircle className="w-3.5 h-3.5 shrink-0" />
@@ -62,7 +69,21 @@ export const TopBar: React.FC<Props> = ({ onOpenSearch }) => {
         </div>
       )}
 
-      <div className="max-w-[1920px] mx-auto px-3 sm:px-4 h-14 flex items-center justify-between gap-3">
+      {/* Offline status notice banner */}
+      {isOffline && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="bg-amber-500/10 border-b border-amber-500/25 px-4 py-1 text-xs text-amber-300 flex items-center justify-center gap-2"
+        >
+          <WifiOff className="w-3.5 h-3.5 shrink-0" />
+          <span>
+            Offline Mode — All 30 lessons, interactive simulations, notes, and local .json backups work without internet.
+          </span>
+        </div>
+      )}
+
+      <div className="w-full px-3 sm:px-4 h-14 flex items-center justify-between gap-3">
         {/* Left: Brand Identity */}
         <div className="flex items-center gap-3">
           <button
@@ -195,6 +216,19 @@ export const TopBar: React.FC<Props> = ({ onOpenSearch }) => {
             />
             <span className="hidden sm:inline">Appearance</span>
             <Sliders className="w-3.5 h-3.5 text-[var(--text-dim)] group-hover:text-[var(--text-main)]" />
+          </button>
+
+          {/* Full Screen Toggle Button */}
+          <button
+            type="button"
+            onClick={() => {
+              void toggleDesktopFullscreen().then((next) => setIsFullscreen(next));
+            }}
+            className="hidden sm:flex items-center justify-center p-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] hover:bg-[var(--border-strong)] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
+            title="Toggle Full Screen (F11)"
+            aria-label="Toggle Full Screen"
+          >
+            {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
           </button>
 
           {/* Mobile Menu Button */}
