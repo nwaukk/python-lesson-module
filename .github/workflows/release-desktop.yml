@@ -1,0 +1,33 @@
+name: Build Windows installer
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npm run build
+      - run: npx electron-builder --win nsis --publish never
+      - name: Attach installer to the release
+        if: github.event_name == 'release'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" release/*.exe --clobber --repo "${{ github.repository }}"
+      - name: Keep installer as a download (manual runs)
+        if: github.event_name != 'release'
+        uses: actions/upload-artifact@v7
+        with:
+          name: windows-installer
+          path: release/*.exe
